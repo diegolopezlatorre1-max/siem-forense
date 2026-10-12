@@ -1,0 +1,20 @@
+como tu proyecto SIEM usa Docker Desktop, que depende de WSL2 y de esas mismas funciones, mientras estén desactivadas Docker tampoco va a funcionar. 😅
+
+Lo normal es alternar según lo que estés usando.
+
+Para trabajar con Docker (reactivar)
+Apaga la VM por completo.
+Activa Plataforma de máquina virtual en “Activar o desactivar las características de Windows”.
+En CMD como administrador: bcdedit /set hypervisorlaunchtype auto
+Opcional, pero recomendado si ya no usas la VM: reactiva Integridad de memoria (Seguridad de Windows → Seguridad del dispositivo → Aislamiento del núcleo).
+Reinicia la PC.
+Para volver a usar las VMs
+Desactiva Plataforma de máquina virtual.
+CMD como administrador: bcdedit /set hypervisorlaunchtype off
+Desactiva Integridad de memoria.
+Reinicia.
+Consejos
+Docker solo necesita Plataforma de máquina virtual y el hipervisor en auto. La Integridad de memoria no es obligatoria para él, así que si la reactivas es por seguridad.
+Cada cambio exige un reinicio.
+Mientras trabajes con las VMs, evita instalar programas de fuentes dudosas.
+Si te cansa alternar, hay una salida: instalar Docker dentro de la VM de Ubuntu. Así todo el laboratorio vive en VirtualBox y no tocas más esos ajustes.
