@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from dotenv import load_dotenv
 from sqlalchemy import create_engine, String, Text, DateTime
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, sessionmaker
+from sqlalchemy import UniqueConstraint
 
 load_dotenv()
 
@@ -38,6 +39,21 @@ class Evento(Base):
     recibido_en: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=lambda: datetime.now(timezone.utc)
     )
+    
+class Alerta(Base):
+    __tablename__ = "alertas"
+    __table_args__ = (UniqueConstraint("regla_id", "clave", "ts"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    regla_id: Mapped[str] = mapped_column(String(30), index=True)
+    nombre: Mapped[str] = mapped_column(String(100))
+    severidad: Mapped[str] = mapped_column(String(10))
+    mitre: Mapped[str] = mapped_column(String(20))
+    clave: Mapped[str] = mapped_column(String(100))
+    cantidad: Mapped[int]
+    ts: Mapped[datetime] = mapped_column(DateTime(timezone=True))
+    creada_en: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=lambda: datetime.now(timezone.utc))
 
 
 def crear_tablas():
