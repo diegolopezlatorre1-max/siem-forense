@@ -1,4 +1,4 @@
-from app.parsers.auth_linux import parsear_linea
+from auth_linux import parsear_linea
 
 LINEA_FALLIDA = "2026-10-14T00:42:32.536944-05:00 diego-latorre10-VirtualBox sshd-session[14890]: Failed password for invalid user intruso from 192.168.56.101 port 49994 ssh2"
 LINEA_EXITOSA = "2026-10-14T01:10:00.000000-05:00 diego-latorre10-VirtualBox sshd-session[15000]: Accepted password for diego from 192.168.56.1 port 50000 ssh2"
