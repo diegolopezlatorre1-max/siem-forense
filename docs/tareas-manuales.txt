@@ -44,9 +44,17 @@ SESIÓN 15 - Base de la API
 [ ] Redis solo escucha en 127.0.0.1 de la VM. Elegir una opción:
       a) correr la API y las pruebas e2e dentro de la VM, o
       b) en docker-compose.yml cambiar "127.0.0.1:6379:6379" por la IP host-only de la VM.
-[ ] Añadir al .env de la VM:
+[ ] Añadir al .env de la VM (ver .env.example):
+      POSTGRES_HOST=localhost
+      POSTGRES_PORT=5432
       REDIS_HOST=localhost
       REDIS_PORT=6379
+      PORT=3000
+[ ] En la VM, instalar dependencias y comprobar:
+      git pull && pnpm install
+      pnpm lint && pnpm typecheck && pnpm test
+[ ] Con docker compose arriba y las migraciones aplicadas (sesión 16), correr los e2e:
+      pnpm --filter api test:e2e
 
 
 SESIÓN 16 - Ingesta con llave de agente

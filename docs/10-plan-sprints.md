@@ -63,7 +63,7 @@ Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
 | --- | --- | --- |
 | 26 | Agente PowerShell (4624, 4625 y 4720) con llave de agente | Los eventos de Windows llegan a la base |
 | 27 | Reglas WIN-001 y WIN-002 con pruebas | Crear un usuario en Windows genera una alerta |
-| 28 | Asignación y estados de alertas con bloqueo optimista (migración 0004) | Dos pestañas editando a la vez: la segunda recibe 409 |
+| 28 | Asignación y estados de alertas con bloqueo optimista (migración 0005) | Dos pestañas editando a la vez: la segunda recibe 409 |
 | 29 | Línea de tiempo (API y vista) | Sale ordenada y mezcla eventos y alertas |
 
 **Al cerrar el S6 (15 nov), el SIEM es funcional.**

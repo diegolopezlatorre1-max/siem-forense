@@ -75,7 +75,7 @@ Cada módulo sigue el mismo patrón: `x.module.ts`, `x.controller.ts`, `x.servic
 
 - `nestjs-pino`: JSON a stdout (en desarrollo, `pino-pretty`).
 - Campos base: `time`, `level`, `msg`, `correlationId`, `contexto` (módulo), `usuarioId` o `agenteId`.
-- **Correlation ID:** el middleware toma `x-correlation-id` de la petición (si es un UUID válido) o genera uno, lo guarda en `AsyncLocalStorage` (vía `nestjs-cls`), lo añade a cada log y lo devuelve en la respuesta. Al encolar un job se copia en `job.data.correlationId`, y el worker lo restaura.
+- **Correlation ID:** el middleware toma `x-correlation-id` de la petición (si es un UUID válido) o genera uno, lo guarda en un `AsyncLocalStorage` propio (`common/contexto.ts`), lo añade a cada log (`mixin` de pino) y lo devuelve en la respuesta. Al encolar un job se copia en `job.data.correlationId`, y el worker lo restaura.
 - Se redactan `authorization`, `cookie`, `password`, `clave` y `x-agent-key`.
 - Eventos de seguridad con nombre fijo: `auth.login_ok`, `auth.login_fallido`, `auth.refresh_reutilizado`, `forense.verificacion_fallida`.
 
@@ -85,7 +85,9 @@ Cada módulo sigue el mismo patrón: `x.module.ts`, `x.controller.ts`, `x.servic
 | --- | --- | --- | --- | --- |
 | `deteccion` | `evaluar-reglas` `{eventType, correlationId}` | `IngestaService` tras el COMMIT | `DeteccionProcessor` (worker) | 3, backoff exponencial de 1 s |
 
-- `jobId = evaluar-reglas:{eventType}:{segundo}` para agrupar ráfagas: 100 eventos en el mismo segundo producen 1 evaluación.
+- `jobId = evaluar-reglas-{eventType}-{segundo}` (BullMQ no admite `:` en ids propios) con `delay` de 1 s, para agrupar ráfagas: 100 eventos en el mismo segundo producen 1 evaluación, que corre cuando ese segundo ya terminó.
+- El worker procesa un job a la vez (concurrencia 1), así la deduplicación de alertas no compite consigo misma.
+- Si Redis no responde, `/ingest` igual guarda el evento y responde 202 (se registra un warning). Al arrancar, el worker reevalúa la ventana reciente de cada tipo vigilado.
 - Los jobs fallidos quedan en la cola con su error para inspeccionarlos.
 
 ## Convenciones

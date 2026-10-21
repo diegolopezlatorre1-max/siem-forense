@@ -83,9 +83,11 @@ erDiagram
 - Comandos: `pnpm --filter api migration:generate <Nombre>`, `migration:run` y `migration:revert`.
 - Plan inicial:
   1. `0001-EsquemaBase`: `eventos` y `alertas` (compatibles con lo existente).
-  2. `0002-Seguridad`: `usuarios`, `refresh_tokens` y `agentes`; `eventos.agente_id`.
-  3. `0003-CadenaForense`: `cadena_forense` y el eslabón génesis.
-  4. `0004-FlujoAlertas`: `alertas.estado`, `asignada_a` y `version`.
+  2. `0002-Agentes`: `agentes` y `eventos.agente_id` (S3, lo que necesita la ingesta).
+  3. `0003-Usuarios`: `usuarios` y `refresh_tokens` (S4).
+  4. `0004-CadenaForense`: `cadena_forense` y el eslabón génesis.
+  5. `0005-FlujoAlertas`: `alertas.estado`, `asignada_a` y `version`.
+- La CLI de TypeORM usa el JavaScript compilado (`dist/database/data-source.js`); por eso `migration:run` compila antes.
 
 ## Transacciones y bloqueos
 
