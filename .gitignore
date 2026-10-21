@@ -6,3 +6,8 @@ __pycache__/
 node_modules/
 *.pem
 id_rsa*
+dist/
+coverage/
+.pnpm-store/
+docs/privado/
+docs/*.docx
