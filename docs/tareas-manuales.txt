@@ -1,0 +1,73 @@
+TAREAS MANUALES - SIEM Forense (Sprint 3)
+==========================================
+Cosas que hay que hacer a mano (no las puede hacer el asistente).
+Marca [x] cuando estén hechas. NUNCA escribas aquí contraseñas ni llaves:
+esas van en docs/privado/ (ignorado por Git).
+
+
+PREPARAR EL PC (Windows)
+------------------------
+[ ] Activar pnpm:  corepack enable   (si pide permisos, abrir la terminal como administrador)
+[ ] Comprobar:     pnpm -v
+[ ] (Opcional) Instalar pandoc para exportar la documentación:
+      winget install JohnMacFarlane.Pandoc
+
+
+SESIÓN 13 - Seguridad y documentación
+-------------------------------------
+[ ] En la VM Ubuntu, rotar la contraseña de PostgreSQL:
+      docker exec -it siem-postgres psql -U siem -d siem
+      ALTER USER siem PASSWORD 'nueva_clave_larga';
+[ ] Actualizar POSTGRES_PASSWORD en el .env de la VM con la clave nueva.
+[ ] Guardar la clave nueva en docs/privado/credenciales.md (en el PC; no se sube a Git).
+[ ] Generar el Word de la documentación, donde haya pandoc o Docker:
+      bash scripts/export-docs.sh
+    Debe crear docs/export/SIEM_Forense.docx.
+
+
+SESIÓN 14 - Monorepo
+--------------------
+[ ] En la VM, instalar Node 22 LTS y pnpm:
+      curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+      sudo apt install -y nodejs
+      sudo corepack enable
+[ ] En la VM, preparar Python para el agente Linux:
+      sudo apt install -y python3-pip python3-venv
+      cd agents/linux && python3 -m venv .venv && . .venv/bin/activate
+      pip install -r requirements.txt pytest
+      pytest
+
+
+SESIÓN 15 - Base de la API
+--------------------------
+[ ] Comprobar que el PC llega a PostgreSQL de la VM (puerto 5432), p. ej. con DBeaver.
+[ ] Redis solo escucha en 127.0.0.1 de la VM. Elegir una opción:
+      a) correr la API y las pruebas e2e dentro de la VM, o
+      b) en docker-compose.yml cambiar "127.0.0.1:6379:6379" por la IP host-only de la VM.
+[ ] Añadir al .env de la VM:
+      REDIS_HOST=localhost
+      REDIS_PORT=6379
+
+
+SESIÓN 16 - Ingesta con llave de agente
+---------------------------------------
+[ ] En la VM, aplicar migraciones y crear la llave del agente:
+      pnpm --filter api migration:run
+      pnpm --filter api agente:crear ubuntu
+[ ] Copiar la llave que se imprime (sale UNA sola vez) a docs/privado/credenciales.md.
+[ ] Exportarla para el agente:  export SIEM_AGENT_KEY='...'
+
+
+SESIÓN 17 - Demo con Hydra
+--------------------------
+[ ] En la VM:
+      docker compose up -d
+      pnpm --filter api migration:run
+      pnpm --filter api start        (API)
+      pnpm --filter api start:worker (worker, en otra terminal)
+      sudo -E python3 agents/linux/agent_linux.py
+[ ] Desde Kali (192.168.56.103):
+      hydra -l intruso -P /usr/share/wordlists/rockyou.txt ssh://192.168.56.101
+[ ] Comprobar que LINUX-001 aparece en menos de 1 minuto:
+      curl http://localhost:3000/api/v1/alerts
+[ ] Hacer capturas para la bitácora (docs/12-bitacora.md).
