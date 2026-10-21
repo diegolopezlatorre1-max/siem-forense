@@ -31,6 +31,7 @@ Proyecto de la carrera de Ciberseguridad · Actualizado el 18 de octubre de 2026
 | 11 | [Laboratorio](11-laboratorio.md) | Máquinas, red y cómo encender todo |
 | 12 | [Bitácora](12-bitacora.md) | Diario, retros y problemas resueltos |
 | — | [Decisiones (ADR)](adr/) | Por qué se eligió cada cosa |
+| — | [Plan de reestructuración por fases](plan-reestructuracion.md) | Fases 0–3 de la migración al CORE (Fases 0 y 1 hechas; sigue la Fase 2: monorepo TS) |
 
 ## Reglas de la documentación
 
