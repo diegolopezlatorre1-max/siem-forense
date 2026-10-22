@@ -9,7 +9,7 @@ import { cargarRegla, cargarReglas, ReglaInvalidaError } from './rules.loader.js
 
 const REGLAS = fileURLToPath(new URL('../../../../../rules', import.meta.url));
 
-// Mismos casos que tests/test_reglas.py.
+// Mismos casos que el antiguo tests/test_reglas.py (backend Python, retirado).
 describe('cargador de reglas', () => {
   it('carga la regla de fuerza bruta', async () => {
     const ids = (await cargarReglas(REGLAS)).map((r) => r.id);

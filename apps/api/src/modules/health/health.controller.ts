@@ -1,5 +1,6 @@
 import { InjectQueue } from '@nestjs/bullmq';
 import { Controller, Get, Res } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { InjectDataSource } from '@nestjs/typeorm';
 import type { Queue } from 'bullmq';
 import type { Response } from 'express';
@@ -21,6 +22,7 @@ const comprobar = (p: Promise<unknown>): Promise<Estado> =>
     () => 'error',
   );
 
+@ApiTags('salud')
 @Controller('health')
 export class HealthController {
   constructor(

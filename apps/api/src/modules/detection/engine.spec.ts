@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 
 import { evaluar, type EventoEvaluable } from './engine.js';
 
-// Mismos 5 casos que tests/test_motor.py.
+// Mismos 5 casos que el antiguo tests/test_motor.py (backend Python, retirado).
 const REGLA: Regla = {
   id: 'LINUX-001',
   nombre: 'Fuerza bruta SSH',
