@@ -25,7 +25,14 @@ Red host-only 192.168.56.0/24 (el PC es la .1). La VM del SIEM es la .101 y Kali
       - Crear VM: 2 vCPU, 4096 MB RAM, disco 25 GB
       - Red: Adaptador 1 = NAT (internet); Adaptador 2 = Host-only (la red de arriba)
       - Instalar; durante la instalación marcar "Install OpenSSH server"
-      - Fijar IP estática 192.168.56.101 en el adaptador host-only (netplan)
+      - Fijar IP estática en el adaptador host-only (NetworkManager).
+        El host-only suele ser enp0s8 (el NAT, enp0s3, toma 10.0.2.15).
+        Verificá con:  ip -br a
+          sudo nmcli connection add type ethernet ifname enp0s8 con-name hostonly \
+            ipv4.method manual ipv4.addresses 192.168.56.101/24
+          sudo nmcli connection up hostonly
+        Si dice que la interfaz está en uso:  sudo nmcli device disconnect enp0s8  y repetir el up.
+        (Sin gateway ni DNS: la salida a internet la da el NAT.)
       - Instalar Docker y el plugin compose:
           curl -fsSL https://get.docker.com | sudo sh
           sudo usermod -aG docker $USER   (reloguear después)
@@ -34,7 +41,12 @@ Red host-only 192.168.56.0/24 (el PC es la .1). La VM del SIEM es la .101 y Kali
       - Descargar la imagen de Kali para VirtualBox (o la .iso e instalar)
       - Crear/importar VM: 2 vCPU, 4096 MB RAM
       - Red: Adaptador 1 = NAT; Adaptador 2 = Host-only (la misma red)
-      - Fijar IP estática 192.168.56.103 en el adaptador host-only
+      - Fijar IP estática en el adaptador host-only (NetworkManager).
+        En Kali el host-only suele ser eth1 (el NAT, eth0, toma 10.0.2.15).
+          sudo nmcli connection add type ethernet ifname eth1 con-name hostonly \
+            ipv4.method manual ipv4.addresses 192.168.56.103/24
+          sudo nmcli connection up hostonly
+        Si dice que la interfaz está en uso:  sudo nmcli device disconnect eth1  y repetir el up.
       - Comprobar que están hydra y rockyou:
           hydra -h
           ls /usr/share/wordlists/rockyou.txt   (si está .gz:  sudo gunzip /usr/share/wordlists/rockyou.txt.gz)
