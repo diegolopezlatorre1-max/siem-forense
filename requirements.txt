@@ -1,8 +1,0 @@
-fastapi
-uvicorn
-pytest
-sqlalchemy
-psycopg[binary]
-python-dotenv
-requests
-pyyaml

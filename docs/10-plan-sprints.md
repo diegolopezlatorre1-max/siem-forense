@@ -37,7 +37,7 @@ Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
 | 14 | Monorepo pnpm: `apps/api` (Nest), `apps/web` (Vite), `packages/shared`; ESLint/TS estricto; mover el agente Python a `agents/linux` | `pnpm -r typecheck` y `pytest` en verde |
 | 15 | Base de la API: configuración Zod, pino + correlation-id, filtro problem+json, TypeORM con migraciones 0001 y `/health` | e2e de `/health` y de errores en verde |
 | 16 | Ingesta con `AgentKeyGuard` (migración 0002 parcial: `agentes`); motor y cargador de reglas portados con sus pruebas; cola BullMQ y worker; `/alerts` | 5 pruebas del motor y 2 del cargador pasando |
-| 17 | **Demo:** Hydra desde Kali contra SSH de Ubuntu; borrar `app/` (FastAPI) | LINUX-001 salta en menos de 1 min en la API nueva |
+| 17 | **Demo:** Hydra desde Kali contra SSH de Ubuntu; borrar `app/` (FastAPI, ya retirado el 21 oct) | LINUX-001 salta en menos de 1 min en la API nueva |
 
 ## Sprint 4: Seguridad y forense · 26 oct al 1 nov
 

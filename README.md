@@ -13,9 +13,9 @@ Cumple el [estándar técnico obligatorio CORE](docs/02-estandar-core.md).
 
 ## Estado
 
-Sprints 0 a 2 terminados con el backend Python (recolección, reglas y alertas). Sprint 3 en curso: reestructuración al estándar CORE. Ver [docs/10-plan-sprints.md](docs/10-plan-sprints.md).
+Sprints 0 a 2 terminados con el backend Python (recolección, reglas y alertas). Sprint 3 en curso: reestructuración al estándar CORE. El backend Python se retiró; la API es NestJS (`apps/api`). Ver [docs/10-plan-sprints.md](docs/10-plan-sprints.md).
 
-## Estructura (objetivo)
+## Estructura
 
 | Carpeta | Contenido |
 | --- | --- |
@@ -27,11 +27,17 @@ Sprints 0 a 2 terminados con el backend Python (recolección, reglas y alertas).
 | `docs/` | Documentación ([índice](docs/README.md)) |
 | `scripts/` | Utilidades (exportar la documentación) |
 
-> Mientras dura la migración, el backend Python anterior sigue en `app/` y `tests/`. Se elimina al alcanzar la paridad (sesión 17).
-
 ## Arranque rápido
 
-Ver [docs/11-laboratorio.md](docs/11-laboratorio.md#cómo-encender-todo).
+Ver [docs/11-laboratorio.md](docs/11-laboratorio.md#cómo-encender-todo). En resumen, en la VM:
+
+```bash
+pnpm install
+docker compose up -d postgres redis
+pnpm --filter api migration:run
+pnpm --filter api start          # API en :3000 (OpenAPI en /api/docs)
+pnpm --filter api start:worker   # worker de detección, en otra terminal
+```
 
 ## Seguridad
 
