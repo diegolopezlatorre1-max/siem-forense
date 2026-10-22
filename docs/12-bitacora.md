@@ -40,6 +40,7 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - `GET /alerts` sigue abierto, como en el backend Python, hasta que llegue el JWT en S4.
 - Se agregó el OpenAPI en `/api/docs` (solo en desarrollo), generado desde los schemas Zod de `packages/shared`.
 - Se retiró el backend Python (`app/`, `tests/` y `requirements.txt` de la raíz). Sus pruebas ya corren portadas en Vitest; si la demo fallara, sigue en el historial de Git (commit `e56bafa`).
+- Se generó `docs/export/SIEM_Forense.docx` con pandoc 3.5 (`scripts/export-docs.sh`). Los diagramas Mermaid salen como texto en el Word.
 - **Problemas:** BullMQ 6 no admite `:` en los ids de job (se usa `-`); con `bufferLogs`, Nest se quedaba colgado sin mostrar errores de arranque (se imprimen y se sale con código 1); `pnpm` no está en el PATH del PC hasta hacer `corepack enable`.
 
 ## Problemas resueltos (Sprints 0 a 2)

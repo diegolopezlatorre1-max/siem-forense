@@ -68,7 +68,7 @@ Cubre los requisitos S1, S2 y S3 del [estándar CORE](02-estandar-core.md).
 
 | Variable | Uso | Rotación |
 | --- | --- | --- |
-| `POSTGRES_PASSWORD` | Base de datos | Rotada el 18 oct tras quedar expuesta en un .docx del repositorio |
+| `POSTGRES_PASSWORD` | Base de datos | Quedó expuesta el 18 oct en un .docx del repositorio: hay que rotarla (tarea manual de la sesión 13) |
 | `SECRETO_JWT` | Firma de los access tokens | Rotarla invalida todos los access |
 | `CLAVE_FORENSE` | HMAC de la cadena | **No se rota** sin re-sellar la cadena (ver [09](09-deteccion-y-forense.md)) |
 
