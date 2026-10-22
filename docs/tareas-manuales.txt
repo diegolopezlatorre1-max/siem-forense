@@ -7,10 +7,40 @@ esas van en docs/privado/ (ignorado por Git).
 
 PREPARAR EL PC (Windows)
 ------------------------
-[ ] Activar pnpm:  corepack enable   (si pide permisos, abrir la terminal como administrador)
-[ ] Comprobar:     pnpm -v
-[ ] (Opcional) Instalar pandoc para exportar la documentación:
+[x] Activar pnpm:  corepack enable   (si pide permisos, abrir la terminal como administrador)
+[x] Comprobar:     pnpm -v
+[x] (Opcional) Instalar pandoc para exportar la documentación:
       winget install JohnMacFarlane.Pandoc
+
+
+CREAR LAS MÁQUINAS VIRTUALES (VirtualBox)
+-----------------------------------------
+Red host-only 192.168.56.0/24 (el PC es la .1). La VM del SIEM es la .101 y Kali la .103.
+[ ] En VirtualBox: Archivo > Herramientas > Administrador de red host-only.
+      Crear/confirmar una red host-only con:
+        IPv4 del adaptador: 192.168.56.1 / 255.255.255.0
+        Servidor DHCP: deshabilitado (usamos IPs fijas)
+[ ] VM Ubuntu Server (SIEM) - 192.168.56.101:
+      - Descargar Ubuntu Server LTS (22.04 o 24.04) .iso
+      - Crear VM: 2 vCPU, 4096 MB RAM, disco 25 GB
+      - Red: Adaptador 1 = NAT (internet); Adaptador 2 = Host-only (la red de arriba)
+      - Instalar; durante la instalación marcar "Install OpenSSH server"
+      - Fijar IP estática 192.168.56.101 en el adaptador host-only (netplan)
+      - Instalar Docker y el plugin compose:
+          curl -fsSL https://get.docker.com | sudo sh
+          sudo usermod -aG docker $USER   (reloguear después)
+      - Comprobar:  ip a   y   docker compose version
+[ ] VM Kali (atacante) - 192.168.56.103:
+      - Descargar la imagen de Kali para VirtualBox (o la .iso e instalar)
+      - Crear/importar VM: 2 vCPU, 4096 MB RAM
+      - Red: Adaptador 1 = NAT; Adaptador 2 = Host-only (la misma red)
+      - Fijar IP estática 192.168.56.103 en el adaptador host-only
+      - Comprobar que están hydra y rockyou:
+          hydra -h
+          ls /usr/share/wordlists/rockyou.txt   (si está .gz:  sudo gunzip /usr/share/wordlists/rockyou.txt.gz)
+[ ] Probar la red host-only entre las dos VMs:
+      desde Kali:         ping 192.168.56.101
+      desde la VM Ubuntu: ping 192.168.56.103
 
 
 SESIÓN 13 - Seguridad y documentación
