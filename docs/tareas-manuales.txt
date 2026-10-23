@@ -33,7 +33,7 @@ Red host-only 192.168.56.0/24 (el PC es la .1). La VM del SIEM es la .101 y Kali
           sudo nmcli connection up hostonly
         Si dice que la interfaz está en uso:  sudo nmcli device disconnect enp0s8  y repetir el up.
         (Sin gateway ni DNS: la salida a internet la da el NAT.)
-[ ] En la VM Ubuntu, instalar Docker y el plugin compose:
+[x] En la VM Ubuntu, instalar Docker y el plugin compose:
           curl -fsSL https://get.docker.com | sudo sh
           sudo usermod -aG docker $USER   (reloguear después)
       Comprobar:  docker compose version
