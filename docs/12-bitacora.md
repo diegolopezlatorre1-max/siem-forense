@@ -43,6 +43,11 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - Se generó `docs/export/SIEM_Forense.docx` con pandoc 3.5 (`scripts/export-docs.sh`). Los diagramas Mermaid salen como texto en el Word.
 - **Problemas:** BullMQ 6 no admite `:` en los ids de job (se usa `-`); con `bufferLogs`, Nest se quedaba colgado sin mostrar errores de arranque (se imprimen y se sale con código 1); `pnpm` no está en el PATH del PC hasta hacer `corepack enable`.
 
+## 22 oct: VMs y clave rotada (sesión 13)
+
+- Red host-only y VMs listas: Ubuntu (.101) y Kali (.103) se hacen ping. La VM Ubuntu es la misma del Sprint 2 (Ubuntu 26.04, con Docker y los datos).
+- **Sesión 13:** respaldo con `pg_dump` (85 eventos y 11 alertas) y rotación de la contraseña de PostgreSQL. Se comprobó por red que la nueva entra y la filtrada no. El `.env` de la VM tiene la clave nueva y `CLAVE_FORENSE` y `SECRETO_JWT` nuevos; todo guardado en `docs/privado/`.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

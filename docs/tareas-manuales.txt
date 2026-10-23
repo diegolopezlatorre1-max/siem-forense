@@ -57,12 +57,15 @@ Red host-only 192.168.56.0/24 (el PC es la .1). La VM del SIEM es la .101 y Kali
 
 SESIÓN 13 - Seguridad y documentación
 -------------------------------------
-[ ] En la VM Ubuntu, rotar la contraseña de PostgreSQL:
+[x] Antes de rotar, respaldar la base:
+      docker exec siem-postgres pg_dump -U siem -d siem -Fc > ~/respaldos/siem-AAAA-MM-DD.dump
+[x] En la VM Ubuntu, rotar la contraseña de PostgreSQL:
       docker exec -it siem-postgres psql -U siem -d siem
       ALTER USER siem PASSWORD 'nueva_clave_larga';
-[ ] Actualizar POSTGRES_PASSWORD en el .env de la VM con la clave nueva.
-[ ] Guardar la clave nueva en docs/privado/credenciales.md (en el PC; no se sube a Git).
-[ ] Generar el Word de la documentación, donde haya pandoc o Docker:
+    Comprobar por red (fuera de localhost exige clave) que la nueva entra y la vieja no.
+[x] Actualizar POSTGRES_PASSWORD en el .env de la VM con la clave nueva.
+[x] Guardar la clave nueva en docs/privado/credenciales.md (en el PC; no se sube a Git).
+[x] Generar el Word de la documentación, donde haya pandoc o Docker:
       bash scripts/export-docs.sh
     Debe crear docs/export/SIEM_Forense.docx.
 
