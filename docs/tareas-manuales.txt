@@ -72,11 +72,16 @@ SESIÓN 13 - Seguridad y documentación
 
 SESIÓN 14 - Monorepo
 --------------------
-[ ] En la VM, instalar Node 22 LTS y pnpm:
-      curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+[x] En la VM, instalar Node 22 LTS y pnpm (Ubuntu 26.04 ya trae Node 22 en apt):
       sudo apt install -y nodejs
       sudo corepack enable
-[ ] En la VM, preparar Python para el agente Linux:
+    En Ubuntu 22.04/24.04 antes hay que agregar NodeSource:
+      curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash -
+[x] En la VM, cambiar a la rama nueva e instalar:
+      git switch reestructuracion-core && pnpm install
+      pnpm lint && pnpm typecheck && pnpm test
+    (pnpm install compila packages/shared con su script "prepare")
+[x] En la VM, preparar Python para el agente Linux:
       sudo apt install -y python3-pip python3-venv
       cd agents/linux && python3 -m venv .venv && . .venv/bin/activate
       pip install -r requirements.txt pytest
