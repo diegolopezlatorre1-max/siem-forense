@@ -128,15 +128,19 @@ SESIÓN 16 - Ingesta con llave de agente
 
 SESIÓN 17 - Demo con Hydra
 --------------------------
-[ ] En la VM:
+[x] En la VM:
       docker compose up -d
       pnpm --filter api migration:run
       pnpm --filter api start        (API)
       pnpm --filter api start:worker (worker, en otra terminal)
       set -a; . ~/.siem-agente.env; set +a
-      sudo -E agents/linux/.venv/bin/python agents/linux/agent_linux.py   (agente, en otra terminal)
-[ ] Desde Kali (192.168.56.103):
-      hydra -l intruso -P /usr/share/wordlists/rockyou.txt ssh://192.168.56.101
-[ ] Comprobar que LINUX-001 aparece en menos de 1 minuto:
+      agents/linux/.venv/bin/python agents/linux/agent_linux.py   (agente, en otra terminal)
+    OJO: el agente va SIN sudo (el usuario está en el grupo adm y lee auth.log);
+    con `sudo -E` en Ubuntu 26.04 la llave no llega y el agente no arranca.
+[x] Desde Kali (192.168.56.103):
+      head -n 12 /usr/share/wordlists/rockyou.txt > /tmp/claves.txt
+      hydra -l intruso -P /tmp/claves.txt -t 4 ssh://192.168.56.101
+    (12 intentos bastan para el umbral de 5; rockyou entero tardaría muchísimo)
+[x] Comprobar que LINUX-001 aparece en menos de 1 minuto:
       curl http://localhost:3000/api/v1/alerts
 [ ] Hacer capturas para la bitácora (docs/12-bitacora.md).

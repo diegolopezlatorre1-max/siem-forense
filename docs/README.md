@@ -1,14 +1,14 @@
 # Documentación: SIEM Forense Centralizado
 
-Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026
+Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026 (tarde)
 
 ## Dónde vamos
 
 | Indicador | Estado |
 | --- | --- |
 | Metodología | Scrum (sprints de ~1 semana, demo y retro al final de cada uno) |
-| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 (motor y 4 reglas, sin la prueba con Hydra) · ▶ Sprint 3: reestructuración al estándar CORE |
-| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sesiones 13 a 16 verificadas en la VM (clave rotada; migraciones aplicadas sin perder datos; llave del agente creada; pruebas unitarias y e2e en verde). Falta la demo con Hydra (sesión 17). Después, ▶ Sprint 4: seguridad y forense |
+| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 (reestructuración al CORE y demo con Hydra en la API nueva) · ▶ Sprint 4: seguridad y forense |
+| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sprint 3 cerrado: reestructuración al monorepo TS verificada en la VM y demo con Hydra en verde (LINUX-001 en segundos). Después, ▶ Sprint 4: seguridad y forense |
 | Meta | SIEM funcional para el 15 de noviembre; margen hasta diciembre |
 | Estándar | [Estándar técnico obligatorio "CORE"](02-estandar-core.md), obligatorio para todos los proyectos |
 

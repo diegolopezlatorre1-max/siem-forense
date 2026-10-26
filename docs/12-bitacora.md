@@ -64,6 +64,14 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - e2e en verde (9 pruebas): `/health`, correlation-id, 404 problem+json, `/ingest` (401, 400, 202 y 409) y `/alerts`.
 - **Problema:** PowerShell 5.1 rompe las comillas de los comandos que se pasan por `ssh`; los comandos con SQL se corren como scripts copiados a la VM.
 
+## 26 oct: demo con Hydra y cierre del Sprint 3 (sesión 17)
+
+- Laboratorio completo arriba: Ubuntu (.101) con API, worker y agente; Kali (.103) como atacante. La red host-only se arregló en ambas con `nmcli ... autoconnect yes` (al reiniciar perdían la IP).
+- Ataque desde Kali: `hydra -l intruso -P` con 12 contraseñas contra el SSH de Ubuntu. El agente leyó los `login_failed` de `auth.log`, los envió a `/ingest` (202) y el worker generó **LINUX-001** (fuerza bruta SSH, high, T1110, clave 192.168.56.103, 5 intentos) a los pocos segundos; también saltó **LINUX-002** sobre la misma IP. **Objetivo del Sprint 2/3 cumplido: la alerta aparece en menos de 1 minuto en la API nueva.**
+- **Problemas:** el agente no arrancaba con `sudo -E agent_linux.py` ("Falta SIEM_AGENT_KEY") porque Ubuntu 26.04 ignora `-E` de sudo; se corre sin sudo, ya que el usuario está en el grupo `adm` y puede leer `auth.log`. En los primeros intentos de Hydra se colaron erratas al teclear (`-p` en vez de `-P`, ruta `wordlist` sin la s): hay que cuidar mayúsculas y la ruta `/usr/share/wordlists/`.
+
+**Retro Sprint 3.** Bien: migración al monorepo TS sin perder los datos del laboratorio; la cadena recolección→reglas→alertas funciona igual que con el backend Python; demo con Hydra en verde. Mejorar: fijar la IP host-only con autoconexión desde el principio; evitar scripts con comillas por SSH desde PowerShell (se corren como archivos .sh copiados). Pendiente para S4: autenticación (doble token), RBAC/ABAC y la cadena HMAC forense.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |
