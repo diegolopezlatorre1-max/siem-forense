@@ -109,17 +109,21 @@ SESIÓN 15 - Base de la API
       pnpm lint && pnpm typecheck && pnpm test
 [x] Arrancar la API y comprobar desde el PC:
       curl http://192.168.56.101:3000/api/v1/health   -> {"estado":"ok","db":"ok","redis":"ok"}
-[ ] Con docker compose arriba y las migraciones aplicadas (sesión 16), correr los e2e:
+[x] Con docker compose arriba y las migraciones aplicadas (sesión 16), correr los e2e:
       pnpm --filter api test:e2e
+    (9 pruebas; dejan en la base agentes "e2e-..." y eventos con host "e2e")
 
 
 SESIÓN 16 - Ingesta con llave de agente
 ---------------------------------------
-[ ] En la VM, aplicar migraciones y crear la llave del agente:
+[x] Respaldar la base antes de migrar:
+      docker exec siem-postgres pg_dump -U siem -d siem -Fc > ~/respaldos/siem-AAAA-MM-DD-pre-migraciones.dump
+[x] En la VM, aplicar migraciones y crear la llave del agente:
       pnpm --filter api migration:run
-      pnpm --filter api agente:crear ubuntu
-[ ] Copiar la llave que se imprime (sale UNA sola vez) a docs/privado/credenciales.md.
-[ ] Exportarla para el agente:  export SIEM_AGENT_KEY='...'
+      pnpm --filter api agente:crear ubuntu 192.168.56.101
+[x] Copiar la llave que se imprime (sale UNA sola vez) a docs/privado/credenciales.md.
+[x] Guardarla para el agente en la VM, en un archivo que solo lee el usuario:
+      ~/.siem-agente.env  (chmod 600) con SIEM_AGENT_KEY=... y SIEM_API=http://localhost:3000/api/v1/ingest
 
 
 SESIÓN 17 - Demo con Hydra
@@ -129,7 +133,8 @@ SESIÓN 17 - Demo con Hydra
       pnpm --filter api migration:run
       pnpm --filter api start        (API)
       pnpm --filter api start:worker (worker, en otra terminal)
-      sudo -E python3 agents/linux/agent_linux.py
+      set -a; . ~/.siem-agente.env; set +a
+      sudo -E agents/linux/.venv/bin/python agents/linux/agent_linux.py   (agente, en otra terminal)
 [ ] Desde Kali (192.168.56.103):
       hydra -l intruso -P /usr/share/wordlists/rockyou.txt ssh://192.168.56.101
 [ ] Comprobar que LINUX-001 aparece en menos de 1 minuto:

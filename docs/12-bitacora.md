@@ -57,6 +57,13 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - El e2e queda para la sesión 16, porque necesita la tabla `agentes` (migración 0002).
 - **Problemas:** al reiniciar, la VM perdió la IP host-only (no quedó en autoconexión) y se arregló con `nmcli connection modify hostonly connection.autoconnect yes`. `/health` respondía 503 con `redis: error` porque BullMQ 6 dejó `ioredis` como dependencia opcional y no estaba instalado; las pruebas unitarias no lo veían porque usan dobles. Se agregó `ioredis` a `apps/api`.
 
+## 26 oct: migraciones y llave del agente (sesión 16)
+
+- Respaldo previo (`siem-2026-10-26-pre-migraciones.dump`) y migraciones 0001 y 0002 aplicadas sobre la base del Sprint 2 sin perder datos: siguen los 85 eventos y las 11 alertas. `event_id` pasó a `varchar(64)`, hay 4 índices nuevos en `eventos`, la tabla `agentes` y la columna `eventos.agente_id` (vacía en los eventos viejos).
+- Agente `ubuntu` creado (id 1). La llave no se mostró: quedó en `~/.siem-agente.env` de la VM (permisos 600) y en `docs/privado/`.
+- e2e en verde (9 pruebas): `/health`, correlation-id, 404 problem+json, `/ingest` (401, 400, 202 y 409) y `/alerts`.
+- **Problema:** PowerShell 5.1 rompe las comillas de los comandos que se pasan por `ssh`; los comandos con SQL se corren como scripts copiados a la VM.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

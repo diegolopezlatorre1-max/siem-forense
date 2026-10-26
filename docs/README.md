@@ -8,7 +8,7 @@ Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026
 | --- | --- |
 | Metodología | Scrum (sprints de ~1 semana, demo y retro al final de cada uno) |
 | Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 (motor y 4 reglas, sin la prueba con Hydra) · ▶ Sprint 3: reestructuración al estándar CORE |
-| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sesiones 13 a 15 verificadas en la VM (clave rotada; pruebas en verde; la API responde con db y redis en ok). Falta la sesión 16 en la VM (migraciones, e2e, llave del agente) y la demo con Hydra. Después, ▶ Sprint 4: seguridad y forense |
+| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sesiones 13 a 16 verificadas en la VM (clave rotada; migraciones aplicadas sin perder datos; llave del agente creada; pruebas unitarias y e2e en verde). Falta la demo con Hydra (sesión 17). Después, ▶ Sprint 4: seguridad y forense |
 | Meta | SIEM funcional para el 15 de noviembre; margen hasta diciembre |
 | Estándar | [Estándar técnico obligatorio "CORE"](02-estandar-core.md), obligatorio para todos los proyectos |
 
