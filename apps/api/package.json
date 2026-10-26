@@ -14,7 +14,8 @@
     "migration:run": "node --run build && typeorm migration:run -d dist/database/data-source.js",
     "migration:revert": "node --run build && typeorm migration:revert -d dist/database/data-source.js",
     "migration:show": "node --run build && typeorm migration:show -d dist/database/data-source.js",
-    "agente:crear": "node --run build && node dist/cli/crear-agente.js"
+    "agente:crear": "node --run build && node dist/cli/crear-agente.js",
+    "usuario:crear": "node --run build && node dist/cli/crear-usuario.js"
   },
   "dependencies": {
     "@nestjs/bullmq": "^12.0.0",
@@ -29,6 +30,7 @@
     "cookie-parser": "^1.4.7",
     "helmet": "^8.3.0",
     "ioredis": "^5.11.1",
+    "jose": "^6.2.13",
     "nestjs-pino": "^5.3.1",
     "pg": "^8.23.1",
     "pino-http": "^11.0.0",
