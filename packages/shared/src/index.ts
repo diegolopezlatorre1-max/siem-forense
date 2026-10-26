@@ -1,4 +1,5 @@
 export * from './comunes.js';
+export * from './auth.js';
 export * from './eventos.js';
 export * from './reglas.js';
 export * from './alertas.js';

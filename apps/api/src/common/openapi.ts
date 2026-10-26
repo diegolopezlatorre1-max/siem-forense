@@ -14,6 +14,7 @@ export function montarOpenApi(app: INestApplication): void {
     .setTitle('SIEM Forense')
     .setVersion('1')
     .addApiKey({ type: 'apiKey', in: 'header', name: 'X-Agent-Key' }, 'agente')
+    .addBearerAuth()
     .build();
   SwaggerModule.setup('api/docs', app, () => SwaggerModule.createDocument(app, config));
 }

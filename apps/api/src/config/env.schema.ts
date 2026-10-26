@@ -11,6 +11,11 @@ export const EnvSchema = z.object({
   POSTGRES_DB: z.string().min(1),
   REDIS_HOST: z.string().default('localhost'),
   REDIS_PORT: z.coerce.number().int().default(6379),
+  // Firma HS256 de los access tokens. Mínimo 32 bytes (openssl rand -base64 48).
+  SECRETO_JWT: z.string().min(32),
+  ACCESS_TTL_SEG: z.coerce.number().int().min(60).default(600),
+  REFRESH_TTL_DIAS: z.coerce.number().int().min(1).default(7),
+  MAX_SESIONES: z.coerce.number().int().min(1).default(3),
   REGLAS_DIR: z.string().optional(),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 });
