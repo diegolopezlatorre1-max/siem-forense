@@ -50,6 +50,13 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - **Sesión 14:** la VM pasó a `reestructuracion-core`. Node 22.22 (de apt) y pnpm 9.15.9 con corepack. `pnpm lint`, `pnpm typecheck` y `pnpm test` en verde (3 pruebas en shared y 25 en la API) y `pytest` del agente en verde (3).
 - **Problemas:** en un clon limpio fallaban `typecheck` de `apps/web` y 3 archivos de prueba de la API ("Failed to resolve entry for package @siem/shared"), porque `packages/shared` se exporta desde `dist/`, que está en `.gitignore` y nadie compilaba. En el PC no se veía porque ya había un `dist/` viejo. Se agregó `"prepare": "pnpm run build"` a shared, así `pnpm install` lo compila. Los `__pycache__` del backend viejo eran de root (el agente corría con `sudo`) y hubo que borrarlos con `sudo`.
 
+## 26 oct: base de la API en la VM (sesión 15)
+
+- La API arranca en la VM y responde desde el PC: `/health` en 200 con db y redis en ok, el `x-correlation-id` vuelve igual, y los errores salen como problem+json con `correlationId` (404, 400 en la query de `/alerts`, 401 en `/ingest` sin llave). `GET /alerts` lee las 11 alertas del Sprint 2. El worker arranca y se conecta a Redis.
+- Redis sigue solo en `127.0.0.1`: la API y los e2e corren dentro de la VM.
+- El e2e queda para la sesión 16, porque necesita la tabla `agentes` (migración 0002).
+- **Problemas:** al reiniciar, la VM perdió la IP host-only (no quedó en autoconexión) y se arregló con `nmcli connection modify hostonly connection.autoconnect yes`. `/health` respondía 503 con `redis: error` porque BullMQ 6 dejó `ioredis` como dependencia opcional y no estaba instalado; las pruebas unitarias no lo veían porque usan dobles. Se agregó `ioredis` a `apps/api`.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

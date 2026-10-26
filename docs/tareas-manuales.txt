@@ -90,19 +90,25 @@ SESIÓN 14 - Monorepo
 
 SESIÓN 15 - Base de la API
 --------------------------
-[ ] Comprobar que el PC llega a PostgreSQL de la VM (puerto 5432), p. ej. con DBeaver.
-[ ] Redis solo escucha en 127.0.0.1 de la VM. Elegir una opción:
+[x] Comprobar que el PC llega a PostgreSQL de la VM (puerto 5432), p. ej. con DBeaver.
+[x] Redis solo escucha en 127.0.0.1 de la VM. Elegir una opción:
       a) correr la API y las pruebas e2e dentro de la VM, o
       b) en docker-compose.yml cambiar "127.0.0.1:6379:6379" por la IP host-only de la VM.
-[ ] Añadir al .env de la VM (ver .env.example):
+    Elegida la a): Redis sigue cerrado a la red.
+[x] Si la VM pierde la 192.168.56.101 al reiniciar, que la conexión arranque sola:
+      sudo nmcli connection modify hostonly connection.autoconnect yes
+      sudo nmcli connection up hostonly
+[x] Añadir al .env de la VM (ver .env.example):
       POSTGRES_HOST=localhost
       POSTGRES_PORT=5432
       REDIS_HOST=localhost
       REDIS_PORT=6379
       PORT=3000
-[ ] En la VM, instalar dependencias y comprobar:
+[x] En la VM, instalar dependencias y comprobar:
       git pull && pnpm install
       pnpm lint && pnpm typecheck && pnpm test
+[x] Arrancar la API y comprobar desde el PC:
+      curl http://192.168.56.101:3000/api/v1/health   -> {"estado":"ok","db":"ok","redis":"ok"}
 [ ] Con docker compose arriba y las migraciones aplicadas (sesión 16), correr los e2e:
       pnpm --filter api test:e2e
 
