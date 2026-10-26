@@ -1,0 +1,9 @@
+id: LINUX-003
+nombre: Ataque contra un solo usuario
+descripcion: 5 logins fallidos contra el mismo usuario en 2 minutos
+event_type: login_failed
+agrupar_por: usuario
+umbral: 5
+ventana_segundos: 120
+severidad: high
+mitre: T1110.001
