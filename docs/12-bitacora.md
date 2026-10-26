@@ -72,6 +72,15 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 
 **Retro Sprint 3.** Bien: migración al monorepo TS sin perder los datos del laboratorio; la cadena recolección→reglas→alertas funciona igual que con el backend Python; demo con Hydra en verde. Mejorar: fijar la IP host-only con autoconexión desde el principio; evitar scripts con comillas por SSH desde PowerShell (se corren como archivos .sh copiados). Pendiente para S4: autenticación (doble token), RBAC/ABAC y la cadena HMAC forense.
 
+## 26 oct: autenticación con doble token (sesiones 18 y 19)
+
+- Migración 0003: `usuarios` (Argon2id) y `refresh_tokens` (familia, hash, usado/revocado). Los 114 eventos y las alertas siguen intactos.
+- Access JWT HS256 con `jose` (10 min, en memoria); refresh opaco de 32 bytes en cookie `HttpOnly; SameSite=Strict; Path=/api/v1/auth`, guardado solo como hash SHA-256. Login, `/auth/me`, refresh rotativo, logout y logout-all.
+- Seguridad de sesión: cada refresh rota el token; reutilizar uno ya usado (fuera de una gracia de 10 s para pestañas concurrentes) revoca toda la familia; máximo de `MAX_SESIONES` por usuario (se revoca la más antigua). `JwtAuthGuard` valida el access y que la familia no esté revocada, con caché de 30 s en Redis.
+- Verificado en la VM: 13 pruebas unitarias nuevas (tokens y auth) y e2e en verde (12 en total). Login real desde el PC con `curl`: 200 con access + cookie; `/auth/me` 200; clave mala 401.
+- **Decisiones/notas:** se eligió `jose` (ESM, probado) para el JWT; `ioredis` se importa con `{ Redis }` (named) en ESM; `gen_random_uuid()` es nativo en PostgreSQL 16, sin extensión. Se creó el usuario `admin` (clave en `docs/privado/`).
+- **Problema:** `git apply` del parche falló por contexto estricto; se desplegó a la VM con commit + push + pull, que resultó más fiable.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |
