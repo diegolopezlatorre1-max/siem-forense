@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'node:crypto';
+import { createHash, randomBytes, randomUUID } from 'node:crypto';
 
 import { Injectable } from '@nestjs/common';
 import type { Rol } from '@siem/shared';
@@ -27,6 +27,7 @@ export class TokensService {
     return new SignJWT({ rol: c.rol, sid: c.sid })
       .setProtectedHeader({ alg: 'HS256' })
       .setSubject(String(c.sub))
+      .setJti(randomUUID()) // cada token es único aunque se emita en el mismo segundo
       .setIssuedAt()
       .setExpirationTime(`${this.ttlSeg}s`)
       .sign(this.clave);
