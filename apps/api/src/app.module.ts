@@ -16,6 +16,7 @@ import { AgentsModule } from './modules/agents/agents.module.js';
 import { AlertsModule } from './modules/alerts/alerts.module.js';
 import { AuthModule } from './modules/auth/auth.module.js';
 import { EventsModule } from './modules/events/events.module.js';
+import { ForensicsModule } from './modules/forensics/forensics.module.js';
 import { HealthModule } from './modules/health/health.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
@@ -51,6 +52,7 @@ import { UsersModule } from './modules/users/users.module.js';
     UsersModule,
     EventsModule,
     AlertsModule,
+    ForensicsModule,
   ],
   providers: [
     // Orden importante: primero autentica y autoriza (RBAC), luego limita.

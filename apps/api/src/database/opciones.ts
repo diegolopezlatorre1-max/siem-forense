@@ -6,12 +6,19 @@ import { AlertaEntity } from '../modules/alerts/alerta.entity.js';
 import { RefreshTokenEntity } from '../modules/auth/refresh-token.entity.js';
 import { UsuarioEntity } from '../modules/auth/usuario.entity.js';
 import { EventoEntity } from '../modules/events/evento.entity.js';
+import { EslabonEntity } from '../modules/forensics/eslabon.entity.js';
 import { EsquemaBase1760900000000 } from './migrations/1760900000000-EsquemaBase.js';
 import { Agentes1760900100000 } from './migrations/1760900100000-Agentes.js';
 import { Usuarios1760900200000 } from './migrations/1760900200000-Usuarios.js';
+import { CadenaForense1760900300000 } from './migrations/1760900300000-CadenaForense.js';
 
-export const ENTIDADES = [EventoEntity, AlertaEntity, AgenteEntity, UsuarioEntity, RefreshTokenEntity];
-export const MIGRACIONES = [EsquemaBase1760900000000, Agentes1760900100000, Usuarios1760900200000];
+export const ENTIDADES = [EventoEntity, AlertaEntity, AgenteEntity, UsuarioEntity, RefreshTokenEntity, EslabonEntity];
+export const MIGRACIONES = [
+  EsquemaBase1760900000000,
+  Agentes1760900100000,
+  Usuarios1760900200000,
+  CadenaForense1760900300000,
+];
 
 // synchronize siempre en false: el esquema solo cambia con migraciones (docs/07-datos.md).
 export const opcionesBd = (env: Env): DataSourceOptions => ({

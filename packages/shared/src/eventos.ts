@@ -16,5 +16,5 @@ export const EventoIngestaSchema = z.object({
 });
 export type EventoIngesta = z.infer<typeof EventoIngestaSchema>;
 
-export const IngestaRespuestaSchema = z.object({ id: z.number().int() });
+export const IngestaRespuestaSchema = z.object({ id: z.number().int(), secuencia: z.number().int() });
 export type IngestaRespuesta = z.infer<typeof IngestaRespuestaSchema>;

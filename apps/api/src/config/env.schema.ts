@@ -16,6 +16,8 @@ export const EnvSchema = z.object({
   ACCESS_TTL_SEG: z.coerce.number().int().min(60).default(600),
   REFRESH_TTL_DIAS: z.coerce.number().int().min(1).default(7),
   MAX_SESIONES: z.coerce.number().int().min(1).default(3),
+  // Clave HMAC de la cadena forense. No se rota sin re-sellar (docs/09). Mínimo 32 bytes.
+  CLAVE_FORENSE: z.string().min(32),
   REGLAS_DIR: z.string().optional(),
   LOG_LEVEL: z.enum(['fatal', 'error', 'warn', 'info', 'debug', 'trace']).default('info'),
 });
