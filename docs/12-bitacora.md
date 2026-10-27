@@ -81,6 +81,14 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - **Decisiones/notas:** se eligió `jose` (ESM, probado) para el JWT; `ioredis` se importa con `{ Redis }` (named) en ESM; `gen_random_uuid()` es nativo en PostgreSQL 16, sin extensión. Se creó el usuario `admin` (clave en `docs/privado/`).
 - **Problema:** `git apply` del parche falló por contexto estricto; se desplegó a la VM con commit + push + pull, que resultó más fiable.
 
+## 26 oct: RBAC, ABAC y rate limiting (sesión 20)
+
+- **RBAC global, denegado por defecto** (`AccesoGuard`): decoradores `@Publico`, `@AgenteKey`, `@Roles`/`@Autenticado`. `/alerts`, `/auth/me`, logout y logout-all ya exigen Bearer; `/ingest` usa la llave de agente; `/health` es público. Nuevo módulo `users`: `GET`/`POST /users` solo admin.
+- **ABAC** (`PolicyGuard`) con políticas puras de ownership de alertas (`alertaPuedeModificar`/`Asignar`), con pruebas; se conectarán a los endpoints de alertas en el Sprint 6.
+- **Rate limiting** con `@nestjs/throttler` y un almacén propio en Redis (`RedisThrottlerStorage`): login 5/min por IP+usuario, refresh 30/min, ingest 600/min, resto 120/min. El 429 sale como problem+json.
+- Verificado en la VM: 48 pruebas unitarias y 17 e2e en verde. En vivo desde el PC: el auditor recibe **403** en `/users`, el admin **200**, y la 6.ª petición de login seguida devuelve **429**.
+- **Problemas:** un e2e fallaba por el servidor efímero de supertest (`req.ip` nulo) —se endureció `getTracker` y el e2e escucha en un puerto real—; y dos access tokens emitidos en el mismo segundo salían idénticos (JWT con `iat`/`exp` por segundos): se añadió un `jti` único a cada uno.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

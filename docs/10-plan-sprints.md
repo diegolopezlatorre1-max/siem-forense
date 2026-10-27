@@ -45,8 +45,8 @@ Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
 | --- | --- | --- |
 | ✔ 18 | Usuarios con Argon2id, login, emisión del access y del refresh | Se inicia sesión con curl |
 | ✔ 19 | Rotación, detección de reutilización, límite de sesiones, logout y logout-all | e2e de auth en verde |
-| ▶ 20 | RBAC global, ABAC (`PolicyGuard`) y throttler en Redis | El auditor recibe 403; una ráfaga de logins recibe 429 |
-| 21 | Cadena HMAC con bloqueo pesimista en la ingesta y `/forensics/verify` | Alterar un evento marca FALLO en el eslabón exacto; 20 ingestas concurrentes dejan una cadena válida |
+| ✔ 20 | RBAC global, ABAC (`PolicyGuard`) y throttler en Redis | El auditor recibe 403; una ráfaga de logins recibe 429 |
+| ▶ 21 | Cadena HMAC con bloqueo pesimista en la ingesta y `/forensics/verify` | Alterar un evento marca FALLO en el eslabón exacto; 20 ingestas concurrentes dejan una cadena válida |
 
 ## Sprint 5: Frontend · 2 al 8 nov
 
