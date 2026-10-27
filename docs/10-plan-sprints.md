@@ -27,7 +27,7 @@ Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
 | H9 | Como sistema, recibo eventos de Windows | — | S6 |
 | H10 | Como analista, consulto la línea de tiempo de un host, usuario o IP | — | S6 |
 
-## Sprint 3: Reestructuración al CORE · 19 al 25 oct · ▶
+## Sprint 3: Reestructuración al CORE · 19 al 25 oct · ✔
 
 **Objetivo:** documentación nueva, monorepo TS y paridad con el backend Python.
 
@@ -39,7 +39,7 @@ Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
 | ✔ 16 | Ingesta con `AgentKeyGuard` (migración 0002 parcial: `agentes`); motor y cargador de reglas portados con sus pruebas; cola BullMQ y worker; `/alerts` | 5 pruebas del motor y 2 del cargador pasando |
 | ✔ 17 | **Demo:** Hydra desde Kali contra SSH de Ubuntu; borrar `app/` (FastAPI, ya retirado el 21 oct) | LINUX-001 salta en menos de 1 min en la API nueva |
 
-## Sprint 4: Seguridad y forense · 26 oct al 1 nov
+## Sprint 4: Seguridad y forense · 26 oct al 1 nov · ✔
 
 | Sesión | Qué se hace | Terminado cuando |
 | --- | --- | --- |
@@ -48,7 +48,7 @@ Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
 | ✔ 20 | RBAC global, ABAC (`PolicyGuard`) y throttler en Redis | El auditor recibe 403; una ráfaga de logins recibe 429 |
 | ✔ 21 | Cadena HMAC con bloqueo pesimista en la ingesta y `/forensics/verify` | Alterar un evento marca FALLO en el eslabón exacto; 20 ingestas concurrentes dejan una cadena válida |
 
-## Sprint 5: Frontend · 2 al 8 nov
+## Sprint 5: Frontend · 2 al 8 nov · ▶
 
 | Sesión | Qué se hace | Terminado cuando |
 | --- | --- | --- |
