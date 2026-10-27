@@ -89,6 +89,16 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - Verificado en la VM: 48 pruebas unitarias y 17 e2e en verde. En vivo desde el PC: el auditor recibe **403** en `/users`, el admin **200**, y la 6.ª petición de login seguida devuelve **429**.
 - **Problemas:** un e2e fallaba por el servidor efímero de supertest (`req.ip` nulo) —se endureció `getTracker` y el e2e escucha en un puerto real—; y dos access tokens emitidos en el mismo segundo salían idénticos (JWT con `iat`/`exp` por segundos): se añadió un `jti` único a cada uno.
 
+## 26 oct: cadena forense HMAC y cierre del Sprint 4 (sesión 21)
+
+- Migración 0004 (`cadena_forense`). El eslabón **génesis es implícito**: `hash_0 = HMAC(CLAVE_FORENSE, "GENESIS|siem-forense")` se calcula en ejecución, sin meter la clave en una migración. El primer eslabón real es la secuencia 1.
+- **Sellado dentro de la transacción de ingesta**: en vez del `SELECT ... FOR UPDATE` del plan (que bajo concurrencia bifurca por leer una cola móvil), se usa `pg_advisory_xact_lock`, que serializa la escritura de la cadena de forma fiable. Canónico con claves en orden alfabético y `ts` en UTC; `hash_n = HMAC(clave, hash_{n-1}|n|canonico)`. `/ingest` ahora devuelve `{ id, secuencia }`.
+- **`GET /forensics/verify`** (admin, auditor): recorre por secuencia en lotes de 1000 y devuelve el primer fallo: `evento_alterado`, `cadena_rota`, `eslabon_faltante` o `evento_sin_sellar`. `CLAVE_FORENSE` pasó a ser obligatoria en la config.
+- Verificado en la VM: 52 pruebas unitarias y 22 e2e. En vivo: alterar un evento da `integra:false` con `evento_alterado` en el eslabón exacto (secuencia 1, eventoId 179) y restaurarlo vuelve a `integra:true`; 20 ingestas concurrentes dejan la cadena válida (e2e).
+- **Nota operativa:** al habilitar el sellado a mitad del proyecto, quedaron eventos antiguos sin eslabón (el servidor corrió con el código viejo mientras el agente seguía ingiriendo). Se estableció una **línea base limpia** reiniciando solo la tabla `cadena_forense` (los eventos no se tocan); desde ahí todo evento nuevo se sella. En producción el sellado estaría activo desde el primer evento.
+
+**Retro Sprint 4.** Bien: doble token con rotación y detección de reutilización, RBAC/ABAC, rate limiting en Redis y cadena forense, todo verificado en el laboratorio real. Mejorar: desplegar el código a la VM antes de probarlo en vivo (evita el estado mezclado que ensució la cadena); aplicar el `REVOKE UPDATE/DELETE` del usuario de la app (docs/07) para que ni siquiera se pueda alterar `eventos` desde la aplicación. Pendiente: frontend (S5).
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

@@ -7,8 +7,8 @@ Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026
 | Indicador | Estado |
 | --- | --- |
 | Metodología | Scrum (sprints de ~1 semana, demo y retro al final de cada uno) |
-| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ▶ Sprint 4: seguridad y forense (18-20 hechas: doble token, RBAC/ABAC, rate limiting) |
-| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sprint 4 en curso: doble token, RBAC global (denegado por defecto), ABAC y rate limiting en Redis, verificados en la VM. Falta la sesión 21 (cadena HMAC forense y `/forensics/verify`) |
+| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ✔ Sprint 4 (doble token, RBAC/ABAC, rate limiting y cadena forense) · ▶ Sprint 5: frontend |
+| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sprint 4 cerrado: autenticación con doble token, RBAC/ABAC, rate limiting y cadena forense HMAC con verificador, todo verificado en la VM. Sigue el ▶ Sprint 5: frontend Vue (login, eventos, alertas y verificar cadena) |
 | Meta | SIEM funcional para el 15 de noviembre; margen hasta diciembre |
 | Estándar | [Estándar técnico obligatorio "CORE"](02-estandar-core.md), obligatorio para todos los proyectos |
 
