@@ -38,6 +38,7 @@ beforeAll(async () => {
   const nest = modulo.createNestApplication<NestExpressApplication>({ bodyParser: false });
   configurarApp(nest);
   await nest.init();
+  await nest.listen(0); // escucha en un puerto real para evitar la carrera del servidor efímero de supertest
   app = nest as unknown as INestApplication<App>;
 });
 

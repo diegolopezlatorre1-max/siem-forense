@@ -10,7 +10,12 @@ export class AppThrottlerGuard extends ThrottlerGuard {
     const r = req as unknown as RequestAutenticada & { agenteId?: number; body?: { usuario?: string } };
     if (r.usuario) return Promise.resolve(`u:${r.usuario.sub}`);
     if (r.agenteId) return Promise.resolve(`a:${r.agenteId}`);
-    const ip = r.ip ?? 'desconocida';
+    let ip = 'desconocida';
+    try {
+      if (typeof r.ip === 'string') ip = r.ip;
+    } catch {
+      // req.ip puede fallar si el socket aún no está listo; usamos el valor por defecto.
+    }
     return Promise.resolve(r.body?.usuario ? `ip:${ip}:${r.body.usuario}` : `ip:${ip}`);
   }
 }
