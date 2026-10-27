@@ -1,5 +1,5 @@
 import { Controller, Get, Inject, Query } from '@nestjs/common';
-import { ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   type Alerta,
   AlertaSchema,
@@ -10,6 +10,7 @@ import {
   type Severidad,
 } from '@siem/shared';
 
+import { Autenticado } from '../../common/auth/decoradores.js';
 import { esquema } from '../../common/openapi.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import type { AlertaEntity } from './alerta.entity.js';
@@ -22,13 +23,14 @@ const aDto = (a: AlertaEntity): Alerta => ({
   creada_en: a.creada_en.toISOString(),
 });
 
-// TODO(S4): exigir Bearer (JwtAuthGuard global). Hasta entonces es de solo lectura y abierto, como en el backend Python.
 @ApiTags('alertas')
+@ApiBearerAuth()
 @Controller('alerts')
 export class AlertsController {
   constructor(@Inject(ALERTAS_REPO) private readonly alertas: AlertasRepository) {}
 
   @Get()
+  @Autenticado()
   @ApiQuery({ name: 'pagina', required: false, schema: { type: 'integer', minimum: 1, default: 1 } })
   @ApiQuery({ name: 'tamano', required: false, schema: { type: 'integer', minimum: 1, maximum: 100, default: 50 } })
   @ApiResponse({ status: 200, schema: esquema(paginado(AlertaSchema)) })

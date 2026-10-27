@@ -22,6 +22,6 @@ import { USUARIOS_REPO, TypeOrmUsuariosRepository } from './usuarios.repository.
     { provide: REFRESH_REPO, useClass: TypeOrmRefreshTokensRepository },
     { provide: CACHE_SESIONES, useClass: RedisCacheSesiones },
   ],
-  exports: [TokensService, AuthService, JwtAuthGuard],
+  exports: [TokensService, AuthService, JwtAuthGuard, USUARIOS_REPO],
 })
 export class AuthModule {}

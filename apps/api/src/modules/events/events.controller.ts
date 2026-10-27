@@ -1,9 +1,10 @@
-import { Body, Controller, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiBody, ApiResponse, ApiSecurity, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import { type EventoIngesta, EventoIngestaSchema, type IngestaRespuesta, IngestaRespuestaSchema, ProblemSchema } from '@siem/shared';
 
+import { AgenteKey } from '../../common/auth/decoradores.js';
 import { AgenteActual } from '../../common/decorators/agente-actual.decorator.js';
-import { AgentKeyGuard } from '../../common/guards/agent-key.guard.js';
 import { esquema } from '../../common/openapi.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { IngestaService } from './ingesta.service.js';
@@ -14,8 +15,9 @@ export class EventsController {
   constructor(private readonly ingesta: IngestaService) {}
 
   @Post('ingest')
+  @AgenteKey()
+  @Throttle({ default: { limit: 600, ttl: 60_000 } })
   @HttpCode(HttpStatus.ACCEPTED)
-  @UseGuards(AgentKeyGuard)
   @ApiSecurity('agente')
   @ApiBody({ schema: esquema(EventoIngestaSchema, 'input') })
   @ApiResponse({ status: 202, schema: esquema(IngestaRespuestaSchema) })

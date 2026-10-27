@@ -6,6 +6,7 @@ import type { Queue } from 'bullmq';
 import type { Response } from 'express';
 import type { DataSource } from 'typeorm';
 
+import { Publico } from '../../common/auth/decoradores.js';
 import { COLA_DETECCION } from '../detection/cola.js';
 
 type Estado = 'ok' | 'error';
@@ -31,6 +32,7 @@ export class HealthController {
   ) {}
 
   @Get()
+  @Publico()
   async salud(@Res({ passthrough: true }) res: Response): Promise<Salud> {
     const [db, redis] = await Promise.all([
       comprobar(this.ds.query('SELECT 1')),

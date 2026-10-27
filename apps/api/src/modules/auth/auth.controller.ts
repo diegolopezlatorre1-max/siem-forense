@@ -1,5 +1,6 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Req, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { Throttle } from '@nestjs/throttler';
 import {
   type Login,
   type LoginRespuesta,
@@ -12,9 +13,9 @@ import {
 } from '@siem/shared';
 import type { CookieOptions, Request, Response } from 'express';
 
+import { Autenticado, Publico } from '../../common/auth/decoradores.js';
 import { UsuarioActual } from '../../common/decorators/usuario-actual.decorator.js';
 import { NoAutenticadoError } from '../../common/errors/dominio.js';
-import { JwtAuthGuard } from '../../common/guards/jwt-auth.guard.js';
 import { esquema } from '../../common/openapi.js';
 import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import { ConfigService } from '../../config/config.service.js';
@@ -43,6 +44,8 @@ export class AuthController {
   }
 
   @Post('login')
+  @Publico()
+  @Throttle({ default: { limit: 5, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiBody({ schema: esquema(LoginSchema, 'input') })
   @ApiResponse({ status: 200, schema: esquema(LoginRespuestaSchema) })
@@ -58,6 +61,8 @@ export class AuthController {
   }
 
   @Post('refresh')
+  @Publico()
+  @Throttle({ default: { limit: 30, ttl: 60_000 } })
   @HttpCode(HttpStatus.OK)
   @ApiResponse({ status: 200, schema: esquema(RefreshRespuestaSchema) })
   @ApiResponse({ status: 401, description: 'Refresh inválido', schema: esquema(ProblemSchema) })
@@ -69,8 +74,8 @@ export class AuthController {
   }
 
   @Post('logout')
+  @Autenticado()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async logout(@UsuarioActual() u: ClaimsAcceso, @Res({ passthrough: true }) res: Response): Promise<void> {
     await this.auth.logout(u.sid);
@@ -78,8 +83,8 @@ export class AuthController {
   }
 
   @Post('logout-all')
+  @Autenticado()
   @HttpCode(HttpStatus.NO_CONTENT)
-  @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   async logoutAll(@UsuarioActual() u: ClaimsAcceso, @Res({ passthrough: true }) res: Response): Promise<void> {
     await this.auth.logoutAll(u.sub);
@@ -87,7 +92,7 @@ export class AuthController {
   }
 
   @Get('me')
-  @UseGuards(JwtAuthGuard)
+  @Autenticado()
   @ApiBearerAuth()
   @ApiResponse({ status: 200, schema: esquema(LoginRespuestaSchema.shape.usuario) })
   async me(@UsuarioActual() u: ClaimsAcceso): Promise<UsuarioPublico> {

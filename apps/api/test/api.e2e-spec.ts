@@ -15,10 +15,13 @@ import { AppModule } from '../src/app.module.js';
 import { configurarApp } from '../src/configurar-app.js';
 import { AgenteEntity } from '../src/modules/agents/agente.entity.js';
 import { generarLlave } from '../src/modules/agents/llave.js';
+import { UsuarioEntity } from '../src/modules/auth/usuario.entity.js';
 
 // Requiere PostgreSQL y Redis del docker compose con las migraciones aplicadas.
 let app: INestApplication<App>;
 let llave: string;
+let accessToken: string;
+const bearer = () => ({ Authorization: `Bearer ${accessToken}` });
 
 const evento = () => ({
   event_id: randomUUID().replaceAll('-', ''),
@@ -45,6 +48,16 @@ beforeAll(async () => {
     prefijo_llave: generada.prefijo,
     llave_hash: await hash(llave),
   });
+
+  // GET /alerts ya exige Bearer: creamos un usuario y obtenemos un access token.
+  const usuario = `e2e-base-${randomUUID().slice(0, 8)}`;
+  const clave = 'Clave-base-123';
+  await app
+    .get(DataSource)
+    .getRepository(UsuarioEntity)
+    .save({ usuario, clave_hash: await hash(clave), rol: 'analista', activo: true });
+  const login = await request(app.getHttpServer()).post('/api/v1/auth/login').send({ usuario, clave }).expect(200);
+  accessToken = login.body.accessToken;
 });
 
 afterAll(async () => {
@@ -101,13 +114,17 @@ describe('POST /ingest', () => {
 });
 
 describe('GET /alerts', () => {
+  it('sin Bearer responde 401', async () => {
+    await request(app.getHttpServer()).get('/api/v1/alerts?tamano=5').expect(401);
+  });
+
   it('devuelve una página', async () => {
-    const r = await request(app.getHttpServer()).get('/api/v1/alerts?tamano=5').expect(200);
+    const r = await request(app.getHttpServer()).get('/api/v1/alerts?tamano=5').set(bearer()).expect(200);
     expect(r.body).toMatchObject({ pagina: 1, tamano: 5 });
     expect(Array.isArray(r.body.items)).toBe(true);
   });
 
   it('valida la query', async () => {
-    await request(app.getHttpServer()).get('/api/v1/alerts?tamano=1000').expect(400);
+    await request(app.getHttpServer()).get('/api/v1/alerts?tamano=1000').set(bearer()).expect(400);
   });
 });

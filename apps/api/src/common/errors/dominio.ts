@@ -26,3 +26,8 @@ export class NoAutenticadoError extends ErrorDominio {
   readonly status = 401;
   readonly tipo = 'no-autenticado';
 }
+
+export class AccesoDenegadoError extends ErrorDominio {
+  readonly status = 403;
+  readonly tipo = 'acceso-denegado';
+}

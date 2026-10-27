@@ -29,6 +29,14 @@ class FakeUsuarios implements UsuariosRepository {
   async buscarPorId(id: number) {
     return this.lista.find((u) => u.id === id) ?? null;
   }
+  async listar() {
+    return this.lista;
+  }
+  async crear(datos: { usuario: string; clave_hash: string; rol: UsuarioEntity['rol'] }) {
+    const u = { id: this.lista.length + 1, activo: true, creado_en: new Date(), ...datos } as UsuarioEntity;
+    this.lista.push(u);
+    return u;
+  }
 }
 
 class FakeRefresh implements RefreshTokensRepository {
