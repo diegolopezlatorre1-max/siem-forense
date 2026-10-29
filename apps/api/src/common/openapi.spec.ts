@@ -11,6 +11,8 @@ import { AlertsController } from '../modules/alerts/alerts.controller.js';
 import { ALERTAS_REPO } from '../modules/alerts/alertas.repository.js';
 import { COLA_DETECCION } from '../modules/detection/cola.js';
 import { EventsController } from '../modules/events/events.controller.js';
+import { EventsQueryController } from '../modules/events/events-query.controller.js';
+import { EVENTOS_REPO } from '../modules/events/eventos.repository.js';
 import { IngestaService } from '../modules/events/ingesta.service.js';
 import { HealthController } from '../modules/health/health.controller.js';
 import { montarOpenApi } from './openapi.js';
@@ -18,13 +20,14 @@ import { montarOpenApi } from './openapi.js';
 describe('OpenAPI', () => {
   it('documenta las rutas con los schemas de packages/shared', { timeout: 30_000 }, async () => {
     const modulo = await Test.createTestingModule({
-      controllers: [HealthController, EventsController, AlertsController],
+      controllers: [HealthController, EventsController, EventsQueryController, AlertsController],
       providers: [
         { provide: getDataSourceToken(), useValue: {} },
         { provide: getQueueToken(COLA_DETECCION), useValue: {} },
         { provide: IngestaService, useValue: {} },
         { provide: AgentesService, useValue: {} },
         { provide: ALERTAS_REPO, useValue: {} },
+        { provide: EVENTOS_REPO, useValue: {} },
       ],
     }).compile();
     const app = modulo.createNestApplication();
@@ -38,6 +41,7 @@ describe('OpenAPI', () => {
     expect(ingesta?.responses).toHaveProperty('409');
     expect(JSON.stringify(ingesta?.requestBody)).toContain('login_failed');
     expect(doc.paths).toHaveProperty(['/api/v1/alerts']);
+    expect(doc.paths).toHaveProperty(['/api/v1/events']);
     expect(doc.paths).toHaveProperty(['/api/v1/health']);
     const servidor = app.getHttpServer();
     await request(servidor).get('/api/docs/').expect(200);

@@ -18,3 +18,34 @@ export type EventoIngesta = z.infer<typeof EventoIngestaSchema>;
 
 export const IngestaRespuestaSchema = z.object({ id: z.number().int(), secuencia: z.number().int() });
 export type IngestaRespuesta = z.infer<typeof IngestaRespuestaSchema>;
+
+// Evento ya almacenado, tal como lo devuelve GET /events (fechas en ISO con zona).
+export const EventoSchema = z.object({
+  id: z.number().int(),
+  event_id: z.string(),
+  ts: z.iso.datetime({ offset: true }),
+  host: z.string(),
+  source: z.string(),
+  event_type: TipoEventoSchema,
+  usuario: z.string().nullable(),
+  src_ip: z.string().nullable(),
+  severity: SeveridadSchema,
+  raw: z.string(),
+  recibido_en: z.iso.datetime({ offset: true }),
+  agente_id: z.number().int().nullable(),
+});
+export type Evento = z.infer<typeof EventoSchema>;
+
+// Filtros y paginación de GET /events. Los valores llegan como texto en la query,
+// por eso pagina/tamano y las fechas se coercionan.
+export const EventosQuerySchema = z.object({
+  host: z.string().min(1).max(120).optional(),
+  usuario: z.string().min(1).max(120).optional(),
+  src_ip: z.string().min(1).max(45).optional(),
+  event_type: TipoEventoSchema.optional(),
+  desde: z.coerce.date().optional(),
+  hasta: z.coerce.date().optional(),
+  pagina: z.coerce.number().int().min(1).default(1),
+  tamano: z.coerce.number().int().min(1).max(100).default(50),
+});
+export type EventosQuery = z.infer<typeof EventosQuerySchema>;

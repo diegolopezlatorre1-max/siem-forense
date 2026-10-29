@@ -34,6 +34,7 @@ function crear(opciones: { duplicado?: boolean; redisCaido?: boolean } = {}) {
       return 7;
     },
     recientes: async () => [],
+    listar: async () => [[], 0],
   };
   const forense = {
     sellar: async (_em: EntityManager, evento: { id: number }) => {

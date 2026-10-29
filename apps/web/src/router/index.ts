@@ -31,6 +31,11 @@ export const router = createRouter({
       name: 'inicio',
       component: () => import('../views/InicioView.vue'),
     },
+    {
+      path: '/eventos',
+      name: 'eventos',
+      component: () => import('../views/EventosView.vue'),
+    },
   ],
 });
 

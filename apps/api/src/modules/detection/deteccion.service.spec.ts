@@ -25,6 +25,7 @@ function crear(eventosGuardados: EventoEvaluable[]) {
     insertar: async () => 0,
     recientes: async (tipo, desde) =>
       eventosGuardados.filter((e) => e.event_type === tipo && e.ts.getTime() >= desde.getTime()),
+    listar: async () => [[], 0],
   };
   const repoAlertas: AlertasRepository = {
     listar: async () => [[], 0],

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
+import { RouterLink, useRouter } from 'vue-router';
 
 import { useAuthStore } from '../stores/auth.js';
 
@@ -29,7 +29,12 @@ async function cerrarSesion(): Promise<void> {
         </button>
       </div>
     </header>
-    <p>Sesión iniciada. Las vistas de eventos, alertas y verificación llegan en las sesiones 23–25.</p>
+    <nav class="secciones">
+      <RouterLink to="/eventos">
+        Eventos
+      </RouterLink>
+    </nav>
+    <p>Las vistas de alertas y verificación llegan en las sesiones 24–25.</p>
   </main>
 </template>
 
