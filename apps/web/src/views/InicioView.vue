@@ -1,10 +1,13 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
 import { useAuthStore } from '../stores/auth.js';
 
 const auth = useAuthStore();
 const router = useRouter();
+
+const puedeVerificar = computed(() => auth.rol === 'admin' || auth.rol === 'auditor');
 
 async function cerrarSesion(): Promise<void> {
   await auth.logout();
@@ -36,8 +39,13 @@ async function cerrarSesion(): Promise<void> {
       <RouterLink to="/alertas">
         Alertas
       </RouterLink>
+      <RouterLink
+        v-if="puedeVerificar"
+        to="/verificar"
+      >
+        Verificar cadena
+      </RouterLink>
     </nav>
-    <p>La vista de verificación de la cadena llega en la sesión 25.</p>
   </main>
 </template>
 

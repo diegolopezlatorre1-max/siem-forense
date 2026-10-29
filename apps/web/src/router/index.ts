@@ -41,6 +41,12 @@ export const router = createRouter({
       name: 'alertas',
       component: () => import('../views/AlertasView.vue'),
     },
+    {
+      path: '/verificar',
+      name: 'verificar',
+      meta: { roles: ['admin', 'auditor'] },
+      component: () => import('../views/VerificarView.vue'),
+    },
   ],
 });
 
