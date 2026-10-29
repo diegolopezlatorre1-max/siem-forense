@@ -1,14 +1,14 @@
 # Documentación: SIEM Forense Centralizado
 
-Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026 (tarde)
+Proyecto de la carrera de Ciberseguridad · Actualizado el 29 de octubre de 2026
 
 ## Dónde vamos
 
 | Indicador | Estado |
 | --- | --- |
 | Metodología | Scrum (sprints de ~1 semana, demo y retro al final de cada uno) |
-| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ✔ Sprint 4 (doble token, RBAC/ABAC, rate limiting y cadena forense) · ▶ Sprint 5: frontend |
-| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sprint 4 cerrado: autenticación con doble token, RBAC/ABAC, rate limiting y cadena forense HMAC con verificador, todo verificado en la VM. Sigue el ▶ Sprint 5: frontend Vue (login, eventos, alertas y verificar cadena) |
+| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ✔ Sprint 4 (doble token, RBAC/ABAC, rate limiting y cadena forense) · ✔ Sprint 5 (frontend Vue) · ▶ Sprint 6: Windows y flujo de alertas |
+| Siguiente | Sprint 5 cerrado: frontend Vue completo (login con sesión persistente, eventos, alertas y verificar cadena) con acceso por rol, verificado en vivo en la VM. En la demo se encontró y corrigió un bug de `crypto.randomUUID` en contexto no seguro (HTTP). Sigue el ▶ Sprint 6: agente de Windows, reglas WIN, flujo de alertas (estado/asignación) y línea de tiempo |
 | Meta | SIEM funcional para el 15 de noviembre; margen hasta diciembre |
 | Estándar | [Estándar técnico obligatorio "CORE"](02-estandar-core.md), obligatorio para todos los proyectos |
 
@@ -30,6 +30,7 @@ Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026
 | 10 | [Plan por sprints](10-plan-sprints.md) | Backlog, sprints y orden de recorte |
 | 11 | [Laboratorio](11-laboratorio.md) | Máquinas, red y cómo encender todo |
 | 12 | [Bitácora](12-bitacora.md) | Diario, retros y problemas resueltos |
+| 13 | [Demostración de ataque](13-demo-ataque.md) | Guion paso a paso del ataque Hydra, detección y verificación forense (con registro de la ejecución en vivo) |
 | — | [Decisiones (ADR)](adr/) | Por qué se eligió cada cosa |
 | — | [Plan de reestructuración por fases](plan-reestructuracion.md) | Fases 0–3 de la migración al CORE (Fases 0 y 1 hechas salvo rotar la clave; Fase 3 en el Sprint 3) |
 

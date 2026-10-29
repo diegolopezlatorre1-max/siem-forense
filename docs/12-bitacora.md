@@ -99,6 +99,47 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 
 **Retro Sprint 4.** Bien: doble token con rotación y detección de reutilización, RBAC/ABAC, rate limiting en Redis y cadena forense, todo verificado en el laboratorio real. Mejorar: desplegar el código a la VM antes de probarlo en vivo (evita el estado mezclado que ensució la cadena); aplicar el `REVOKE UPDATE/DELETE` del usuario de la app (docs/07) para que ni siquiera se pueda alterar `eventos` desde la aplicación. Pendiente: frontend (S5).
 
+## 28–29 oct: frontend Vue y cierre del Sprint 5 (sesiones 22 a 25)
+
+- **Sesión 22 (cliente HTTP, auth, guards):** instancia Axios con interceptores (Bearer +
+  `x-correlation-id`; ante 401, un único refresh en cola y reintento; backoff en GET ante
+  red/5xx); store `auth` con el access **solo en memoria**; guards async (restaurar sesión /
+  `meta.roles` → 403); vistas Login y 403. Prueba del *single-flight* del refresh (3 casos).
+- **Sesión 23 (Eventos):** al construir la vista se descubrió que **`GET /events` no existía**
+  en el backend (estaba documentado pero nunca se implementó). Se creó: `EventoSchema` y
+  `EventosQuerySchema` en `@siem/shared`, `listar` con filtros en el repositorio y
+  `EventsQueryController` (rol: todos), siguiendo el patrón de `GET /alerts`. Frontend: store
+  `events` normalizado (caché 30 s), store `ui` con filtros persistidos en `localStorage` y la
+  vista con tabla, filtros y paginador (`raw` como texto, sin `v-html`).
+- **Sesión 24 (Alertas):** se añadieron filtros `severidad` y `regla_id` a `GET /alerts`
+  (backend) y la vista de Alertas con tarjetas (franja/chip de severidad, MITRE, paginador).
+  El filtro por estado, la asignación y `GET /alerts/:id` quedan para el Sprint 6 (la tabla aún
+  no tiene esas columnas).
+- **Sesión 25 (Verificar cadena + roles):** vista Verificar que llama a `GET /forensics/verify`
+  (verde con nº de eslabones o rojo con la secuencia y el motivo del primer fallo) y rutas por
+  rol (`/verificar` solo admin/auditor; el guard manda a `/403` a quien no corresponde).
+- **Demo en vivo (29 oct):** stack completo arriba en la VM con el código de los Sprints 5
+  (`git pull` de `dev`). Verificado desde el PC: `/health` 200, login `admin` 200,
+  `GET /events` 169 eventos (116 `login_failed`), `GET /alerts` 18 alertas (LINUX-001: 6,
+  LINUX-003: 5), `GET /forensics/verify` **íntegra** con 13 eslabones. Login en el navegador
+  funcionando tras corregir el bug de abajo.
+- **Bug corregido (commit `c6e80f5`):** el login en el navegador fallaba **sin enviar la
+  petición** porque el interceptor generaba el `x-correlation-id` con `crypto.randomUUID()`,
+  que solo existe en contexto seguro (HTTPS/localhost). La web se sirve por `http://192.168.56.101`
+  (HTTP + IP), así que la función era `undefined` y Axios rechazaba cada petición. Se añadió un
+  generador con respaldo en `crypto.getRandomValues`. Afectaba a todo el frontend, no solo al login.
+- **Correcciones de documentación:** se aclaró en [11](11-laboratorio.md) que la contraseña del
+  SO de las máquinas no está en el repo (solo las de servicios/app); se añadió a [08](08-api.md)
+  una nota de estado de implementación (qué endpoints existen y cuáles son del Sprint 6).
+
+**Retro Sprint 5.** Bien: frontend completo (login con sesión persistente, eventos, alertas y
+verificación) con TS estricto, stores normalizados y acceso por rol; el bug de `crypto.randomUUID`
+se encontró y corrigió en la demo en vivo. Mejorar: **probar el frontend en la URL real del
+laboratorio** (HTTP + IP), no solo contra la API o en `localhost`; verificar el contrato del
+backend antes de construir una vista (la ausencia de `GET /events` apareció a mitad de la sesión).
+Pendiente S6: agente de Windows, reglas WIN, flujo de alertas (estado/asignación, migración 0005)
+y línea de tiempo.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" font-family="'Segoe UI',Arial,sans-serif" font-size="12">
+  <rect x="0" y="0" width="860" height="300" fill="#ffffff"/>
+  <text x="24" y="34" fill="#1f2933" font-size="16" font-weight="700">Figura 5 · La cadena forense HMAC y su verificación</text>
+
+  <defs>
+    <marker id="a5" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2f855d"/>
+    </marker>
+  </defs>
+
+  <!-- genesis -->
+  <rect x="24" y="86" width="150" height="88" rx="8" fill="#f0f2f5" stroke="#9aa5b1"/>
+  <text x="99" y="110" text-anchor="middle" fill="#1f2933" font-weight="600">GÉNESIS</text>
+  <text x="99" y="132" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">hash_0 =</text>
+  <text x="99" y="148" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">HMAC("GENESIS</text>
+  <text x="99" y="162" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">|siem-forense")</text>
+
+  <!-- evento n-1 -->
+  <rect x="214" y="86" width="178" height="88" rx="8" fill="#e6f4ec" stroke="#2f855d"/>
+  <text x="303" y="110" text-anchor="middle" fill="#1f2933" font-weight="600">evento n−1 (seq 40)</text>
+  <text x="303" y="132" text-anchor="middle" fill="#52606d" font-size="11">login_failed · intruso</text>
+  <text x="303" y="152" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">hash_{40} = a3f9…</text>
+
+  <!-- evento n -->
+  <rect x="432" y="86" width="178" height="88" rx="8" fill="#e6f4ec" stroke="#2f855d"/>
+  <text x="521" y="110" text-anchor="middle" fill="#1f2933" font-weight="600">evento n (seq 41)</text>
+  <text x="521" y="132" text-anchor="middle" fill="#52606d" font-size="11">login_failed · intruso</text>
+  <text x="521" y="152" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">hash_{41} = 7c2e…</text>
+
+  <!-- evento n+1 -->
+  <rect x="650" y="86" width="178" height="88" rx="8" fill="#e6f4ec" stroke="#2f855d"/>
+  <text x="739" y="110" text-anchor="middle" fill="#1f2933" font-weight="600">evento n+1 (seq 42)</text>
+  <text x="739" y="132" text-anchor="middle" fill="#52606d" font-size="11">login_failed · intruso</text>
+  <text x="739" y="152" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">hash_{42} = 1b80…</text>
+
+  <path d="M174 130 H212" stroke="#2f855d" stroke-width="1.6" marker-end="url(#a5)"/>
+  <path d="M392 130 H430" stroke="#2f855d" stroke-width="1.6" marker-end="url(#a5)"/>
+  <path d="M610 130 H648" stroke="#2f855d" stroke-width="1.6" marker-end="url(#a5)"/>
+
+  <text x="430" y="206" text-anchor="middle" fill="#52606d" font-size="12" font-family="Consolas,monospace">hash_n = HMAC( CLAVE_FORENSE ,  hash_{n-1} | n | canonico(evento_n) )</text>
+
+  <rect x="214" y="230" width="430" height="40" rx="8" fill="#e6f4ec" stroke="#2f855d" stroke-width="1.5"/>
+  <text x="236" y="255" fill="#226644" font-size="13" font-weight="700">GET /forensics/verify → { integra: true, eslabones: 42 }</text>
+  <text x="624" y="255" text-anchor="end" fill="#2f855d" font-size="16">✓</text>
+
+  <text x="24" y="292" fill="#718096" font-size="11">CLAVE_FORENSE sólo vive en el .env de la VM: quien escriba en la base sin esa clave no puede recalcular la cadena.</text>
+</svg>

@@ -13,7 +13,7 @@ Red solo-anfitrión `192.168.56.0/24`: solo el PC y las máquinas virtuales la v
 - Zona horaria de todas las máquinas: `America/Bogota`, con NTP activado. Es clave para la línea de tiempo forense.
 - Snapshot limpio de cada máquina: `dia5-limpio`.
 - Logs de logins de Ubuntu: `/var/log/auth.log` (léelo con `grep -a`, porque tiene bytes nulos de un cierre de VirtualBox).
-- Las contraseñas de las máquinas y servicios están en `docs/privado/credenciales.md` (no se versiona).
+- Las credenciales de **servicios y aplicación** (PostgreSQL, `CLAVE_FORENSE`, `SECRETO_JWT`, llave de agente y el login `admin` de la web) están en `docs/privado/credenciales.md` (no se versiona). La **contraseña del sistema operativo** de cada máquina (la del login/SSH) es la que se puso al instalar y **no está en el repo**. El usuario de Ubuntu para SSH es `diego-latorre10` (`ssh diego-latorre10@192.168.56.101`).
 
 ## Requisitos en Ubuntu
 

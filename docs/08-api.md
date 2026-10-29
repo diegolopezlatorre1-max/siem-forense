@@ -2,6 +2,13 @@
 
 Base: `/api/v1`. Formato JSON. Los errores siguen `application/problem+json` ([05-backend.md](05-backend.md#manejo-global-de-errores)). Toda respuesta trae `x-correlation-id`. El contrato ejecutable (schemas Zod) está en `packages/shared`, y el OpenAPI se genera en `/api/docs`.
 
+> **Estado de implementación (29 oct 2026).** Implementados y verificados en la VM: `/health`,
+> `/auth/*`, `POST /ingest`, `GET /events` (filtros host/usuario/IP/tipo/fecha), `GET /alerts`
+> (filtros `severidad` y `regla_id`) y `GET /forensics/verify`. **Pendientes (Sprint 6):**
+> `GET /events/:id`, `GET /timeline`, `GET /alerts/:id`, `POST /alerts/:id/asignar` y
+> `PATCH /alerts/:id` —estos tres últimos necesitan la migración 0005 (`estado`, `asignada_a`,
+> `version`)— y el agente de Windows. El filtro por `estado` de `/alerts` también es del Sprint 6.
+
 ## Salud
 
 | Método | Ruta | Auth | Respuesta |

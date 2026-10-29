@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 300" font-family="'Segoe UI',Arial,sans-serif" font-size="13">
+  <rect x="0" y="0" width="860" height="300" fill="#ffffff"/>
+  <text x="24" y="34" fill="#1f2933" font-size="16" font-weight="700">Figura 2 · Del ataque a la alerta sellada (línea de tiempo del evento)</text>
+
+  <defs>
+    <marker id="a2" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#2b6cb0"/>
+    </marker>
+  </defs>
+
+  <!-- 5 stages -->
+  <g>
+    <rect x="24"  y="90" width="150" height="80" rx="9" fill="#fde8e8" stroke="#c53030" stroke-width="1.5"/>
+    <text x="99"  y="118" text-anchor="middle" fill="#1f2933" font-weight="600">1 · Hydra</text>
+    <text x="99"  y="138" text-anchor="middle" fill="#52606d" font-size="11">logins SSH fallidos</text>
+    <text x="99"  y="155" text-anchor="middle" fill="#718096" font-size="11">usuario «intruso»</text>
+
+    <rect x="200" y="90" width="150" height="80" rx="9" fill="#f0f2f5" stroke="#9aa5b1" stroke-width="1.5"/>
+    <text x="275" y="118" text-anchor="middle" fill="#1f2933" font-weight="600">2 · auth.log</text>
+    <text x="275" y="138" text-anchor="middle" fill="#52606d" font-size="11">sshd escribe cada</text>
+    <text x="275" y="155" text-anchor="middle" fill="#718096" font-size="11">"Failed password"</text>
+
+    <rect x="376" y="90" width="150" height="80" rx="9" fill="#ebf2fa" stroke="#2b6cb0" stroke-width="1.5"/>
+    <text x="451" y="118" text-anchor="middle" fill="#1f2933" font-weight="600">3 · Agente</text>
+    <text x="451" y="138" text-anchor="middle" fill="#52606d" font-size="11">normaliza a</text>
+    <text x="451" y="155" text-anchor="middle" fill="#718096" font-size="11">login_failed</text>
+
+    <rect x="552" y="90" width="150" height="80" rx="9" fill="#ebf2fa" stroke="#2b6cb0" stroke-width="1.5"/>
+    <text x="627" y="114" text-anchor="middle" fill="#1f2933" font-weight="600">4 · Ingesta</text>
+    <text x="627" y="134" text-anchor="middle" fill="#52606d" font-size="11">guarda + sella</text>
+    <text x="627" y="151" text-anchor="middle" fill="#718096" font-size="11">eslabón HMAC</text>
+
+    <rect x="710" y="90" width="126" height="80" rx="9" fill="#fff4f4" stroke="#c53030" stroke-width="1.5"/>
+    <text x="773" y="114" text-anchor="middle" fill="#1f2933" font-weight="600">5 · Motor</text>
+    <text x="773" y="134" text-anchor="middle" fill="#52606d" font-size="11">5 fallos / 60 s</text>
+    <text x="773" y="151" text-anchor="middle" fill="#c53030" font-size="11" font-weight="600">ALERTA</text>
+  </g>
+
+  <path d="M174 130 H198" stroke="#2b6cb0" stroke-width="1.6" marker-end="url(#a2)"/>
+  <path d="M350 130 H374" stroke="#2b6cb0" stroke-width="1.6" marker-end="url(#a2)"/>
+  <path d="M526 130 H550" stroke="#2b6cb0" stroke-width="1.6" marker-end="url(#a2)"/>
+  <path d="M702 130 H708" stroke="#2b6cb0" stroke-width="1.6" marker-end="url(#a2)"/>
+
+  <text x="24" y="210" fill="#52606d" font-size="12">Reglas que disparan:</text>
+  <rect x="150" y="196" width="230" height="22" rx="4" fill="#fbeaea" stroke="#c53030"/>
+  <text x="160" y="212" fill="#9b2c2c" font-size="12" font-family="Consolas,monospace">LINUX-001  5 fallos / IP / 60 s  (T1110)</text>
+  <rect x="396" y="196" width="270" height="22" rx="4" fill="#fbeaea" stroke="#c53030"/>
+  <text x="406" y="212" fill="#9b2c2c" font-size="12" font-family="Consolas,monospace">LINUX-003  5 fallos / usuario / 120 s (T1110.001)</text>
+
+  <text x="24" y="258" fill="#718096" font-size="12">El sellado (paso 4) ocurre dentro de la transacción de ingesta: aunque el atacante llene la base de eventos,</text>
+  <text x="24" y="276" fill="#718096" font-size="12">cada uno queda encadenado con HMAC-SHA256, así que después se puede probar que nada se alteró.</text>
+</svg>
