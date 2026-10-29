@@ -1,14 +1,19 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, type EntityManager, MoreThanOrEqual } from 'typeorm';
+import { DataSource, type EntityManager, type FindOptionsWhere, MoreThanOrEqual } from 'typeorm';
 
 import type { AlertaNueva } from '../detection/engine.js';
 import { AlertaEntity } from './alerta.entity.js';
 
 export const ALERTAS_REPO = Symbol('ALERTAS_REPO');
 
+export interface FiltrosAlertas {
+  severidad?: string;
+  regla_id?: string;
+}
+
 export interface AlertasRepository {
-  listar(pagina: number, tamano: number): Promise<[AlertaEntity[], number]>;
+  listar(filtros: FiltrosAlertas, pagina: number, tamano: number): Promise<[AlertaEntity[], number]>;
   existeDesde(reglaId: string, clave: string, desde: Date, em?: EntityManager): Promise<boolean>;
   /** Devuelve false si ya existía (constraint única regla_id + clave + ts). */
   insertar(alerta: AlertaNueva, em?: EntityManager): Promise<boolean>;
@@ -18,8 +23,13 @@ export interface AlertasRepository {
 export class TypeOrmAlertasRepository implements AlertasRepository {
   constructor(@InjectDataSource() private readonly ds: DataSource) {}
 
-  listar(pagina: number, tamano: number): Promise<[AlertaEntity[], number]> {
+  listar(filtros: FiltrosAlertas, pagina: number, tamano: number): Promise<[AlertaEntity[], number]> {
+    const where: FindOptionsWhere<AlertaEntity> = {};
+    if (filtros.severidad !== undefined) where.severidad = filtros.severidad;
+    if (filtros.regla_id !== undefined) where.regla_id = filtros.regla_id;
+
     return this.ds.manager.findAndCount(AlertaEntity, {
+      where,
       order: { ts: 'DESC', id: 'DESC' },
       skip: (pagina - 1) * tamano,
       take: tamano,

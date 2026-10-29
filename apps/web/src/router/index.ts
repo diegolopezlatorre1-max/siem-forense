@@ -36,6 +36,11 @@ export const router = createRouter({
       name: 'eventos',
       component: () => import('../views/EventosView.vue'),
     },
+    {
+      path: '/alertas',
+      name: 'alertas',
+      component: () => import('../views/AlertasView.vue'),
+    },
   ],
 });
 

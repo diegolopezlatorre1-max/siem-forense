@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { ref, watch } from 'vue';
 
+import type { FiltrosAlertas } from '../api/alerts.api.js';
 import type { FiltrosEventos } from '../api/events.api.js';
 
 // Único store que se persiste (F2 de docs/06-frontend.md): filtros y tamaño de
@@ -10,10 +11,11 @@ const CLAVE = 'siem.ui';
 
 interface UiPersistido {
   filtrosEventos: FiltrosEventos;
+  filtrosAlertas: FiltrosAlertas;
   tamano: number;
 }
 
-const filtrosVacios = (): FiltrosEventos => ({
+const eventosVacios = (): FiltrosEventos => ({
   host: '',
   usuario: '',
   src_ip: '',
@@ -22,14 +24,20 @@ const filtrosVacios = (): FiltrosEventos => ({
   hasta: '',
 });
 
+const alertasVacios = (): FiltrosAlertas => ({
+  severidad: '',
+  regla_id: '',
+});
+
 function cargarInicial(): UiPersistido {
-  const base: UiPersistido = { filtrosEventos: filtrosVacios(), tamano: 50 };
+  const base: UiPersistido = { filtrosEventos: eventosVacios(), filtrosAlertas: alertasVacios(), tamano: 50 };
   try {
     const crudo = localStorage.getItem(CLAVE);
     if (crudo === null) return base;
     const guardado = JSON.parse(crudo) as Partial<UiPersistido>;
     return {
-      filtrosEventos: { ...filtrosVacios(), ...guardado.filtrosEventos },
+      filtrosEventos: { ...eventosVacios(), ...guardado.filtrosEventos },
+      filtrosAlertas: { ...alertasVacios(), ...guardado.filtrosAlertas },
       tamano: typeof guardado.tamano === 'number' ? guardado.tamano : 50,
     };
   } catch {
@@ -40,17 +48,25 @@ function cargarInicial(): UiPersistido {
 export const useUiStore = defineStore('ui', () => {
   const inicial = cargarInicial();
   const filtrosEventos = ref<FiltrosEventos>(inicial.filtrosEventos);
+  const filtrosAlertas = ref<FiltrosAlertas>(inicial.filtrosAlertas);
   const tamano = ref<number>(inicial.tamano);
 
   function limpiarFiltrosEventos(): void {
-    filtrosEventos.value = filtrosVacios();
+    filtrosEventos.value = eventosVacios();
+  }
+
+  function limpiarFiltrosAlertas(): void {
+    filtrosAlertas.value = alertasVacios();
   }
 
   watch(
-    [filtrosEventos, tamano],
+    [filtrosEventos, filtrosAlertas, tamano],
     () => {
       try {
-        localStorage.setItem(CLAVE, JSON.stringify({ filtrosEventos: filtrosEventos.value, tamano: tamano.value }));
+        localStorage.setItem(
+          CLAVE,
+          JSON.stringify({ filtrosEventos: filtrosEventos.value, filtrosAlertas: filtrosAlertas.value, tamano: tamano.value }),
+        );
       } catch {
         // sin persistencia; la app sigue funcionando en memoria
       }
@@ -58,5 +74,5 @@ export const useUiStore = defineStore('ui', () => {
     { deep: true },
   );
 
-  return { filtrosEventos, tamano, limpiarFiltrosEventos };
+  return { filtrosEventos, filtrosAlertas, tamano, limpiarFiltrosEventos, limpiarFiltrosAlertas };
 });

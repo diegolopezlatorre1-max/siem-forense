@@ -33,8 +33,11 @@ async function cerrarSesion(): Promise<void> {
       <RouterLink to="/eventos">
         Eventos
       </RouterLink>
+      <RouterLink to="/alertas">
+        Alertas
+      </RouterLink>
     </nav>
-    <p>Las vistas de alertas y verificación llegan en las sesiones 24–25.</p>
+    <p>La vista de verificación de la cadena llega en la sesión 25.</p>
   </main>
 </template>
 
@@ -70,5 +73,15 @@ button {
   border-radius: 6px;
   background: #fff;
   cursor: pointer;
+}
+.secciones {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+.secciones a {
+  color: #2b6cb0;
+  font-weight: 600;
+  text-decoration: none;
 }
 </style>
