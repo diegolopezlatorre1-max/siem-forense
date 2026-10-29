@@ -1,16 +1,39 @@
 <script setup lang="ts">
 import { computed, onMounted } from 'vue';
-import { SeveridadSchema } from '@siem/shared';
+import { type Alerta, type EstadoAlerta, EstadoAlertaSchema, SeveridadSchema } from '@siem/shared';
 
 import { useAlertsStore } from '../stores/alerts.js';
+import { useAuthStore } from '../stores/auth.js';
 import { useUiStore } from '../stores/ui.js';
 
 const ui = useUiStore();
 const alerts = useAlertsStore();
+const auth = useAuthStore();
 
 const severidades = SeveridadSchema.options;
+const estados = EstadoAlertaSchema.options;
 
 const totalPaginas = computed(() => Math.max(1, Math.ceil(alerts.total / ui.tamano)));
+
+// ABAC, reflejo del backend (alerta.policy.ts): el analista solo se asigna a sí
+// mismo y solo modifica las alertas que tiene asignadas; el admin, cualquiera.
+const puedeAsignarse = computed(() => auth.rol === 'admin' || auth.rol === 'analista');
+
+function puedeModificar(a: Alerta): boolean {
+  return auth.rol === 'admin' || (auth.rol === 'analista' && a.asignada_a === auth.usuario?.id);
+}
+
+function esMia(a: Alerta): boolean {
+  return a.asignada_a !== null && a.asignada_a === auth.usuario?.id;
+}
+
+function asignarme(a: Alerta): void {
+  if (auth.usuario !== null) void alerts.asignarme(a.id, auth.usuario.id);
+}
+
+function cambiarEstado(a: Alerta, destino: EstadoAlerta): void {
+  if (destino !== a.estado) void alerts.cambiarEstado(a.id, destino);
+}
 
 function buscar(): void {
   void alerts.cargar(1, true);
@@ -43,6 +66,18 @@ onMounted(() => {
       class="filtros"
       @submit.prevent="buscar"
     >
+      <select v-model="ui.filtrosAlertas.estado">
+        <option value="">
+          todo estado
+        </option>
+        <option
+          v-for="e in estados"
+          :key="e"
+          :value="e"
+        >
+          {{ e }}
+        </option>
+      </select>
       <select v-model="ui.filtrosAlertas.severidad">
         <option value="">
           toda severidad
@@ -69,6 +104,14 @@ onMounted(() => {
         Limpiar
       </button>
     </form>
+
+    <p
+      v-if="alerts.accionError"
+      class="aviso error"
+      role="alert"
+    >
+      {{ alerts.accionError.detail ?? alerts.accionError.title }}
+    </p>
 
     <p
       v-if="alerts.status === 'loading'"
@@ -108,6 +151,41 @@ onMounted(() => {
           <p class="pie">
             MITRE {{ a.mitre }} · {{ fecha(a.ts) }}
           </p>
+          <div class="acciones">
+            <span
+              class="estado"
+              :class="`est-${a.estado}`"
+            >{{ a.estado }}</span>
+            <span class="asignada">
+              {{ a.asignada_a === null ? 'sin asignar' : esMia(a) ? 'asignada a ti' : `asignada a #${a.asignada_a}` }}
+            </span>
+            <button
+              v-if="puedeAsignarse && !esMia(a)"
+              type="button"
+              class="accion"
+              @click="asignarme(a)"
+            >
+              Asignármela
+            </button>
+            <label
+              v-if="puedeModificar(a)"
+              class="cambiar-estado"
+            >
+              estado:
+              <select
+                :value="a.estado"
+                @change="cambiarEstado(a, ($event.target as HTMLSelectElement).value as EstadoAlerta)"
+              >
+                <option
+                  v-for="e in estados"
+                  :key="e"
+                  :value="e"
+                >
+                  {{ e }}
+                </option>
+              </select>
+            </label>
+          </div>
         </div>
       </li>
       <li
@@ -236,6 +314,57 @@ h1 {
   color: #718096;
   font-size: 0.78rem;
   font-family: Consolas, monospace;
+}
+.acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+  font-size: 0.8rem;
+  color: #52606d;
+}
+.estado {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  padding: 0.1rem 0.5rem;
+  border-radius: 10px;
+  background: #edf0f3;
+  color: #3e4c59;
+}
+.estado.est-abierta {
+  background: #ebf2fa;
+  color: #2b6cb0;
+}
+.estado.est-en_progreso {
+  background: #fbf3e2;
+  color: #975a16;
+}
+.estado.est-cerrada {
+  background: #e6f6ec;
+  color: #276749;
+}
+.estado.est-falso_positivo {
+  background: #edf0f3;
+  color: #616e7c;
+}
+.asignada {
+  font-style: italic;
+}
+.accion {
+  padding: 0.25rem 0.6rem;
+  border: 1px solid #2b6cb0;
+  border-radius: 6px;
+  background: #fff;
+  color: #2b6cb0;
+  cursor: pointer;
+}
+.cambiar-estado select {
+  margin-left: 0.3rem;
+  padding: 0.2rem;
+  border: 1px solid #9aa5b1;
+  border-radius: 6px;
 }
 .vacio,
 .aviso {

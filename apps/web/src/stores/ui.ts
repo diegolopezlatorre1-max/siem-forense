@@ -25,6 +25,7 @@ const eventosVacios = (): FiltrosEventos => ({
 });
 
 const alertasVacios = (): FiltrosAlertas => ({
+  estado: '',
   severidad: '',
   regla_id: '',
 });
