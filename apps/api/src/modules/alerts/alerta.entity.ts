@@ -1,4 +1,4 @@
-import { Column, Entity, PrimaryGeneratedColumn, Unique } from 'typeorm';
+import { Column, Entity, PrimaryGeneratedColumn, Unique, VersionColumn } from 'typeorm';
 
 // Tabla heredada del backend Python (app/db.py).
 @Entity('alertas')
@@ -30,4 +30,15 @@ export class AlertaEntity {
 
   @Column({ type: 'timestamptz', default: () => 'now()' })
   creada_en: Date;
+
+  // Flujo de triage (S6, migración 0005).
+  @Column({ type: 'varchar', length: 20, default: 'abierta' })
+  estado: string;
+
+  @Column({ type: 'int', nullable: true })
+  asignada_a: number | null;
+
+  // Bloqueo optimista: TypeORM la gestiona; la actualización condicional la compara (409 si no coincide).
+  @VersionColumn()
+  version: number;
 }

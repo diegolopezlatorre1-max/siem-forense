@@ -9,6 +9,7 @@ import { describe, expect, it } from 'vitest';
 import { AgentesService } from '../modules/agents/agentes.service.js';
 import { AlertsController } from '../modules/alerts/alerts.controller.js';
 import { ALERTAS_REPO } from '../modules/alerts/alertas.repository.js';
+import { AlertasService } from '../modules/alerts/alertas.service.js';
 import { COLA_DETECCION } from '../modules/detection/cola.js';
 import { EventsController } from '../modules/events/events.controller.js';
 import { EventsQueryController } from '../modules/events/events-query.controller.js';
@@ -27,6 +28,7 @@ describe('OpenAPI', () => {
         { provide: IngestaService, useValue: {} },
         { provide: AgentesService, useValue: {} },
         { provide: ALERTAS_REPO, useValue: {} },
+        AlertasService,
         { provide: EVENTOS_REPO, useValue: {} },
       ],
     }).compile();
