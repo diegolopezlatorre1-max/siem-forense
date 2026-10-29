@@ -8,12 +8,22 @@ import { AlertaEntity } from './alerta.entity.js';
 export const ALERTAS_REPO = Symbol('ALERTAS_REPO');
 
 export interface FiltrosAlertas {
+  estado?: string;
   severidad?: string;
   regla_id?: string;
 }
 
+// Cambios permitidos por la actualización condicional (asignación y estado).
+export type CambiosAlerta = Partial<Pick<AlertaEntity, 'estado' | 'asignada_a'>>;
+
 export interface AlertasRepository {
   listar(filtros: FiltrosAlertas, pagina: number, tamano: number): Promise<[AlertaEntity[], number]>;
+  buscarPorId(id: number): Promise<AlertaEntity | null>;
+  /**
+   * Actualiza solo si la `version` coincide (bloqueo optimista) e incrementa la versión.
+   * Devuelve la fila ya actualizada, o null si otra escritura cambió la versión antes.
+   */
+  actualizarConVersion(id: number, version: number, cambios: CambiosAlerta): Promise<AlertaEntity | null>;
   existeDesde(reglaId: string, clave: string, desde: Date, em?: EntityManager): Promise<boolean>;
   /** Devuelve false si ya existía (constraint única regla_id + clave + ts). */
   insertar(alerta: AlertaNueva, em?: EntityManager): Promise<boolean>;
@@ -25,6 +35,7 @@ export class TypeOrmAlertasRepository implements AlertasRepository {
 
   listar(filtros: FiltrosAlertas, pagina: number, tamano: number): Promise<[AlertaEntity[], number]> {
     const where: FindOptionsWhere<AlertaEntity> = {};
+    if (filtros.estado !== undefined) where.estado = filtros.estado;
     if (filtros.severidad !== undefined) where.severidad = filtros.severidad;
     if (filtros.regla_id !== undefined) where.regla_id = filtros.regla_id;
 
@@ -34,6 +45,21 @@ export class TypeOrmAlertasRepository implements AlertasRepository {
       skip: (pagina - 1) * tamano,
       take: tamano,
     });
+  }
+
+  buscarPorId(id: number): Promise<AlertaEntity | null> {
+    return this.ds.manager.findOneBy(AlertaEntity, { id });
+  }
+
+  async actualizarConVersion(id: number, version: number, cambios: CambiosAlerta): Promise<AlertaEntity | null> {
+    const { affected } = await this.ds
+      .createQueryBuilder()
+      .update(AlertaEntity)
+      .set({ ...cambios, version: () => 'version + 1' })
+      .where('id = :id AND version = :version', { id, version })
+      .execute();
+    if (!affected) return null;
+    return this.buscarPorId(id);
   }
 
   existeDesde(reglaId: string, clave: string, desde: Date, em: EntityManager = this.ds.manager): Promise<boolean> {

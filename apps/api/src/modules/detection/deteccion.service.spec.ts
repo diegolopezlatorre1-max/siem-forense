@@ -29,6 +29,8 @@ function crear(eventosGuardados: EventoEvaluable[]) {
   };
   const repoAlertas: AlertasRepository = {
     listar: async () => [[], 0],
+    buscarPorId: async () => null,
+    actualizarConVersion: async () => null,
     existeDesde: async (regla, clave, desde) =>
       alertas.some((a) => a.regla_id === regla && a.clave === clave && a.ts.getTime() >= desde.getTime()),
     insertar: async (a) => {
