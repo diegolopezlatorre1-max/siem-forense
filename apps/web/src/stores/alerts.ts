@@ -2,7 +2,9 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import type { Alerta, Problem } from '@siem/shared';
 
-import { listarAlertas } from '../api/alerts.api.js';
+import type { EstadoAlerta } from '@siem/shared';
+
+import { asignarAlerta, cambiarEstadoAlerta, listarAlertas } from '../api/alerts.api.js';
 import { extraerProblem } from '../api/http.js';
 import { useUiStore } from './ui.js';
 
@@ -18,6 +20,7 @@ export const useAlertsStore = defineStore('alerts', () => {
   const pagina = ref(1);
   const status = ref<Estado>('idle');
   const error = ref<Problem | null>(null);
+  const accionError = ref<Problem | null>(null);
   const fetchedAt = ref<number | null>(null);
   let claveConsulta = '';
 
@@ -56,5 +59,36 @@ export const useAlertsStore = defineStore('alerts', () => {
     }
   }
 
-  return { byId, allIds, total, pagina, status, error, lista, cargar };
+  // Aplica la alerta devuelta por el backend (ya trae la version incrementada).
+  function reemplazar(a: Alerta): void {
+    byId.value = { ...byId.value, [a.id]: a };
+  }
+
+  // Acción de escritura con bloqueo optimista. Ante un 409 (u otro error) guarda
+  // el Problem en accionError y recarga la página actual para refrescar versiones.
+  async function ejecutarAccion(accion: () => Promise<Alerta>): Promise<boolean> {
+    accionError.value = null;
+    try {
+      reemplazar(await accion());
+      return true;
+    } catch (e) {
+      accionError.value = extraerProblem(e);
+      await cargar(pagina.value, true);
+      return false;
+    }
+  }
+
+  function asignarme(id: number, usuarioId: number): Promise<boolean> {
+    const actual = byId.value[id];
+    if (actual === undefined) return Promise.resolve(false);
+    return ejecutarAccion(() => asignarAlerta(id, usuarioId, actual.version));
+  }
+
+  function cambiarEstado(id: number, estado: EstadoAlerta): Promise<boolean> {
+    const actual = byId.value[id];
+    if (actual === undefined) return Promise.resolve(false);
+    return ejecutarAccion(() => cambiarEstadoAlerta(id, estado, actual.version));
+  }
+
+  return { byId, allIds, total, pagina, status, error, accionError, lista, cargar, asignarme, cambiarEstado };
 });
