@@ -144,3 +144,21 @@ SESIÓN 17 - Demo con Hydra
 [x] Comprobar que LINUX-001 aparece en menos de 1 minuto:
       curl http://localhost:3000/api/v1/alerts
 [ ] Hacer capturas para la bitácora (docs/12-bitacora.md).
+
+
+SESIÓN 28 - Flujo de alertas (migración 0005)
+---------------------------------------------
+[ ] Respaldar la base antes de migrar:
+      docker exec siem-postgres pg_dump -U siem -d siem -Fc > ~/respaldos/siem-2026-10-30-pre-0005.dump
+[ ] En la VM, traer el código y aplicar la migración 0005 (estado, asignada_a, version):
+      git pull && pnpm install
+      pnpm --filter api migration:run
+[ ] Correr los e2e:
+      pnpm --filter api test:e2e
+[ ] Reiniciar la API y el worker (pnpm --filter api start / start:worker).
+[ ] Demo del bloqueo optimista: abrir Alertas en dos pestañas con la misma alerta,
+    cambiar su estado en la primera y luego en la segunda (sin recargar).
+    La segunda debe mostrar el aviso de 409 ("La alerta fue modificada por otra persona")
+    y recargar la lista.
+[ ] Comprobar el ABAC: un analista solo puede asignarse alertas a sí mismo y solo cambia
+    el estado de las que tiene asignadas; el auditor no ve los controles.
