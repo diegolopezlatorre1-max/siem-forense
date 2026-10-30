@@ -18,6 +18,7 @@ import { AuthModule } from './modules/auth/auth.module.js';
 import { EventsModule } from './modules/events/events.module.js';
 import { ForensicsModule } from './modules/forensics/forensics.module.js';
 import { HealthModule } from './modules/health/health.module.js';
+import { TimelineModule } from './modules/timeline/timeline.module.js';
 import { UsersModule } from './modules/users/users.module.js';
 
 @Module({
@@ -53,6 +54,7 @@ import { UsersModule } from './modules/users/users.module.js';
     EventsModule,
     AlertsModule,
     ForensicsModule,
+    TimelineModule,
   ],
   providers: [
     // Orden importante: primero autentica y autoriza (RBAC), luego limita.

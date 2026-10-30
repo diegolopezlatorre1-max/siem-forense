@@ -2,12 +2,13 @@
 
 Base: `/api/v1`. Formato JSON. Los errores siguen `application/problem+json` ([05-backend.md](05-backend.md#manejo-global-de-errores)). Toda respuesta trae `x-correlation-id`. El contrato ejecutable (schemas Zod) está en `packages/shared`, y el OpenAPI se genera en `/api/docs`.
 
-> **Estado de implementación (29 oct 2026).** Implementados y verificados en la VM: `/health`,
+> **Estado de implementación (30 oct 2026).** Implementados y verificados en la VM: `/health`,
 > `/auth/*`, `POST /ingest`, `GET /events` (filtros host/usuario/IP/tipo/fecha), `GET /alerts`
-> (filtros `severidad` y `regla_id`) y `GET /forensics/verify`. **Pendientes (Sprint 6):**
-> `GET /events/:id`, `GET /timeline`, `GET /alerts/:id`, `POST /alerts/:id/asignar` y
-> `PATCH /alerts/:id` —estos tres últimos necesitan la migración 0005 (`estado`, `asignada_a`,
-> `version`)— y el agente de Windows. El filtro por `estado` de `/alerts` también es del Sprint 6.
+> (filtros `severidad` y `regla_id`) y `GET /forensics/verify`.
+> **Implementados con pruebas unitarias; falta verificarlos en la VM (Sprint 6):** el flujo de alertas
+> (`GET /alerts/:id`, `POST /alerts/:id/asignar`, `PATCH /alerts/:id` y el filtro `estado`, con la
+> migración 0005) y `GET /timeline`. **Pendientes:** `GET /events/:id` y que `GET /alerts/:id`
+> incluya los eventos que provocaron la alerta.
 
 ## Salud
 
@@ -55,6 +56,23 @@ Base: `/api/v1`. Formato JSON. Los errores siguen `application/problem+json` ([0
 | GET | `/timeline` | todos | `host?, usuario?, src_ip?, desde, hasta`. Devuelve eventos y alertas mezclados, en orden cronológico |
 
 Las respuestas paginadas tienen la forma `{ items: T[], total, pagina, tamano }`.
+
+**`GET /timeline`** (`LineaTiempoQuerySchema` y `LineaTiempoSchema` en `packages/shared`):
+
+- Exige al menos uno de `host`, `usuario` o `src_ip`, y `desde ≤ hasta`. Si no se cumple, responde 400 problem+json.
+- **Eventos:** los que cumplen **todos** los sujetos indicados y caen en el rango.
+- **Alertas:** las que tienen la `clave` igual a **alguno** de los sujetos. La clave es la IP, el usuario o el host según el `agrupar_por` de la regla.
+- No se pagina. Devuelve como máximo 500 eventos y 500 alertas (los más recientes) y avisa con `truncada: true`.
+
+```ts
+{
+  items: Array<
+    | { tipo: 'evento'; ts: string; evento: Evento }
+    | { tipo: 'alerta'; ts: string; alerta: Alerta }
+  >,   // ascendente por ts; a igual ts, el evento va antes que su alerta
+  truncada: boolean
+}
+```
 
 ## Alertas
 

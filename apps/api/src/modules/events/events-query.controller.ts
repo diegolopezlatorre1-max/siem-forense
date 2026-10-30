@@ -17,7 +17,7 @@ import { ZodValidationPipe } from '../../common/pipes/zod-validation.pipe.js';
 import type { EventoEntity } from './evento.entity.js';
 import { EVENTOS_REPO, type EventosRepository } from './eventos.repository.js';
 
-const aDto = (e: EventoEntity): Evento => ({
+export const eventoADto = (e: EventoEntity): Evento => ({
   id: e.id,
   event_id: e.event_id,
   ts: e.ts.toISOString(),
@@ -55,6 +55,6 @@ export class EventsQueryController {
       q.pagina,
       q.tamano,
     );
-    return { items: filas.map(aDto), total, pagina: q.pagina, tamano: q.tamano };
+    return { items: filas.map(eventoADto), total, pagina: q.pagina, tamano: q.tamano };
   }
 }

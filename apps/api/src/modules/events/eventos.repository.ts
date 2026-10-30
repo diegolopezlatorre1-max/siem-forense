@@ -35,7 +35,7 @@ export class TypeOrmEventosRepository implements EventosRepository {
 
   recientes(eventType: string, desde: Date, em: EntityManager = this.ds.manager): Promise<EventoEvaluable[]> {
     return em.find(EventoEntity, {
-      select: { event_type: true, ts: true, src_ip: true, usuario: true, host: true },
+      select: { event_type: true, source: true, ts: true, src_ip: true, usuario: true, host: true },
       where: { event_type: eventType, ts: MoreThanOrEqual(desde) },
     });
   }

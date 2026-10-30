@@ -9,6 +9,7 @@ id: LINUX-001                # único, ^[A-Z]+-\d{3}$
 nombre: Fuerza bruta SSH
 descripcion: Muchos logins fallidos desde la misma IP en poco tiempo
 event_type: login_failed      # tipo de evento que vigila
+source: auth.log              # opcional: solo eventos de este origen (auth.log | windows-security)
 agrupar_por: src_ip           # src_ip | usuario | host
 umbral: 5                     # entero ≥ 1
 ventana_segundos: 60          # entero ≥ 1
@@ -16,14 +17,16 @@ severidad: high               # low | medium | high | critical
 mitre: T1110                  # ^T\d{4}(\.\d{3})?$
 ```
 
-| ID | Nombre | Tipo | Agrupa | Umbral / ventana | Severidad | MITRE |
-| --- | --- | --- | --- | --- | --- | --- |
-| LINUX-001 | Fuerza bruta SSH | login_failed | src_ip | 5 / 60 s | high | T1110 |
-| LINUX-002 | Fuerza bruta SSH lenta | login_failed | src_ip | 10 / 600 s | medium | T1110 |
-| LINUX-003 | Ataque contra un solo usuario | login_failed | usuario | 5 / 120 s | high | T1110.001 |
-| LINUX-004 | Ráfaga de logins exitosos | login_success | src_ip | 5 / 60 s | medium | T1078 |
-| WIN-001 | Fuerza bruta en Windows (4625) | login_failed | src_ip | 5 / 60 s | high | T1110 |
-| WIN-002 | Creación de usuario local (4720) | user_created | host | 1 / 60 s | high | T1136.001 |
+| ID | Nombre | Tipo | Origen | Agrupa | Umbral / ventana | Severidad | MITRE |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| LINUX-001 | Fuerza bruta SSH | login_failed | auth.log | src_ip | 5 / 60 s | high | T1110 |
+| LINUX-002 | Fuerza bruta SSH lenta | login_failed | auth.log | src_ip | 10 / 600 s | medium | T1110 |
+| LINUX-003 | Ataque contra un solo usuario | login_failed | auth.log | usuario | 5 / 120 s | high | T1110.001 |
+| LINUX-004 | Ráfaga de logins exitosos | login_success | auth.log | src_ip | 5 / 60 s | medium | T1078 |
+| WIN-001 | Fuerza bruta en Windows (4625) | login_failed | windows-security | src_ip | 5 / 60 s | high | T1110 |
+| WIN-002 | Creación de usuario local (4720) | user_created | windows-security | host | 1 / 60 s | high | T1136.001 |
+
+**Campo `source` (sesión 27).** Linux y Windows producen el mismo `login_failed`. Sin el campo, una fuerza bruta contra Windows disparaba también LINUX-001/002/003, y tres fallos en cada sistema desde la misma IP sumaban cinco. Con `source`, cada regla mira solo su origen. Es opcional: una regla sin `source` sigue mirando todos los orígenes, como antes.
 
 ## Motor (`engine.ts`)
 
@@ -75,3 +78,24 @@ Se responde con el **primer** fallo y se registra `forense.verificacion_fallida`
 | Windows (PowerShell) | Security Event Log 4625, 4624 y 4720 | login_failed, login_success, user_created | `agents/windows/` |
 
 El `event_id` es la huella SHA-256 de la línea o del registro original (32 caracteres), así que reenviar no duplica. La llave de agente se lee de la variable `SIEM_AGENT_KEY`.
+
+### Agente Windows (sesión 26)
+
+| Archivo | Qué hace |
+| --- | --- |
+| `ParserWindows.psm1` | `ConvertTo-EventoSiem`: pasa el XML de un registro (`EventRecord.ToXml()`) al formato de `/ingest`. Así se prueba sin el Event Log |
+| `agente_windows.ps1` | Bucle cada 5 s: lee del registro Security los 4624, 4625 y 4720 posteriores al último `EventRecordID` enviado y los manda con `X-Agent-Key` |
+| `Probar-Parser.ps1` | 17 pruebas del parser, sin dependencias (no necesita Pester) |
+
+| Evento | `event_type` | `usuario` | `src_ip` | Severidad |
+| --- | --- | --- | --- | --- |
+| 4625 | login_failed | `TargetUserName` | `IpAddress` | medium |
+| 4624 | login_success | `TargetUserName` | `IpAddress` | low |
+| 4720 | user_created | `TargetUserName`, es decir, la cuenta creada | null | high |
+
+- `source` = `windows-security`, `host` = `Computer` del evento y `ts` = `TimeCreated` en ISO UTC con milisegundos.
+- `event_id` = SHA-256 del XML del registro. `raw` es un resumen legible con los campos clave y el `EventRecordID`, que identifica el original en el visor de eventos de Windows.
+- **Ruido del 4624:** solo se envían los inicios de sesión de personas (tipos de logon 2, 3, 7, 10 y 11). Se descartan las cuentas de equipo (`...$`), `DWM-n`/`UMFD-n` y las de `NT AUTHORITY`/`AUTORIDAD NT`, que generan cientos de eventos por hora.
+- **IP:** `-` pasa a null, `::ffff:a.b.c.d` a `a.b.c.d` y se quita la zona de las IPv6 (`%12`). Lo que no es una IP pasa a null, porque la API rechazaría el evento.
+- **Reanudación:** guarda el último `EventRecordID` en `agents/windows/.ultimo-registro`, que está en `.gitignore`. La primera vez arranca desde el final del registro, como el agente Linux, salvo con `-DesdeInicio`. Solo avanza si la API responde 202, 409 (duplicado) o 400 (inválido). Ante un error de red, 401, 429 o 5xx, reintenta en la siguiente vuelta.
+- **Requisitos:** PowerShell 5.1 como administrador (el registro Security lo exige) y la auditoría de "Inicio de sesión" y de "Administración de cuentas de usuario" activa (ver `docs/tareas-manuales.txt`, sesión 26).

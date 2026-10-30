@@ -1,0 +1,10 @@
+id: WIN-002
+nombre: Creación de usuario local
+descripcion: Se creó una cuenta de usuario local en un equipo Windows (evento 4720)
+event_type: user_created
+source: windows-security
+agrupar_por: host
+umbral: 1
+ventana_segundos: 60
+severidad: high
+mitre: T1136.001

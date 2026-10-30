@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import { EventoIngestaSchema } from './eventos.js';
+import { LineaTiempoQuerySchema } from './linea-tiempo.js';
 
 const valido = {
   event_id: 'a'.repeat(32),
@@ -27,5 +28,35 @@ describe('EventoIngestaSchema', () => {
   it('rechaza una IP inválida y un tipo desconocido', () => {
     expect(EventoIngestaSchema.safeParse({ ...valido, src_ip: 'no-ip' }).success).toBe(false);
     expect(EventoIngestaSchema.safeParse({ ...valido, event_type: 'otro' }).success).toBe(false);
+  });
+
+  it('acepta lo que envía el agente Windows (ts UTC con milisegundos, sin IP)', () => {
+    const windows = {
+      ...valido,
+      ts: '2026-10-30T16:45:00.123Z',
+      host: 'WIN10',
+      source: 'windows-security',
+      event_type: 'user_created',
+      usuario: 'backdoor',
+      src_ip: null,
+      severity: 'high',
+    };
+    expect(EventoIngestaSchema.parse(windows).source).toBe('windows-security');
+  });
+});
+
+describe('LineaTiempoQuerySchema', () => {
+  const rango = { desde: '2026-10-30T00:00:00Z', hasta: '2026-10-31T00:00:00Z' };
+
+  it('acepta un sujeto y un rango', () => {
+    expect(LineaTiempoQuerySchema.parse({ ...rango, src_ip: '192.168.56.103' }).desde).toBeInstanceOf(Date);
+  });
+
+  it('exige al menos host, usuario o src_ip', () => {
+    expect(LineaTiempoQuerySchema.safeParse(rango).success).toBe(false);
+  });
+
+  it('rechaza un rango invertido', () => {
+    expect(LineaTiempoQuerySchema.safeParse({ host: 'WIN10', desde: rango.hasta, hasta: rango.desde }).success).toBe(false);
   });
 });

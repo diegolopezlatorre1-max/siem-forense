@@ -1,0 +1,10 @@
+id: WIN-001
+nombre: Fuerza bruta en Windows
+descripcion: Muchos inicios de sesión fallidos (evento 4625) desde la misma IP en poco tiempo
+event_type: login_failed
+source: windows-security
+agrupar_por: src_ip
+umbral: 5
+ventana_segundos: 60
+severidad: high
+mitre: T1110

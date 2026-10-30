@@ -2,6 +2,7 @@ id: LINUX-001
 nombre: Fuerza bruta SSH
 descripcion: Muchos logins fallidos desde la misma IP en poco tiempo
 event_type: login_failed
+source: auth.log
 agrupar_por: src_ip
 umbral: 5
 ventana_segundos: 60

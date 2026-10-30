@@ -34,6 +34,7 @@ function crear(alerta: AlertaEntity | null) {
     listar: async () => [[], 0],
     existeDesde: async () => false,
     insertar: async () => true,
+    porClaves: async () => [[], 0],
     buscarPorId: async (id) => (actual && actual.id === id ? actual : null),
     actualizarConVersion: async (id: number, version: number, cambios: CambiosAlerta) => {
       if (!actual || actual.id !== id || actual.version !== version) return null;

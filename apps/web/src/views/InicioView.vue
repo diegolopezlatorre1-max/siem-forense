@@ -39,6 +39,9 @@ async function cerrarSesion(): Promise<void> {
       <RouterLink to="/alertas">
         Alertas
       </RouterLink>
+      <RouterLink to="/linea-tiempo">
+        Línea de tiempo
+      </RouterLink>
       <RouterLink
         v-if="puedeVerificar"
         to="/verificar"

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectDataSource } from '@nestjs/typeorm';
-import { DataSource, type EntityManager, type FindOptionsWhere, MoreThanOrEqual } from 'typeorm';
+import { Between, DataSource, type EntityManager, type FindOptionsWhere, In, MoreThanOrEqual } from 'typeorm';
 
 import type { AlertaNueva } from '../detection/engine.js';
 import { AlertaEntity } from './alerta.entity.js';
@@ -27,6 +27,8 @@ export interface AlertasRepository {
   existeDesde(reglaId: string, clave: string, desde: Date, em?: EntityManager): Promise<boolean>;
   /** Devuelve false si ya existía (constraint única regla_id + clave + ts). */
   insertar(alerta: AlertaNueva, em?: EntityManager): Promise<boolean>;
+  /** Línea de tiempo: alertas cuya clave es alguno de los valores, en el rango; las más recientes primero. */
+  porClaves(claves: readonly string[], desde: Date, hasta: Date, limite: number): Promise<[AlertaEntity[], number]>;
 }
 
 @Injectable()
@@ -70,5 +72,13 @@ export class TypeOrmAlertasRepository implements AlertasRepository {
     const { raw } = await em.createQueryBuilder().insert().into(AlertaEntity).values(alerta).orIgnore().execute();
     // En PostgreSQL `raw` son las filas de RETURNING: vacío si ON CONFLICT DO NOTHING la descartó.
     return Array.isArray(raw) && raw.length > 0;
+  }
+
+  porClaves(claves: readonly string[], desde: Date, hasta: Date, limite: number): Promise<[AlertaEntity[], number]> {
+    return this.ds.manager.findAndCount(AlertaEntity, {
+      where: { clave: In([...claves]), ts: Between(desde, hasta) },
+      order: { ts: 'DESC', id: 'DESC' },
+      take: limite,
+    });
   }
 }

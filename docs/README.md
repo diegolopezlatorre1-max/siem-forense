@@ -1,14 +1,14 @@
 # Documentación: SIEM Forense Centralizado
 
-Proyecto de la carrera de Ciberseguridad · Actualizado el 29 de octubre de 2026
+Proyecto de la carrera de Ciberseguridad · Actualizado el 30 de octubre de 2026
 
 ## Dónde vamos
 
 | Indicador | Estado |
 | --- | --- |
 | Metodología | Scrum (sprints de ~1 semana, demo y retro al final de cada uno) |
-| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ✔ Sprint 4 (doble token, RBAC/ABAC, rate limiting y cadena forense) · ✔ Sprint 5 (frontend Vue) · ▶ Sprint 6: Windows y flujo de alertas |
-| Siguiente | Sprint 5 cerrado: frontend Vue completo (login con sesión persistente, eventos, alertas y verificar cadena) con acceso por rol, verificado en vivo en la VM. En la demo se encontró y corrigió un bug de `crypto.randomUUID` en contexto no seguro (HTTP). Sigue el ▶ Sprint 6: agente de Windows, reglas WIN, flujo de alertas (estado/asignación) y línea de tiempo |
+| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ✔ Sprint 4 (doble token, RBAC/ABAC, rate limiting y cadena forense) · ✔ Sprint 5 (frontend Vue) · ◐ Sprint 6: código completo (agente Windows, reglas WIN, flujo de alertas y línea de tiempo), falta la demo en el laboratorio |
+| Siguiente | Verificar el Sprint 6 en el laboratorio (pasos en `tareas-manuales.txt`): migración 0005 y demo del 409, agente en la VM Windows 10, alertas WIN-001/WIN-002 y línea de tiempo. Después, PR de `dev` a `main` y Sprint 7 (escenarios, pruebas de seguridad, Docker Compose completo y entrega) |
 | Meta | SIEM funcional para el 15 de noviembre; margen hasta diciembre |
 | Estándar | [Estándar técnico obligatorio "CORE"](02-estandar-core.md), obligatorio para todos los proyectos |
 

@@ -2,6 +2,7 @@ id: LINUX-004
 nombre: Rafaga de logins exitosos
 descripcion: 5 logins exitosos de la misma IP en 1 minuto
 event_type: login_success
+source: auth.log
 agrupar_por: src_ip
 umbral: 5
 ventana_segundos: 60

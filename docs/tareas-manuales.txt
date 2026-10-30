@@ -162,3 +162,58 @@ SESIÓN 28 - Flujo de alertas (migración 0005)
     y recargar la lista.
 [ ] Comprobar el ABAC: un analista solo puede asignarse alertas a sí mismo y solo cambia
     el estado de las que tiene asignadas; el auditor no ve los controles.
+
+
+SESIÓN 26 - Agente Windows (VM Windows 10, 192.168.56.102)
+----------------------------------------------------------
+(El código ya está en dev: agents/windows/. La VM Ubuntu debe tener el git pull de la sesión 28
+ y la API y el worker reiniciados, porque el worker carga las reglas nuevas al arrancar.)
+[ ] En la VM Ubuntu, crear la llave del agente Windows:
+      pnpm --filter api agente:crear windows10 192.168.56.102
+    Copiar la llave que se imprime (sale UNA sola vez) a docs/privado/credenciales.md.
+[ ] Copiar la carpeta agents/windows/ a la VM Windows (p. ej. C:\siem\agente\), o clonar el repo.
+[ ] En la VM Windows, comprobar que llega a la API:
+      Invoke-RestMethod http://192.168.56.101:3000/api/v1/health
+[ ] En la VM Windows, PowerShell COMO ADMINISTRADOR: activar la auditoría (por GUID, porque los
+    nombres de las subcategorías cambian con el idioma de Windows):
+      auditpol /set /subcategory:"{0CCE9215-69AE-11D9-BED3-505054503030}" /success:enable /failure:enable
+      auditpol /set /subcategory:"{0CCE9235-69AE-11D9-BED3-505054503030}" /success:enable /failure:enable
+    (La primera es "Inicio de sesión" -> 4624/4625. La segunda es "Administración de cuentas de
+     usuario" -> 4720.) Comprobar con:  auditpol /get /category:*
+[ ] Correr las pruebas del parser (deben salir 17 "ok"):
+      powershell -ExecutionPolicy Bypass -File C:\siem\agente\Probar-Parser.ps1
+[ ] Arrancar el agente (PowerShell como administrador; la llave solo en esta sesión):
+      $env:SIEM_AGENT_KEY = '<la llave>'
+      powershell -ExecutionPolicy Bypass -File C:\siem\agente\agente_windows.ps1
+    Debe decir "Agente siguiendo Security (4624, 4625, 4720) desde el registro N -> ...".
+[ ] Cerrar sesión y volver a entrar en Windows: el agente debe imprimir "202 login_success Usuario10"
+    y el evento debe verse en la vista Eventos con source windows-security.
+
+
+SESIÓN 27 - Reglas WIN-001 y WIN-002 (con el agente Windows corriendo)
+----------------------------------------------------------------------
+[ ] WIN-002 (creación de usuario). En la VM Windows, como administrador:
+      net user backdoor Clave.Lab.2026 /add
+    En menos de ~10 s debe aparecer en Alertas: WIN-002 · Creación de usuario local · clave = nombre
+    del equipo · MITRE T1136.001. Luego borrar la cuenta:  net user backdoor /delete
+[ ] WIN-001 (fuerza bruta). Abrir el SMB solo para la red del laboratorio (en la VM Windows, como admin):
+      New-NetFirewallRule -DisplayName "SIEM lab SMB" -Direction Inbound -Protocol TCP -LocalPort 445 -RemoteAddress 192.168.56.0/24 -Action Allow
+    Desde Kali (12 claves bastan para el umbral de 5):
+      head -n 12 /usr/share/wordlists/rockyou.txt > /tmp/claves.txt
+      nxc smb 192.168.56.102 -u Usuario10 -p /tmp/claves.txt
+    (Si no está nxc:  crackmapexec smb ...  o  hydra -l Usuario10 -P /tmp/claves.txt smb2://192.168.56.102)
+    Debe aparecer WIN-001 con clave 192.168.56.103 y NO debe aparecer LINUX-001 por esos eventos
+    (las reglas filtran por source).
+[ ] Al terminar, quitar la regla del firewall:  Remove-NetFirewallRule -DisplayName "SIEM lab SMB"
+[ ] Capturas para la bitácora: la alerta WIN-001, la WIN-002 y los eventos windows-security.
+
+
+SESIÓN 29 - Línea de tiempo
+---------------------------
+[ ] En la web (http://192.168.56.101), entrar a "Línea de tiempo" y consultar src_ip = 192.168.56.103
+    con el rango de hoy: deben salir mezclados, en orden, los login_failed de SSH y de Windows y las
+    alertas LINUX-001 / WIN-001, cada alerta justo después de los eventos que la provocaron.
+[ ] Consultar host = <nombre del equipo Windows>: debe salir el user_created y la alerta WIN-002.
+[ ] Sin host, usuario ni IP, el botón Consultar queda deshabilitado; con un rango invertido la API
+    responde 400 (se ve el mensaje en rojo).
+[ ] Atajo por URL: http://192.168.56.101/linea-tiempo?src_ip=192.168.56.103 consulta directo.

@@ -4,6 +4,7 @@ import type { Regla, Severidad } from '@siem/shared';
 
 export interface EventoEvaluable {
   event_type: string;
+  source?: string;
   ts: Date;
   src_ip?: string | null;
   usuario?: string | null;
@@ -25,6 +26,7 @@ export function evaluar(regla: Regla, eventos: readonly EventoEvaluable[]): Aler
   const grupos = new Map<string, EventoEvaluable[]>();
   for (const e of eventos) {
     if (e.event_type !== regla.event_type) continue;
+    if (regla.source !== undefined && e.source !== regla.source) continue;
     const clave = e[regla.agrupar_por];
     if (!clave) continue;
     const grupo = grupos.get(clave);

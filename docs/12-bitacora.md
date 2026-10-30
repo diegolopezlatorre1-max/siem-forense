@@ -140,6 +140,61 @@ backend antes de construir una vista (la ausencia de `GET /events` apareció a m
 Pendiente S6: agente de Windows, reglas WIN, flujo de alertas (estado/asignación, migración 0005)
 y línea de tiempo.
 
+## 29–30 oct: Sprint 6 en código (sesiones 26 a 29)
+
+Todo el código del Sprint 6 quedó en `dev` con pruebas unitarias, dos semanas antes de lo planeado.
+Falta la demo de cada sesión en el laboratorio; los pasos están en `docs/tareas-manuales.txt`.
+
+- **Sesión 28 (flujo de alertas, Carlos, PR #5 y #6):** migración 0005 (`estado`, `asignada_a`,
+  `version`), `GET /alerts/:id`, `POST /alerts/:id/asignar` y `PATCH /alerts/:id`, con 409 si la
+  `version` no coincide (bloqueo optimista con un `UPDATE ... WHERE version = :v`). El ABAC
+  reutiliza `alerta.policy.ts`. En la vista de Alertas: filtro por estado, etiqueta de estado,
+  "Asignármela" y selector de estado. Ante un 409 se muestra el aviso y se recarga la lista.
+  9 pruebas del servicio y 4 del store.
+- **Sesión 26 (agente Windows):** `agents/windows/` en PowerShell 5.1, sin dependencias. El parser
+  (`ParserWindows.psm1`) va separado del bucle (`agente_windows.ps1`), igual que en Linux, y recibe
+  el XML del registro, así se prueba sin el Event Log (`Probar-Parser.ps1`, 17 pruebas). Detalles:
+  - Lee 4625, 4624 y 4720 con `Get-WinEvent -FilterXPath` por `EventRecordID` y reanuda desde
+    `.ultimo-registro`.
+  - Descarta el ruido del 4624: logons de servicio, cuentas `...$`, `DWM-n` y `NT AUTHORITY`.
+  - Normaliza la IP (`-` pasa a null y `::ffff:` a IPv4).
+  - El `event_id` es el SHA-256 del XML y `ts` va en ISO UTC con milisegundos.
+  - El cuerpo se envía como bytes UTF-8, para no depender de cómo PowerShell 5.1 codifica las
+    cadenas (las tildes en nombres de usuario podrían llegar rotas).
+- **Sesión 27 (reglas WIN):** `windows_fuerza_bruta.yml` (WIN-001, 4625 por IP, 5 en 60 s, T1110)
+  y `windows_usuario_creado.yml` (WIN-002, 4720 por host, umbral 1, T1136.001).
+  - **Problema encontrado al diseñarlas:** las reglas solo filtraban por `event_type`, y Linux y
+    Windows comparten `login_failed`. Una fuerza bruta a Windows habría disparado también
+    LINUX-001/002/003, y fallos repartidos entre los dos sistemas sumaban para el umbral.
+  - **Solución:** campo opcional `source` en `ReglaSchema`. El motor descarta los eventos de otro
+    origen y `recientes()` ahora trae `source`. Las 4 reglas de Linux llevan `source: auth.log` y
+    las de Windows `source: windows-security`. Las reglas sin `source` se comportan como antes.
+  - 5 pruebas nuevas del motor, entre ellas "no mezcla orígenes para llegar al umbral" y "LINUX-001
+    ignora Windows", y 1 del cargador (las 6 reglas del repo cargan y todas declaran su origen).
+- **Sesión 29 (línea de tiempo):**
+  - **Contrato:** `LineaTiempoQuerySchema` y `LineaTiempoSchema` en `@siem/shared`. La query exige
+    al menos host, usuario o IP y un rango válido.
+  - **Backend:** módulo `timeline/` con la función pura `mezclar()` (orden ascendente; a igual
+    `ts`, el evento va antes que su alerta), `TimelineService` y `GET /timeline`. Los eventos
+    cumplen todos los sujetos; las alertas, una `clave` igual a cualquiera de ellos (nuevo
+    `AlertasRepository.porClaves`). Tope de 500 por tipo, con `truncada`.
+  - **Frontend:** store `timeline`, vista `LineaTiempoView` en `/linea-tiempo` (todos los roles)
+    con cronología vertical (alertas resaltadas por severidad), rango por defecto de 24 h y
+    atajo por URL (`?src_ip=...`). El enlace está en Inicio.
+  - **Pruebas:** 4 del servicio, 3 del schema, 4 del store y `/timeline` en la prueba de OpenAPI.
+- **Verificado en el PC (30 oct):** `pnpm typecheck`, `pnpm lint` y `pnpm test` en verde (API 71,
+  web 11 y shared 7 pruebas), `build` de la API y de la web, y las 17 pruebas del parser de Windows.
+  - **No verificado:** el agente contra el Event Log real. Sin permisos de administrador, el
+    registro Security da "operación no válida"; se probará en la VM Windows.
+  - **No ejecutados:** los e2e, que necesitan la base de la VM.
+- **Limitaciones conocidas:**
+  - WIN-002 deduplica por host en 60 s: dos usuarios creados en el mismo minuto en el mismo
+    equipo dan una sola alerta.
+  - En la línea de tiempo, el filtro de alertas es por `clave` y no sabe si esa clave era una IP,
+    un usuario o un host (la alerta no guarda el `agrupar_por`).
+  - Siguen pendientes `GET /events/:id` y que `GET /alerts/:id` incluya los eventos que provocaron
+    la alerta.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

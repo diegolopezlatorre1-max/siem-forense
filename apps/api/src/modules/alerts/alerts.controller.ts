@@ -25,7 +25,7 @@ import type { AlertaEntity } from './alerta.entity.js';
 import { AlertasService } from './alertas.service.js';
 import { ALERTAS_REPO, type AlertasRepository } from './alertas.repository.js';
 
-const aDto = (a: AlertaEntity): Alerta => ({
+export const alertaADto = (a: AlertaEntity): Alerta => ({
   ...a,
   severidad: a.severidad as Severidad,
   estado: a.estado as EstadoAlerta,
@@ -56,7 +56,7 @@ export class AlertsController {
       q.pagina,
       q.tamano,
     );
-    return { items: filas.map(aDto), total, pagina: q.pagina, tamano: q.tamano };
+    return { items: filas.map(alertaADto), total, pagina: q.pagina, tamano: q.tamano };
   }
 
   @Get(':id')
@@ -65,7 +65,7 @@ export class AlertsController {
   async obtener(@Param('id', ParseIntPipe) id: number): Promise<Alerta> {
     const alerta = await this.servicio.obtener(id);
     if (!alerta) throw new NoEncontradoError('Alerta no encontrada');
-    return aDto(alerta);
+    return alertaADto(alerta);
   }
 
   @Post(':id/asignar')
@@ -76,7 +76,7 @@ export class AlertsController {
     @Body(new ZodValidationPipe(AsignarAlertaSchema)) cuerpo: AsignarAlerta,
     @UsuarioActual() usuario: ClaimsAcceso,
   ): Promise<Alerta> {
-    return aDto(await this.servicio.asignar(id, usuario, cuerpo.usuarioId, cuerpo.version));
+    return alertaADto(await this.servicio.asignar(id, usuario, cuerpo.usuarioId, cuerpo.version));
   }
 
   @Patch(':id')
@@ -87,6 +87,6 @@ export class AlertsController {
     @Body(new ZodValidationPipe(CambiarEstadoAlertaSchema)) cuerpo: CambiarEstadoAlerta,
     @UsuarioActual() usuario: ClaimsAcceso,
   ): Promise<Alerta> {
-    return aDto(await this.servicio.cambiarEstado(id, usuario, cuerpo.estado, cuerpo.version));
+    return alertaADto(await this.servicio.cambiarEstado(id, usuario, cuerpo.estado, cuerpo.version));
   }
 }

@@ -42,6 +42,11 @@ export const router = createRouter({
       component: () => import('../views/AlertasView.vue'),
     },
     {
+      path: '/linea-tiempo',
+      name: 'linea-tiempo',
+      component: () => import('../views/LineaTiempoView.vue'),
+    },
+    {
       path: '/verificar',
       name: 'verificar',
       meta: { roles: ['admin', 'auditor'] },

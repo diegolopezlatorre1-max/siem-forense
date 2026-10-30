@@ -2,7 +2,7 @@
 
 Cada sesión dura de 1,5 a 2 horas. Al cerrar cada sprint, el objetivo debe verse funcionando (la demo), y `dev` se fusiona a `main` con un Pull Request.
 
-Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
+Leyenda: ✔ hecho · ◐ código hecho con pruebas, falta la demo en el laboratorio · ▶ siguiente · sin marca = pendiente.
 
 ## Historial (backend Python, ya cerrado)
 
@@ -48,23 +48,25 @@ Leyenda: ✔ hecho · ▶ siguiente · sin marca = pendiente.
 | ✔ 20 | RBAC global, ABAC (`PolicyGuard`) y throttler en Redis | El auditor recibe 403; una ráfaga de logins recibe 429 |
 | ✔ 21 | Cadena HMAC con bloqueo pesimista en la ingesta y `/forensics/verify` | Alterar un evento marca FALLO en el eslabón exacto; 20 ingestas concurrentes dejan una cadena válida |
 
-## Sprint 5: Frontend · 2 al 8 nov · ▶
+## Sprint 5: Frontend · 2 al 8 nov · ✔ (cerrado el 29 oct)
 
 | Sesión | Qué se hace | Terminado cuando |
 | --- | --- | --- |
-| 22 | Cliente Axios con interceptores (refresh en cola y reintentos), store `auth` y guards | Login en el navegador; recargar la página mantiene la sesión |
-| 23 | Store `events` normalizado y vista de Eventos con filtros | Se ven y filtran los eventos |
-| 24 | Store `alerts` y vista de Alertas (MITRE y severidad) | Se ven las alertas |
-| 25 | Vista Verificar cadena (verde o rojo) y rutas por rol | El auditor verifica pero no edita |
+| ✔ 22 | Cliente Axios con interceptores (refresh en cola y reintentos), store `auth` y guards | Login en el navegador; recargar la página mantiene la sesión |
+| ✔ 23 | Store `events` normalizado y vista de Eventos con filtros | Se ven y filtran los eventos |
+| ✔ 24 | Store `alerts` y vista de Alertas (MITRE y severidad) | Se ven las alertas |
+| ✔ 25 | Vista Verificar cadena (verde o rojo) y rutas por rol | El auditor verifica pero no edita |
 
-## Sprint 6: Windows y flujo de alertas · 9 al 15 nov
+## Sprint 6: Windows y flujo de alertas · 9 al 15 nov · ▶ (código adelantado al 30 oct)
 
 | Sesión | Qué se hace | Terminado cuando |
 | --- | --- | --- |
-| 26 | Agente PowerShell (4624, 4625 y 4720) con llave de agente | Los eventos de Windows llegan a la base |
-| 27 | Reglas WIN-001 y WIN-002 con pruebas | Crear un usuario en Windows genera una alerta |
-| 28 | Asignación y estados de alertas con bloqueo optimista (migración 0005) | Dos pestañas editando a la vez: la segunda recibe 409 |
-| 29 | Línea de tiempo (API y vista) | Sale ordenada y mezcla eventos y alertas |
+| ◐ 26 | Agente PowerShell (4624, 4625 y 4720) con llave de agente | Los eventos de Windows llegan a la base |
+| ◐ 27 | Reglas WIN-001 y WIN-002 con pruebas | Crear un usuario en Windows genera una alerta |
+| ◐ 28 | Asignación y estados de alertas con bloqueo optimista (migración 0005) | Dos pestañas editando a la vez: la segunda recibe 409 |
+| ◐ 29 | Línea de tiempo (API y vista) | Sale ordenada y mezcla eventos y alertas |
+
+Las cuatro sesiones tienen el código y las pruebas unitarias en `dev`. Para marcarlas ✔ falta su demo en el laboratorio: VM Windows 10 (.102), migración 0005 en la VM y e2e. Los pasos están en `docs/tareas-manuales.txt`.
 
 **Al cerrar el S6 (15 nov), el SIEM es funcional.**
 
