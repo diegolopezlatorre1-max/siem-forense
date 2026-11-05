@@ -1,6 +1,6 @@
 # Documentación: SIEM Forense Centralizado
 
-Proyecto de la carrera de Ciberseguridad · Actualizado el 30 de octubre de 2026
+Proyecto de la carrera de Ciberseguridad · Actualizado el 5 de noviembre de 2026
 
 ## Dónde vamos
 
@@ -8,7 +8,7 @@ Proyecto de la carrera de Ciberseguridad · Actualizado el 30 de octubre de 2026
 | --- | --- |
 | Metodología | Scrum (sprints de ~1 semana, demo y retro al final de cada uno) |
 | Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ✔ Sprint 4 (doble token, RBAC/ABAC, rate limiting y cadena forense) · ✔ Sprint 5 (frontend Vue) · ◐ Sprint 6: código completo (agente Windows, reglas WIN, flujo de alertas y línea de tiempo), falta la demo en el laboratorio |
-| Siguiente | Verificar el Sprint 6 en el laboratorio (pasos en `tareas-manuales.txt`): migración 0005 y demo del 409, agente en la VM Windows 10, alertas WIN-001/WIN-002 y línea de tiempo. Después, PR de `dev` a `main` y Sprint 7 (escenarios, pruebas de seguridad, Docker Compose completo y entrega) |
+| Siguiente | Verificar el Sprint 6 en el laboratorio (pasos en `tareas-manuales.txt`): migración 0005 y demo del 409, agente en la VM Windows 10, alertas WIN-001/WIN-002 y línea de tiempo. En paralelo, en el PC: mejora del diseño del frontend (sesiones D1–D3: tokens con modo oscuro, componentes comunes y pulido por vista). Después, PR de `dev` a `main` y Sprint 7 (escenarios, pruebas de seguridad, Docker Compose completo y entrega) |
 | Meta | SIEM funcional para el 15 de noviembre; margen hasta diciembre |
 | Estándar | [Estándar técnico obligatorio "CORE"](02-estandar-core.md), obligatorio para todos los proyectos |
 
