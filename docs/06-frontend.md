@@ -32,16 +32,24 @@ apps/web/src/
     index.ts
     guards.ts
   components/
-    AppLayout.vue      barra superior: marca, menú por rol y cerrar sesión
+    AppLayout.vue      barra superior fija: marca, menú por rol, usuario y cerrar sesión
+    ChipSeveridad.vue  severidad de una alerta (Baja, Media, Alta, Crítica)
+    ChipEstado.vue     estado de una alerta (Abierta, En progreso, …)
+    IndicadorCarga.vue "Cargando…" con indicador animado (role=status)
+    AvisoError.vue     problem+json de la API (detail › title › texto por defecto) o slot
+    EstadoVacio.vue    listas y tablas sin resultados
+    etiquetas.ts       textos visibles de severidades y estados
   views/               Login, 403, Inicio, Eventos, Alertas, LineaTiempo, Verificar, Usuarios
   styles/
     tokens.css         colores, tipografía, espaciado, radios y sombras; modo oscuro
-    base.css           estilos globales de elementos y clases comunes (.chip, .aviso, .vacio)
+    base.css           elementos, maquetación (.pagina, .panel, .tabla-contenedor) y .chip/.aviso
 ```
 
 ## Estilos
 
-Los colores salen solo de `styles/tokens.css` (variables CSS); ninguna vista escribe un color fijo. El modo oscuro sigue la preferencia del sistema (`prefers-color-scheme`) y solo redefine colores y sombras. `styles/base.css` da estilo a botones, campos y tablas, así que las vistas solo añaden su maquetación en `<style scoped>`. Los botones son secundarios por defecto y la acción principal lleva `class="primario"`. Los chips usan `class="chip"` con `sev-<severidad>` o `est-<estado>`.
+Los colores salen solo de `styles/tokens.css` (variables CSS); ninguna vista escribe un color fijo. El modo oscuro sigue la preferencia del sistema (`prefers-color-scheme`) y solo redefine colores y sombras. `styles/base.css` da estilo a botones, campos y tablas, así que las vistas solo añaden su maquetación en `<style scoped>`. Los botones son secundarios por defecto y la acción principal lleva `class="primario"`. Los chips usan `class="chip"` con `sev-<severidad>` o `est-<estado>`, pero las vistas los pintan con `ChipSeveridad` y `ChipEstado`.
+
+Cada vista es un `<main class="pagina">`: ancho fluido hasta 1280 px, o `pagina estrecha` (820 px) para formularios y resultados cortos. Arriba va una `cabecera-pagina` con el título y el total. Filtros, tablas y bloques van en un `.panel`, y las tablas dentro de `.tabla-contenedor` para que se desplacen en horizontal en pantallas angostas. Carga, error y vacío se muestran siempre con `IndicadorCarga`, `AvisoError` y `EstadoVacio`.
 
 ## Menú y layout
 

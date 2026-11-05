@@ -2,6 +2,9 @@
 import { computed, onMounted } from 'vue';
 import { TipoEventoSchema } from '@siem/shared';
 
+import AvisoError from '../components/AvisoError.vue';
+import EstadoVacio from '../components/EstadoVacio.vue';
+import IndicadorCarga from '../components/IndicadorCarga.vue';
 import { useEventsStore } from '../stores/events.js';
 import { useUiStore } from '../stores/ui.js';
 
@@ -36,26 +39,35 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="eventos">
-    <h1>Eventos</h1>
+  <main class="pagina">
+    <header class="cabecera-pagina">
+      <h1>Eventos</h1>
+      <p>{{ events.total }} eventos</p>
+    </header>
 
     <form
-      class="filtros"
+      class="filtros panel"
       @submit.prevent="buscar"
     >
       <input
         v-model="ui.filtrosEventos.host"
         placeholder="host"
+        aria-label="Host"
       >
       <input
         v-model="ui.filtrosEventos.usuario"
         placeholder="usuario"
+        aria-label="Usuario"
       >
       <input
         v-model="ui.filtrosEventos.src_ip"
         placeholder="IP origen"
+        aria-label="IP origen"
       >
-      <select v-model="ui.filtrosEventos.event_type">
+      <select
+        v-model="ui.filtrosEventos.event_type"
+        aria-label="Tipo de evento"
+      >
         <option value="">
           todos los tipos
         </option>
@@ -95,74 +107,71 @@ onMounted(() => {
       </button>
     </form>
 
-    <p
-      v-if="events.status === 'loading'"
-      class="aviso"
-    >
-      Cargando…
-    </p>
-    <p
+    <IndicadorCarga v-if="events.status === 'loading'" />
+    <AvisoError
       v-else-if="events.status === 'error'"
-      class="aviso error"
-      role="alert"
-    >
-      {{ events.error?.detail ?? events.error?.title ?? 'No se pudieron cargar los eventos' }}
-    </p>
+      :problema="events.error"
+      por-defecto="No se pudieron cargar los eventos"
+    />
 
-    <table v-else>
-      <thead>
-        <tr>
-          <th>ts</th>
-          <th>host</th>
-          <th>tipo</th>
-          <th>usuario</th>
-          <th>IP origen</th>
-          <th>sev.</th>
-          <th>raw</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="e in events.lista"
-          :key="e.id"
-        >
-          <td>{{ fecha(e.ts) }}</td>
-          <td>{{ e.host }}</td>
-          <td>{{ e.event_type }}</td>
-          <td>{{ e.usuario ?? '—' }}</td>
-          <td>{{ e.src_ip ?? '—' }}</td>
-          <td>{{ e.severity }}</td>
-          <td class="raw">
-            {{ e.raw }}
-          </td>
-        </tr>
-        <tr v-if="events.lista.length === 0">
-          <td
-            colspan="7"
-            class="vacio"
+    <div
+      v-else
+      class="panel tabla-contenedor"
+    >
+      <table>
+        <thead>
+          <tr>
+            <th>ts</th>
+            <th>host</th>
+            <th>tipo</th>
+            <th>usuario</th>
+            <th>IP origen</th>
+            <th>sev.</th>
+            <th>raw</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="e in events.lista"
+            :key="e.id"
           >
-            Sin eventos para estos filtros.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td class="ts">
+              {{ fecha(e.ts) }}
+            </td>
+            <td>{{ e.host }}</td>
+            <td>{{ e.event_type }}</td>
+            <td>{{ e.usuario ?? '—' }}</td>
+            <td>{{ e.src_ip ?? '—' }}</td>
+            <td>{{ e.severity }}</td>
+            <td class="raw">
+              {{ e.raw }}
+            </td>
+          </tr>
+          <tr v-if="events.lista.length === 0">
+            <td colspan="7">
+              <EstadoVacio>Sin eventos para estos filtros.</EstadoVacio>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
     <footer class="paginador">
-      <span>{{ events.total }} eventos · página {{ events.pagina }} de {{ totalPaginas }}</span>
+      <span>Página {{ events.pagina }} de {{ totalPaginas }}</span>
       <span class="botones">
         <button
           type="button"
           :disabled="events.pagina <= 1"
           @click="irA(events.pagina - 1)"
         >
-          ‹ anterior
+          ‹ Anterior
         </button>
         <button
           type="button"
           :disabled="events.pagina >= totalPaginas"
           @click="irA(events.pagina + 1)"
         >
-          siguiente ›
+          Siguiente ›
         </button>
       </span>
     </footer>
@@ -170,16 +179,12 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.eventos {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: var(--esp-5);
-}
 .filtros {
   display: flex;
   flex-wrap: wrap;
   gap: var(--esp-2);
   align-items: end;
+  padding: var(--esp-3);
   margin-bottom: var(--esp-4);
 }
 .filtros label {
@@ -189,14 +194,15 @@ onMounted(() => {
   color: var(--color-texto-2);
   gap: 0.2rem;
 }
-table {
-  background: var(--color-superficie);
+.ts {
+  white-space: nowrap;
 }
 .raw {
   font-family: var(--fuente-mono);
   font-size: 0.78rem;
   color: var(--color-texto-2);
-  max-width: 360px;
+  min-width: 240px;
+  max-width: 520px;
   overflow-wrap: anywhere;
 }
 .paginador {

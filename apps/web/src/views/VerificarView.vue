@@ -2,6 +2,7 @@
 import { ref } from 'vue';
 import type { ForenseVerificacion, MotivoForense, Problem } from '@siem/shared';
 
+import AvisoError from '../components/AvisoError.vue';
 import { verificarCadena } from '../api/forensics.api.js';
 import { extraerProblem } from '../api/http.js';
 
@@ -33,7 +34,7 @@ async function verificar(): Promise<void> {
 </script>
 
 <template>
-  <main class="verificar">
+  <main class="pagina estrecha">
     <h1>Verificar cadena forense</h1>
     <p class="intro">
       Recalcula la cadena HMAC completa y comprueba que ningún evento fue alterado, borrado o insertado.
@@ -48,13 +49,12 @@ async function verificar(): Promise<void> {
       {{ estado === 'loading' ? 'Verificando…' : 'Verificar cadena' }}
     </button>
 
-    <p
+    <AvisoError
       v-if="estado === 'error'"
-      class="recuadro error"
-      role="alert"
-    >
-      {{ error?.detail ?? error?.title ?? 'No se pudo verificar la cadena' }}
-    </p>
+      class="resultado-error"
+      :problema="error"
+      por-defecto="No se pudo verificar la cadena"
+    />
 
     <template v-else-if="estado === 'success' && resultado">
       <div
@@ -94,17 +94,16 @@ async function verificar(): Promise<void> {
 </template>
 
 <style scoped>
-.verificar {
-  max-width: 700px;
-  margin: 0 auto;
-  padding: var(--esp-5);
-}
 .intro {
   color: var(--color-texto-2);
   font-size: 0.9rem;
 }
 button {
   padding: 0.6rem var(--esp-4);
+}
+/* Más específico que el margen propio de AvisoError */
+.pagina .resultado-error {
+  margin-top: 1.25rem;
 }
 .recuadro {
   margin-top: 1.25rem;
@@ -125,8 +124,7 @@ button {
   border-color: var(--color-ok);
   color: var(--color-ok-texto);
 }
-.fallo,
-.error {
+.fallo {
   background: var(--color-peligro-suave);
   border-color: var(--color-peligro);
   color: var(--color-peligro-texto);

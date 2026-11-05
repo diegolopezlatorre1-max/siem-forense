@@ -21,7 +21,7 @@ const secciones = computed(() => seccionesPara(router.options.routes, auth.rol))
 </script>
 
 <template>
-  <main class="inicio">
+  <main class="pagina">
     <h1>Hola, {{ auth.usuario?.usuario }}</h1>
     <p class="rol">
       Rol: {{ auth.rol }}
@@ -41,11 +41,6 @@ const secciones = computed(() => seccionesPara(router.options.routes, auth.rol))
 </template>
 
 <style scoped>
-.inicio {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: var(--esp-5);
-}
 h1 {
   margin: 0;
 }

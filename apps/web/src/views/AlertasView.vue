@@ -2,6 +2,12 @@
 import { computed, onMounted } from 'vue';
 import { type Alerta, type EstadoAlerta, EstadoAlertaSchema, SeveridadSchema } from '@siem/shared';
 
+import AvisoError from '../components/AvisoError.vue';
+import ChipEstado from '../components/ChipEstado.vue';
+import ChipSeveridad from '../components/ChipSeveridad.vue';
+import EstadoVacio from '../components/EstadoVacio.vue';
+import IndicadorCarga from '../components/IndicadorCarga.vue';
+import { ETIQUETA_ESTADO, ETIQUETA_SEVERIDAD } from '../components/etiquetas.js';
 import { useAlertsStore } from '../stores/alerts.js';
 import { useAuthStore } from '../stores/auth.js';
 import { useUiStore } from '../stores/ui.js';
@@ -59,40 +65,50 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="alertas">
-    <h1>Alertas</h1>
+  <main class="pagina">
+    <header class="cabecera-pagina">
+      <h1>Alertas</h1>
+      <p>{{ alerts.total }} alertas</p>
+    </header>
 
     <form
-      class="filtros"
+      class="filtros panel"
       @submit.prevent="buscar"
     >
-      <select v-model="ui.filtrosAlertas.estado">
+      <select
+        v-model="ui.filtrosAlertas.estado"
+        aria-label="Estado"
+      >
         <option value="">
-          todo estado
+          Todo estado
         </option>
         <option
           v-for="e in estados"
           :key="e"
           :value="e"
         >
-          {{ e }}
+          {{ ETIQUETA_ESTADO[e] }}
         </option>
       </select>
-      <select v-model="ui.filtrosAlertas.severidad">
+      <select
+        v-model="ui.filtrosAlertas.severidad"
+        aria-label="Severidad"
+      >
         <option value="">
-          toda severidad
+          Toda severidad
         </option>
         <option
           v-for="s in severidades"
           :key="s"
           :value="s"
         >
-          {{ s }}
+          {{ ETIQUETA_SEVERIDAD[s] }}
         </option>
       </select>
       <input
         v-model="ui.filtrosAlertas.regla_id"
         placeholder="regla (p. ej. LINUX-001)"
+        aria-label="Regla"
       >
       <button
         type="submit"
@@ -108,113 +124,99 @@ onMounted(() => {
       </button>
     </form>
 
-    <p
+    <AvisoError
       v-if="alerts.accionError"
-      class="aviso error"
-      role="alert"
-    >
-      {{ alerts.accionError.detail ?? alerts.accionError.title }}
-    </p>
+      :problema="alerts.accionError"
+    />
 
-    <p
-      v-if="alerts.status === 'loading'"
-      class="aviso"
-    >
-      Cargando…
-    </p>
-    <p
+    <IndicadorCarga v-if="alerts.status === 'loading'" />
+    <AvisoError
       v-else-if="alerts.status === 'error'"
-      class="aviso error"
-      role="alert"
-    >
-      {{ alerts.error?.detail ?? alerts.error?.title ?? 'No se pudieron cargar las alertas' }}
-    </p>
+      :problema="alerts.error"
+      por-defecto="No se pudieron cargar las alertas"
+    />
 
-    <ul
-      v-else
-      class="lista"
-    >
-      <li
-        v-for="a in alerts.lista"
-        :key="a.id"
-        class="tarjeta"
-        :class="`sev-${a.severidad}`"
+    <template v-else>
+      <ul
+        v-if="alerts.lista.length > 0"
+        class="lista"
       >
-        <span
-          class="chip"
+        <li
+          v-for="a in alerts.lista"
+          :key="a.id"
+          class="tarjeta"
           :class="`sev-${a.severidad}`"
-        >{{ a.severidad.toUpperCase() }}</span>
-        <div class="cuerpo">
-          <p class="titulo">
-            {{ a.regla_id }} · {{ a.nombre }}
-          </p>
-          <p class="meta">
-            {{ a.clave }} · cantidad {{ a.cantidad }}
-          </p>
-          <p class="pie">
-            MITRE {{ a.mitre }} · {{ fecha(a.ts) }}
-          </p>
-          <div class="acciones">
-            <span
-              class="chip estado"
-              :class="`est-${a.estado}`"
-            >{{ a.estado }}</span>
-            <span class="asignada">
-              {{ a.asignada_a === null ? 'sin asignar' : esMia(a) ? 'asignada a ti' : `asignada a #${a.asignada_a}` }}
-            </span>
-            <button
-              v-if="puedeAsignarse && !esMia(a)"
-              type="button"
-              class="accion"
-              @click="asignarme(a)"
-            >
-              Asignármela
-            </button>
-            <label
-              v-if="puedeModificar(a)"
-              class="cambiar-estado"
-            >
-              estado:
-              <select
-                :value="a.estado"
-                @change="cambiarEstado(a, ($event.target as HTMLSelectElement).value as EstadoAlerta)"
+        >
+          <ChipSeveridad :severidad="a.severidad" />
+          <div class="cuerpo">
+            <p class="titulo">
+              {{ a.regla_id }} · {{ a.nombre }}
+            </p>
+            <p class="meta">
+              {{ a.clave }} · cantidad {{ a.cantidad }}
+            </p>
+            <p class="pie">
+              MITRE {{ a.mitre }} · {{ fecha(a.ts) }}
+            </p>
+            <div class="acciones">
+              <ChipEstado :estado="a.estado" />
+              <span class="asignada">
+                {{ a.asignada_a === null ? 'sin asignar' : esMia(a) ? 'asignada a ti' : `asignada a #${a.asignada_a}` }}
+              </span>
+              <button
+                v-if="puedeAsignarse && !esMia(a)"
+                type="button"
+                class="accion"
+                @click="asignarme(a)"
               >
-                <option
-                  v-for="e in estados"
-                  :key="e"
-                  :value="e"
+                Asignármela
+              </button>
+              <label
+                v-if="puedeModificar(a)"
+                class="cambiar-estado"
+              >
+                estado:
+                <select
+                  :value="a.estado"
+                  @change="cambiarEstado(a, ($event.target as HTMLSelectElement).value as EstadoAlerta)"
                 >
-                  {{ e }}
-                </option>
-              </select>
-            </label>
+                  <option
+                    v-for="e in estados"
+                    :key="e"
+                    :value="e"
+                  >
+                    {{ ETIQUETA_ESTADO[e] }}
+                  </option>
+                </select>
+              </label>
+            </div>
           </div>
-        </div>
-      </li>
-      <li
-        v-if="alerts.lista.length === 0"
-        class="vacio"
+        </li>
+      </ul>
+      <EstadoVacio
+        v-else
+        class="panel"
       >
         Sin alertas para estos filtros.
-      </li>
-    </ul>
+      </EstadoVacio>
+    </template>
 
     <footer class="paginador">
-      <span>{{ alerts.total }} alertas · página {{ alerts.pagina }} de {{ totalPaginas }}</span>
+      <span>Página {{ alerts.pagina }} de {{ totalPaginas }}</span>
       <span class="botones">
         <button
           type="button"
           :disabled="alerts.pagina <= 1"
           @click="irA(alerts.pagina - 1)"
         >
-          ‹ anterior
+          ‹ Anterior
         </button>
         <button
           type="button"
           :disabled="alerts.pagina >= totalPaginas"
           @click="irA(alerts.pagina + 1)"
         >
-          siguiente ›
+          Siguiente ›
         </button>
       </span>
     </footer>
@@ -222,15 +224,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.alertas {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: var(--esp-5);
-}
 .filtros {
   display: flex;
   flex-wrap: wrap;
   gap: var(--esp-2);
+  padding: var(--esp-3);
   margin-bottom: var(--esp-4);
 }
 .lista {
@@ -264,6 +262,10 @@ onMounted(() => {
 .tarjeta.sev-low {
   border-left-color: var(--color-sev-low);
 }
+.cuerpo {
+  flex: 1;
+  min-width: 0;
+}
 .titulo {
   margin: 0;
   font-weight: 700;
@@ -272,6 +274,7 @@ onMounted(() => {
   margin: 0.2rem 0 0;
   color: var(--color-texto-2);
   font-size: var(--texto-s);
+  overflow-wrap: anywhere;
 }
 .pie {
   margin: 0.2rem 0 0;
@@ -287,10 +290,6 @@ onMounted(() => {
   margin-top: var(--esp-2);
   font-size: 0.8rem;
   color: var(--color-texto-2);
-}
-.estado {
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
 }
 .asignada {
   font-style: italic;

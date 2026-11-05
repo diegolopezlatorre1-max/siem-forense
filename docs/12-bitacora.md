@@ -237,6 +237,26 @@ sesión solo estaba en Inicio) y faltaba la vista `/admin`.
 - **Verificado:** typecheck, lint, test (web 18) y build en verde.
   - **No verificado aún en el navegador:** se revisa en la URL del laboratorio en D3.
 
+## 5 nov: diseño del frontend, sesión D2 (componentes y layout)
+
+- **Componentes comunes** en `components/`: `ChipSeveridad`, `ChipEstado`, `IndicadorCarga`,
+  `AvisoError` y `EstadoVacio`. Los textos de severidades y estados están en `etiquetas.ts`, con
+  un `Record` por enum, así que si el schema gana una opción falla el typecheck. Las alertas
+  muestran "Alta" o "En progreso" en vez de `high` o `en_progreso`, también en los selectores.
+- **Vistas:** carga, error y vacío se ven igual en todas. Antes eran un `<p>` gris o rojo distinto
+  en cada vista. `AvisoError` también reemplaza el recuadro de error de Verificar y los errores
+  del formulario de Usuarios (el texto del 409 va por slot).
+- **Layout:**
+  - `.pagina` con ancho fluido hasta 1280 px (antes 700–1100 px según la vista), `.pagina estrecha`
+    para Usuarios y Verificar, y una cabecera con título y total.
+  - Filtros y tablas van en paneles. Las tablas se desplazan en horizontal en el celular, en vez
+    de desbordar la página.
+- **Barra de navegación:** queda fija arriba y alineada con el contenido. Lleva un logo SVG, un
+  avatar con la inicial, el usuario y su rol en dos líneas. En el celular, el menú se desplaza en
+  horizontal en vez de partirse en varias filas.
+- **Verificado:** typecheck, lint, test (web 18) y build en verde.
+  - **No verificado aún en el navegador:** se revisa en D3.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

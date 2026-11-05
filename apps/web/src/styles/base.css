@@ -113,6 +113,56 @@ th {
   letter-spacing: 0.03em;
 }
 
+/* Maquetación de páginas: ancho fluido hasta 1280px; .estrecha para formularios y resultados cortos */
+.pagina {
+  width: 100%;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: var(--esp-5);
+}
+.pagina.estrecha {
+  max-width: 820px;
+}
+.cabecera-pagina {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--esp-2) var(--esp-4);
+  margin-bottom: var(--esp-4);
+}
+.cabecera-pagina h1 {
+  margin: 0;
+}
+.cabecera-pagina p {
+  margin: 0;
+  color: var(--color-texto-2);
+  font-size: var(--texto-s);
+}
+
+/* Panel: superficie con borde y sombra para formularios de filtros, tablas y bloques */
+.panel {
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-m);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-1);
+}
+.tabla-contenedor {
+  overflow-x: auto;
+}
+.tabla-contenedor tbody tr:last-child td {
+  border-bottom: 0;
+}
+.tabla-contenedor tbody tr:hover td {
+  background: var(--color-superficie-2);
+}
+
+@media (max-width: 640px) {
+  .pagina {
+    padding: var(--esp-4);
+  }
+}
+
 /* Chips de severidad (sev-*) y de estado de alerta (est-*) */
 .chip {
   display: inline-block;
@@ -151,15 +201,11 @@ th {
   color: var(--color-texto-3);
 }
 
-/* Mensajes de carga, error y listas vacías */
-.aviso,
-.vacio {
+/* Mensajes informativos (carga, error y vacío tienen componente propio) */
+.aviso {
   margin: 0;
   padding: var(--esp-4) 0;
   color: var(--color-texto-3);
-}
-.aviso.error {
-  color: var(--color-peligro-texto);
 }
 .aviso.ok {
   color: var(--color-ok-texto);

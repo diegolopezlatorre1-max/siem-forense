@@ -2,6 +2,11 @@
 import { onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 
+import AvisoError from '../components/AvisoError.vue';
+import ChipEstado from '../components/ChipEstado.vue';
+import ChipSeveridad from '../components/ChipSeveridad.vue';
+import EstadoVacio from '../components/EstadoVacio.vue';
+import IndicadorCarga from '../components/IndicadorCarga.vue';
 import { useTimelineStore } from '../stores/timeline.js';
 
 const timeline = useTimelineStore();
@@ -30,24 +35,39 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="linea">
-    <h1>Línea de tiempo</h1>
+  <main class="pagina">
+    <header class="cabecera-pagina">
+      <h1>Línea de tiempo</h1>
+      <p
+        v-if="timeline.status === 'success'"
+        class="resumen"
+      >
+        {{ timeline.items.length }} elementos · {{ timeline.totalAlertas }} alertas
+        <span
+          v-if="timeline.truncada"
+          class="truncada"
+        >· hay más resultados: se muestran los más recientes, acote el rango</span>
+      </p>
+    </header>
 
     <form
-      class="filtros"
+      class="filtros panel"
       @submit.prevent="buscar"
     >
       <input
         v-model="timeline.filtros.host"
         placeholder="host"
+        aria-label="Host"
       >
       <input
         v-model="timeline.filtros.usuario"
         placeholder="usuario"
+        aria-label="Usuario"
       >
       <input
         v-model="timeline.filtros.src_ip"
         placeholder="IP origen"
+        aria-label="IP origen"
       >
       <label>
         desde
@@ -86,30 +106,18 @@ onMounted(() => {
     >
       Indique un host, un usuario o una IP para ver su línea de tiempo.
     </p>
-    <p
-      v-else-if="timeline.status === 'loading'"
-      class="aviso"
-    >
-      Cargando…
-    </p>
-    <p
+    <IndicadorCarga v-else-if="timeline.status === 'loading'" />
+    <AvisoError
       v-else-if="timeline.status === 'error'"
-      class="aviso error"
-      role="alert"
-    >
-      {{ timeline.error?.detail ?? timeline.error?.title ?? 'No se pudo cargar la línea de tiempo' }}
-    </p>
+      :problema="timeline.error"
+      por-defecto="No se pudo cargar la línea de tiempo"
+    />
 
     <template v-else-if="timeline.status === 'success'">
-      <p class="resumen">
-        {{ timeline.items.length }} elementos · {{ timeline.totalAlertas }} alertas
-        <span
-          v-if="timeline.truncada"
-          class="truncada"
-        >· hay más resultados: se muestran los más recientes, acote el rango</span>
-      </p>
-
-      <ol class="cronologia">
+      <ol
+        v-if="timeline.items.length > 0"
+        class="cronologia"
+      >
         <li
           v-for="i in timeline.items"
           :key="`${i.tipo}-${i.tipo === 'evento' ? i.evento.id : i.alerta.id}`"
@@ -134,39 +142,33 @@ onMounted(() => {
             class="detalle"
           >
             <p class="titulo">
-              <span
-                class="chip"
-                :class="`sev-${i.alerta.severidad}`"
-              >{{ i.alerta.severidad.toUpperCase() }}</span>
+              <ChipSeveridad :severidad="i.alerta.severidad" />
               {{ i.alerta.regla_id }} · {{ i.alerta.nombre }}
             </p>
             <p class="meta">
-              {{ i.alerta.clave }} · cantidad {{ i.alerta.cantidad }} · MITRE {{ i.alerta.mitre }} · {{ i.alerta.estado }}
+              {{ i.alerta.clave }} · cantidad {{ i.alerta.cantidad }} · MITRE {{ i.alerta.mitre }}
+              <ChipEstado :estado="i.alerta.estado" />
             </p>
           </div>
         </li>
-        <li
-          v-if="timeline.items.length === 0"
-          class="vacio"
-        >
-          Sin eventos ni alertas en ese rango.
-        </li>
       </ol>
+      <EstadoVacio
+        v-else
+        class="panel"
+      >
+        Sin eventos ni alertas en ese rango.
+      </EstadoVacio>
     </template>
   </main>
 </template>
 
 <style scoped>
-.linea {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: var(--esp-5);
-}
 .filtros {
   display: flex;
   flex-wrap: wrap;
   gap: var(--esp-2);
   align-items: end;
+  padding: var(--esp-3);
   margin-bottom: var(--esp-4);
 }
 .filtros label {
@@ -175,10 +177,6 @@ onMounted(() => {
   font-size: var(--texto-xs);
   color: var(--color-texto-2);
   gap: 0.2rem;
-}
-.resumen {
-  font-size: var(--texto-s);
-  color: var(--color-texto-2);
 }
 .truncada {
   color: var(--color-aviso-texto);
@@ -268,7 +266,7 @@ onMounted(() => {
   color: var(--color-texto-3);
   overflow-wrap: anywhere;
 }
-.chip {
+.titulo .chip {
   margin-right: 0.3rem;
 }
 @media (max-width: 640px) {
