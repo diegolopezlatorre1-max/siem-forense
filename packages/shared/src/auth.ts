@@ -17,6 +17,9 @@ export const UsuarioPublicoSchema = z.object({
 });
 export type UsuarioPublico = z.infer<typeof UsuarioPublicoSchema>;
 
+// Respuesta de GET /users.
+export const ListaUsuariosSchema = z.array(UsuarioPublicoSchema);
+
 export const LoginRespuestaSchema = z.object({
   accessToken: z.string(),
   usuario: UsuarioPublicoSchema,

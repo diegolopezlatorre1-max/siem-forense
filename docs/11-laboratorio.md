@@ -35,7 +35,7 @@ Regla para no confundirse: se escribe en el PC (prompt MINGW64) y se ejecuta en 
 | Worker de detección | `pnpm --filter api start:worker` (otra ventana) |
 | Web (desarrollo) | `pnpm --filter web dev --host` → `http://192.168.56.101:5173` |
 | Crear llave de agente (una vez) | `pnpm --filter api agente:crear ubuntu` → guardar la llave en `docs/privado/` |
-| Agente Linux | `cd agents/linux && sudo SIEM_AGENT_KEY=... .venv/bin/python agent_linux.py` |
+| Agente Linux | `cd agents/linux && SIEM_AGENT_KEY=... .venv/bin/python agent_linux.py` (SIN `sudo`: el usuario está en el grupo `adm`; con `sudo -E` en Ubuntu 26.04 la llave no llega) |
 | Pruebas | `pnpm lint && pnpm typecheck && pnpm test`, `pnpm --filter api test:e2e` y `cd agents/linux && pytest` |
 
 Todo en contenedores (Sprint 7): `docker compose up -d` y luego `http://192.168.56.101`.

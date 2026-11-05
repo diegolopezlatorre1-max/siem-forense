@@ -210,10 +210,26 @@ SESIÓN 27 - Reglas WIN-001 y WIN-002 (con el agente Windows corriendo)
 
 SESIÓN 29 - Línea de tiempo
 ---------------------------
-[ ] En la web (http://192.168.56.101), entrar a "Línea de tiempo" y consultar src_ip = 192.168.56.103
+[ ] En la web (http://192.168.56.101:5173), entrar a "Línea de tiempo" y consultar src_ip = 192.168.56.103
     con el rango de hoy: deben salir mezclados, en orden, los login_failed de SSH y de Windows y las
     alertas LINUX-001 / WIN-001, cada alerta justo después de los eventos que la provocaron.
 [ ] Consultar host = <nombre del equipo Windows>: debe salir el user_created y la alerta WIN-002.
 [ ] Sin host, usuario ni IP, el botón Consultar queda deshabilitado; con un rango invertido la API
     responde 400 (se ve el mensaje en rojo).
-[ ] Atajo por URL: http://192.168.56.101/linea-tiempo?src_ip=192.168.56.103 consulta directo.
+[ ] Atajo por URL: http://192.168.56.101:5173/linea-tiempo?src_ip=192.168.56.103 consulta directo.
+
+
+MENÚ Y USUARIOS (2 nov)
+-----------------------
+(Tras el git pull en la VM, reiniciar la web:  pnpm --filter web dev --host  -> http://192.168.56.101:5173.
+ Si @siem/shared cambió, el pnpm install lo recompila.)
+[ ] Entrar como admin: arriba debe verse el menú Eventos · Alertas · Línea de tiempo ·
+    Verificar cadena · Usuarios, el usuario·rol y "Cerrar sesión". La sección actual sale resaltada.
+[ ] En Usuarios, crear un analista y un auditor de prueba (contraseña de 8 o más; guardarlas en
+    docs/privado/credenciales.md). Volver a crear el mismo nombre: debe decir "Ese nombre de
+    usuario ya existe".
+[ ] Entrar con el analista: el menú NO debe mostrar Verificar cadena ni Usuarios; escribir
+    /admin a mano debe llevar a la página 403.
+[ ] Entrar con el auditor: ve Verificar cadena pero no Usuarios.
+[ ] El login y la página 403 se ven sin menú. Con la ventana angosta (celular), el menú baja a
+    su propia fila.

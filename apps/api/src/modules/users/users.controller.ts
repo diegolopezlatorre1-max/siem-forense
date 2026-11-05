@@ -3,12 +3,12 @@ import { ApiBearerAuth, ApiBody, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   type CrearUsuario,
   CrearUsuarioSchema,
+  ListaUsuariosSchema,
   ProblemSchema,
   type UsuarioPublico,
   UsuarioPublicoSchema,
 } from '@siem/shared';
 import { hash } from 'argon2';
-import { z } from 'zod';
 
 import { Roles } from '../../common/auth/decoradores.js';
 import { esquema } from '../../common/openapi.js';
@@ -26,7 +26,7 @@ export class UsersController {
 
   @Get()
   @Roles('admin')
-  @ApiResponse({ status: 200, schema: esquema(z.array(UsuarioPublicoSchema)) })
+  @ApiResponse({ status: 200, schema: esquema(ListaUsuariosSchema) })
   @ApiResponse({ status: 403, description: 'Solo admin', schema: esquema(ProblemSchema) })
   async listar(): Promise<UsuarioPublico[]> {
     return (await this.usuarios.listar()).map(publico);

@@ -17,18 +17,30 @@ apps/web/src/
     alerts.api.ts
     events.api.ts
     forensics.api.ts
+    timeline.api.ts
+    users.api.ts
   stores/
     auth.ts            usuario, accessToken (en memoria), estado de sesión
     alerts.ts          normalizado
     events.ts          normalizado
+    users.ts           normalizado (solo admin)
+    timeline.ts        última consulta de la línea de tiempo
     ui.ts              filtros y preferencias (persistencia selectiva)
   router/
+    rutas.ts           lista de rutas con meta.public / meta.roles / meta.menu
+    menu.ts            seccionesPara(rutas, rol): el menú sale de las rutas
     index.ts
     guards.ts
-  views/               LoginView, EventosView, AlertasView, VerificarView, LineaTiempoView
   components/
-  composables/
+    AppLayout.vue      barra superior: marca, menú por rol y cerrar sesión
+  views/               Login, 403, Inicio, Eventos, Alertas, LineaTiempo, Verificar, Usuarios
 ```
+
+## Menú y layout
+
+`App.vue` envuelve en `AppLayout` toda ruta que no sea pública: Login y 403 van sin menú. Antes de la primera navegación (`matched` vacío) tampoco se pinta, para que el menú no aparezca un instante a quien el guard va a mandar al login.
+
+El menú no se escribe a mano. Una ruta aparece en él si tiene `meta.menu` (su título), y `meta.roles` decide quién la ve, con la misma regla que el guard. Así el menú nunca ofrece una ruta que daría 403, y agregar una sección es agregar una ruta. Inicio muestra las mismas secciones como tarjetas, con una línea de descripción.
 
 ## F1 · TypeScript estricto
 
@@ -77,4 +89,8 @@ interface ColeccionState<T extends { id: number }> {
 | Alertas (MITRE, severidad, estado, asignación) | `/alertas` | todos (editar: admin y analista) |
 | Verificar cadena (verde/rojo y eslabón roto) | `/verificar` | admin, auditor |
 | Línea de tiempo | `/linea-tiempo` | todos |
-| Usuarios y agentes | `/admin` | admin |
+| Usuarios (lista y alta con rol) | `/admin` | admin |
+
+**Usuarios (`/admin`):** lista los usuarios (`GET /users`) y crea uno nuevo (`POST /users`) con usuario, contraseña de 8 caracteres o más y rol. Antes de enviar, valida con el mismo `CrearUsuarioSchema` del backend. Un nombre repetido (409) se muestra como "Ese nombre de usuario ya existe", y la contraseña se borra del formulario tras crear. **Fuera de alcance por ahora:** cambiar el rol, desactivar usuarios (`PATCH /users/:id`, que no existe en el backend) y gestionar agentes desde la web (no hay `GET/POST /agents`; las llaves se crean con `pnpm --filter api agente:crear`).
+
+**Nota sobre el 409 en Alertas:** la vista no aplica el cambio antes de la respuesta, como pedía el plan original. Envía la acción, aplica la alerta que devuelve el backend y, ante un 409, muestra el aviso y recarga la lista. Es más simple y evita estados intermedios incoherentes; el usuario ve el mismo resultado.

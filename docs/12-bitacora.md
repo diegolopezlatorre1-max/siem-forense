@@ -195,6 +195,31 @@ Falta la demo de cada sesión en el laboratorio; los pasos están en `docs/tarea
   - Siguen pendientes `GET /events/:id` y que `GET /alerts/:id` incluya los eventos que provocaron
     la alerta.
 
+## 2 nov: menú común y vista de Usuarios (frontend)
+
+Al repasar el frontend contra [06](06-frontend.md) aparecieron dos huecos: no había menú (desde
+Eventos, Alertas, Verificar o Línea de tiempo solo se volvía con "atrás" del navegador, y cerrar
+sesión solo estaba en Inicio) y faltaba la vista `/admin`.
+
+- **Menú:** `components/AppLayout.vue` con marca, secciones por rol y cerrar sesión, aplicado por
+  `App.vue` a toda ruta no pública. El menú se genera desde las rutas (`meta.menu` y
+  `meta.roles`, en `router/menu.ts`), así coincide siempre con lo que permite el guard. Las rutas
+  pasaron a `router/rutas.ts` para poder probar el menú sin navegador. Inicio pasó a ser una
+  portada con las secciones del rol.
+- **Usuarios (`/admin`, solo admin):**
+  - Store `users` normalizado y `users.api.ts`.
+  - Tabla con id, usuario y rol, y formulario de alta validado con `CrearUsuarioSchema`. Un 409
+    se muestra como "Ese nombre de usuario ya existe".
+  - `ListaUsuariosSchema` pasó a `@siem/shared`, y el backend también lo usa en el OpenAPI de
+    `GET /users`.
+  - Los agentes siguen fuera de la web porque no hay endpoints `/agents`. Cambiar el rol o
+    desactivar un usuario tampoco existe en el backend.
+- **Pruebas:** 4 del menú por rol (admin ve 5 secciones, analista 3, auditor 4 y sin sesión
+  ninguna) y 3 del store de usuarios. Web: 18 pruebas; todo el monorepo con typecheck, lint, test
+  y build en verde.
+- **No verificado aún en el navegador:** el menú, Usuarios y Línea de tiempo (no hay API local en
+  el PC). Pasos en `tareas-manuales.txt`.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

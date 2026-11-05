@@ -2,53 +2,41 @@
 import { computed } from 'vue';
 import { RouterLink, useRouter } from 'vue-router';
 
+import { seccionesPara } from '../router/menu.js';
 import { useAuthStore } from '../stores/auth.js';
 
 const auth = useAuthStore();
 const router = useRouter();
 
-const puedeVerificar = computed(() => auth.rol === 'admin' || auth.rol === 'auditor');
+// Las mismas secciones del menú, con una línea que explica cada una.
+const DESCRIPCIONES: Record<string, string> = {
+  eventos: 'Eventos recibidos de los agentes de Linux y Windows, con filtros.',
+  alertas: 'Alertas de las reglas de detección: tomarlas y cambiar su estado.',
+  'linea-tiempo': 'Eventos y alertas de un host, un usuario o una IP, en orden.',
+  verificar: 'Comprobar que ningún evento fue alterado (cadena HMAC).',
+  admin: 'Crear usuarios y ver sus roles.',
+};
 
-async function cerrarSesion(): Promise<void> {
-  await auth.logout();
-  await router.push({ name: 'login' });
-}
+const secciones = computed(() => seccionesPara(router.options.routes, auth.rol));
 </script>
 
 <template>
   <main class="inicio">
-    <header>
-      <h1>SIEM Forense</h1>
-      <div
-        v-if="auth.usuario"
-        class="sesion"
+    <h1>Hola, {{ auth.usuario?.usuario }}</h1>
+    <p class="rol">
+      Rol: {{ auth.rol }}
+    </p>
+    <ul class="secciones">
+      <li
+        v-for="s in secciones"
+        :key="s.nombre"
       >
-        <span>{{ auth.usuario.usuario }} · {{ auth.usuario.rol }}</span>
-        <button
-          type="button"
-          @click="cerrarSesion"
-        >
-          Cerrar sesión
-        </button>
-      </div>
-    </header>
-    <nav class="secciones">
-      <RouterLink to="/eventos">
-        Eventos
-      </RouterLink>
-      <RouterLink to="/alertas">
-        Alertas
-      </RouterLink>
-      <RouterLink to="/linea-tiempo">
-        Línea de tiempo
-      </RouterLink>
-      <RouterLink
-        v-if="puedeVerificar"
-        to="/verificar"
-      >
-        Verificar cadena
-      </RouterLink>
-    </nav>
+        <RouterLink :to="s.ruta">
+          <span class="titulo">{{ s.titulo }}</span>
+          <span class="texto">{{ DESCRIPCIONES[s.nombre] }}</span>
+        </RouterLink>
+      </li>
+    </ul>
   </main>
 </template>
 
@@ -56,43 +44,44 @@ async function cerrarSesion(): Promise<void> {
 .inicio {
   max-width: 900px;
   margin: 0 auto;
-  padding: 2rem;
+  padding: 1.5rem;
   color: #1f2933;
-}
-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  border-bottom: 1px solid #cbd2d9;
-  padding-bottom: 1rem;
-  margin-bottom: 1rem;
 }
 h1 {
   margin: 0;
   font-size: 1.25rem;
 }
-.sesion {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
+.rol {
   color: #52606d;
   font-size: 0.9rem;
 }
-button {
-  padding: 0.4rem 0.75rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-}
 .secciones {
-  display: flex;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 0.75rem;
+  list-style: none;
+  padding: 0;
 }
 .secciones a {
-  color: #2b6cb0;
-  font-weight: 600;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  height: 100%;
+  padding: 0.9rem 1rem;
+  border: 1px solid #e4e7eb;
+  border-radius: 8px;
   text-decoration: none;
+  color: inherit;
+}
+.secciones a:hover {
+  border-color: #2b6cb0;
+}
+.titulo {
+  color: #2b6cb0;
+  font-weight: 700;
+}
+.texto {
+  color: #52606d;
+  font-size: 0.85rem;
 }
 </style>
