@@ -220,6 +220,39 @@ sesión solo estaba en Inicio) y faltaba la vista `/admin`.
 - **No verificado aún en el navegador:** el menú, Usuarios y Línea de tiempo (no hay API local en
   el PC). Pasos en `tareas-manuales.txt`.
 
+## 4–5 nov: puesta en marcha del laboratorio y agente Windows en vivo (sesión 26)
+
+Jornada de demo en el laboratorio real: se subió el trabajo del menú/Usuarios (commit `f8a6f48`,
+verificado antes con typecheck, lint y test en verde) y se levantó el stack en la VM Ubuntu. El
+**agente Windows quedó enviando eventos de verdad** por primera vez.
+
+- **Agente Windows (sesión 26) funcionando:** auditoría de Inicio de sesión activada por GUID,
+  los tres archivos de `agents/windows/` en `C:\siem\agente\`, el agente arranca como administrador
+  en Windows PowerShell 5.1 y, al cerrar e iniciar sesión, imprime `202 login_success Usuario10`.
+  La API acepta el evento con `source: windows-security`.
+- **Hallazgo sobre la llave de agente:** la autenticación (`AgentesService.autenticar`) valida la
+  llave contra el hash de *cualquier* agente y **no exige que el host coincida**; el `host` se toma
+  del propio evento. Por eso la demo funcionó usando la llave del agente `ubuntu` (id 1). Para que
+  los eventos de Windows queden atribuidos a su agente, conviene crear la llave `windows10` y
+  cambiarla; no es bloqueante.
+- **Tropiezos del laboratorio (todos resueltos), documentados en [11](11-laboratorio.md):**
+  - **pnpm/corepack roto** en la VM (`Cannot find module .../corepack/pnpm/12.15.0/bin/pnpm.cjs`);
+    `corepack prepare` no redescargaba ni tras borrar la caché. Se reinstaló con `sudo apt install
+    npm` + `sudo npm install -g pnpm@12.15.0` (quedó en `/usr/local/bin/pnpm`).
+  - **La VM Windows se congelaba** con el `git clone` del monorepo. Causa de fondo: pocos recursos y
+    el conflicto de Hyper-V/Integridad de memoria del **anfitrión Windows 11**. Se desactivó en el
+    anfitrión (`bcdedit /set hypervisorlaunchtype off` + Integridad de memoria) y se apagó Kali para
+    liberar RAM (solo se necesita en la Fase 3).
+  - **No se pudo copiar/pegar del PC a la VM:** se instalaron las Guest Additions y se activó
+    Portapapeles compartido → Bidireccional.
+  - **Llevar el agente a Windows sin `git clone`** (que es lo que congelaba): se descargaron los 3
+    archivos con `Invoke-WebRequest`/`WebClient` desde el `raw` de GitHub (rama `dev`).
+  - **`auditpol` fallaba en PowerShell** (reinterpreta `{}` y `/...`); se corre desde **cmd como
+    administrador** (o con el token `--%` en PowerShell).
+- **Pendiente de la jornada:** la subcategoría de auditoría "Administración de cuentas" (para 4720 /
+  WIN-002), el agente Linux en paralelo y la **Fase 3** (WIN-002 con `net user`, y fuerza bruta
+  desde Kali para WIN-001 / LINUX-001).
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |
