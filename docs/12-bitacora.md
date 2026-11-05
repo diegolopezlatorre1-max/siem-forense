@@ -220,6 +220,23 @@ sesión solo estaba en Inicio) y faltaba la vista `/admin`.
 - **No verificado aún en el navegador:** el menú, Usuarios y Línea de tiempo (no hay API local en
   el PC). Pasos en `tareas-manuales.txt`.
 
+## 5 nov: diseño del frontend, sesión D1 (sistema de diseño)
+
+- **Problema:** cada vista definía sus propios estilos: unos 150 colores fijos repetidos, botones e
+  inputs redefinidos en cada `<style scoped>` y ningún estilo global (el `body` usaba la fuente y
+  el margen por defecto del navegador).
+- **Tokens:** `styles/tokens.css` con colores semánticos (superficie, texto, primario, peligro,
+  aviso, ok, neutro y severidades), tipografía, espaciado, radios y sombras. Modo oscuro por
+  `prefers-color-scheme`. En oscuro el primario es un azul claro con texto oscuro encima, porque
+  el blanco sobre azul no llega al contraste AA.
+- **Base:** `styles/base.css` con fuente del sistema, fondo, foco visible, botones (secundario por
+  defecto y `.primario`), campos, tablas, `.chip` con `sev-*` y `est-*`, y `.aviso`/`.vacio`.
+- **Vistas:** sin colores fijos (ningún hexadecimal fuera de `tokens.css`) y sin estilos de
+  elementos duplicados. Tarjetas y tablas sobre superficie con sombra suave, y el menú activo pasa
+  a un fondo suave en vez de azul sólido. La severidad `critical` tiene un rojo propio.
+- **Verificado:** typecheck, lint, test (web 18) y build en verde.
+  - **No verificado aún en el navegador:** se revisa en la URL del laboratorio en D3.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

@@ -44,21 +44,19 @@ const secciones = computed(() => seccionesPara(router.options.routes, auth.rol))
 .inicio {
   max-width: 900px;
   margin: 0 auto;
-  padding: 1.5rem;
-  color: #1f2933;
+  padding: var(--esp-5);
 }
 h1 {
   margin: 0;
-  font-size: 1.25rem;
 }
 .rol {
-  color: #52606d;
+  color: var(--color-texto-2);
   font-size: 0.9rem;
 }
 .secciones {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 0.75rem;
+  gap: var(--esp-3);
   list-style: none;
   padding: 0;
 }
@@ -67,21 +65,27 @@ h1 {
   flex-direction: column;
   gap: 0.3rem;
   height: 100%;
-  padding: 0.9rem 1rem;
-  border: 1px solid #e4e7eb;
-  border-radius: 8px;
+  padding: 0.9rem var(--esp-4);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-m);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-1);
   text-decoration: none;
   color: inherit;
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
 }
 .secciones a:hover {
-  border-color: #2b6cb0;
+  border-color: var(--color-primario);
+  box-shadow: var(--sombra-2);
 }
 .titulo {
-  color: #2b6cb0;
+  color: var(--color-primario);
   font-weight: 700;
 }
 .texto {
-  color: #52606d;
-  font-size: 0.85rem;
+  color: var(--color-texto-2);
+  font-size: var(--texto-s);
 }
 </style>

@@ -61,54 +61,52 @@ async function cerrarSesion(): Promise<void> {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem 1.5rem;
-  padding: 0.6rem 1.5rem;
-  border-bottom: 1px solid #cbd2d9;
-  background: #f5f7fa;
+  gap: var(--esp-2) var(--esp-5);
+  padding: 0.6rem var(--esp-5);
+  border-bottom: 1px solid var(--color-borde);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-1);
 }
 .marca {
   font-weight: 700;
-  color: #1f2933;
+  color: var(--color-texto);
   text-decoration: none;
 }
 .menu {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: var(--esp-1);
   flex: 1;
 }
 .menu a {
   padding: 0.35rem 0.7rem;
-  border-radius: 6px;
-  color: #2b6cb0;
+  border-radius: var(--radio-s);
+  color: var(--color-texto-2);
   font-weight: 600;
-  font-size: 0.9rem;
+  font-size: var(--texto-s);
   text-decoration: none;
 }
 .menu a:hover {
-  background: #ebf2fa;
+  background: var(--color-superficie-2);
+  color: var(--color-texto);
 }
 .menu a.activa {
-  background: #2b6cb0;
-  color: #fff;
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
 }
 .sesion {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  color: #52606d;
-  font-size: 0.85rem;
+  gap: var(--esp-3);
+  color: var(--color-texto-2);
+  font-size: var(--texto-s);
 }
 .sesion button {
   padding: 0.35rem 0.7rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
 }
 @media (max-width: 640px) {
   .barra {
-    padding: 0.6rem 1rem;
+    padding: 0.6rem var(--esp-4);
   }
   .menu {
     order: 3;

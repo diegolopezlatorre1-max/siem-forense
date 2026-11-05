@@ -1,6 +1,9 @@
 import { createPinia } from 'pinia';
 import { createApp } from 'vue';
 
+import './styles/tokens.css';
+import './styles/base.css';
+
 import App from './App.vue';
 import { configurarHttp } from './api/http.js';
 import { router } from './router/index.js';
