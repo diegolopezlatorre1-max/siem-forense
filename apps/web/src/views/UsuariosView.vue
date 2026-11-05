@@ -133,6 +133,9 @@ onMounted(() => {
     <div
       v-else
       class="panel tabla-contenedor"
+      tabindex="0"
+      role="region"
+      aria-label="Tabla de usuarios"
     >
       <table>
         <thead>

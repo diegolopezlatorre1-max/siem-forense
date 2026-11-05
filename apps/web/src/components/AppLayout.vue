@@ -20,6 +20,10 @@ async function cerrarSesion(): Promise<void> {
 
 <template>
   <div class="marco">
+    <a
+      href="#contenido"
+      class="saltar"
+    >Saltar al contenido</a>
     <header class="barra">
       <div class="contenido">
         <RouterLink
@@ -71,11 +75,19 @@ async function cerrarSesion(): Promise<void> {
         </div>
       </div>
     </header>
-    <slot />
+    <div
+      id="contenido"
+      tabindex="-1"
+    >
+      <slot />
+    </div>
   </div>
 </template>
 
 <style scoped>
+#contenido:focus {
+  outline: none;
+}
 .barra {
   position: sticky;
   top: 0;

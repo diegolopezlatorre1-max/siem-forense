@@ -257,6 +257,33 @@ sesión solo estaba en Inicio) y faltaba la vista `/admin`.
 - **Verificado:** typecheck, lint, test (web 18) y build en verde.
   - **No verificado aún en el navegador:** se revisa en D3.
 
+## 5 nov: diseño del frontend, sesión D3 (pulido y accesibilidad)
+
+- **Inicio:** panel "Alertas abiertas" con el total y las cifras por severidad y en progreso.
+  - Cada cifra abre Alertas ya filtrada.
+  - No hay endpoint de conteos, así que el store `resumen` pide `GET /alerts` con `tamano=1` por
+    filtro (5 consultas) y lee el `total`. Tiene caché de 30 s, como los otros stores.
+- **Login:** logo, botón "Mostrar/Ocultar" para la clave, error con `AvisoError`, nota de acceso
+  restringido y un fondo con degradado suave.
+- **Línea de tiempo:** un separador por día y solo la hora en cada elemento. Antes cada línea
+  repetía la fecha completa en una columna de 11rem.
+- **Verificar:** explicación de la cadena HMAC en un panel, resultado con ícono ✓/✗ y la hora de
+  la verificación.
+- **Accesibilidad:**
+  - **Contraste:** se midió con un script cada par texto/fondo de los tokens. Fallaban 6 en claro
+    (el texto terciario sobre el fondo y sobre los fondos suaves, entre 4,2 y 4,4) y 2 en oscuro (el
+    borde de los campos quedaba en 2,7:1). Se oscurecieron `--color-texto-3` y se aclararon
+    `--color-borde-fuerte` y `--color-texto-3` en oscuro; ahora pasan los 42 pares.
+  - **Navegación:** enlace "Saltar al contenido", título de la pestaña por ruta y tablas
+    enfocables con teclado.
+  - **Celular:** filtros uno por fila.
+  - **Duplicados:** `.filtros` y `.paginador` pasaron a `base.css`.
+- **Pruebas:** 3 del store `resumen` y 1 de `tituloDocumento`. Web: 22 pruebas. Typecheck, lint,
+  test y build en verde.
+- **No verificado aún en el navegador:** falta la revisión en la URL del laboratorio, en claro,
+  oscuro y celular. Los pasos están en `tareas-manuales.txt`. Hasta hacerla, D1–D3 quedan con el
+  código terminado y la demo pendiente.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

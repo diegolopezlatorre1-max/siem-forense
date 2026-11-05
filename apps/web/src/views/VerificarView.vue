@@ -18,6 +18,7 @@ const MOTIVOS: Record<MotivoForense, string> = {
 const estado = ref<Estado>('idle');
 const resultado = ref<ForenseVerificacion | null>(null);
 const error = ref<Problem | null>(null);
+const verificadaEn = ref<Date | null>(null);
 
 async function verificar(): Promise<void> {
   estado.value = 'loading';
@@ -25,6 +26,7 @@ async function verificar(): Promise<void> {
   resultado.value = null;
   try {
     resultado.value = await verificarCadena();
+    verificadaEn.value = new Date();
     estado.value = 'success';
   } catch (e) {
     error.value = extraerProblem(e);
@@ -35,19 +37,25 @@ async function verificar(): Promise<void> {
 
 <template>
   <main class="pagina estrecha">
-    <h1>Verificar cadena forense</h1>
-    <p class="intro">
-      Recalcula la cadena HMAC completa y comprueba que ningún evento fue alterado, borrado o insertado.
-    </p>
+    <header class="cabecera-pagina">
+      <h1>Verificar cadena forense</h1>
+    </header>
 
-    <button
-      type="button"
-      class="primario"
-      :disabled="estado === 'loading'"
-      @click="verificar"
-    >
-      {{ estado === 'loading' ? 'Verificando…' : 'Verificar cadena' }}
-    </button>
+    <section class="panel explicacion">
+      <p>
+        Cada evento se sella al guardarse con un HMAC que incluye el sello del evento anterior.
+        La verificación recalcula la cadena completa y comprueba que ningún evento fue
+        <strong>alterado</strong>, <strong>borrado</strong> o <strong>insertado</strong>.
+      </p>
+      <button
+        type="button"
+        class="primario"
+        :disabled="estado === 'loading'"
+        @click="verificar"
+      >
+        {{ estado === 'loading' ? 'Verificando…' : 'Verificar cadena' }}
+      </button>
+    </section>
 
     <AvisoError
       v-if="estado === 'error'"
@@ -62,43 +70,68 @@ async function verificar(): Promise<void> {
         class="recuadro ok"
         role="status"
       >
-        <p class="titulo">
-          ✓ Cadena íntegra
-        </p>
-        <p>Se verificaron {{ resultado.eslabones }} eslabones sin alteraciones.</p>
+        <span
+          class="icono"
+          aria-hidden="true"
+        >✓</span>
+        <div>
+          <p class="titulo">
+            Cadena íntegra
+          </p>
+          <p>Se verificaron {{ resultado.eslabones }} eslabones sin alteraciones.</p>
+          <p
+            v-if="verificadaEn"
+            class="total"
+          >
+            Verificada el {{ verificadaEn.toLocaleString() }}.
+          </p>
+        </div>
       </div>
       <div
         v-else
         class="recuadro fallo"
         role="alert"
       >
-        <p class="titulo">
-          ✗ Cadena comprometida
-        </p>
-        <p v-if="resultado.primerFallo">
-          Primer fallo en la secuencia <strong>{{ resultado.primerFallo.secuencia ?? '—' }}</strong>
-          (evento {{ resultado.primerFallo.eventoId ?? '—' }}).
-        </p>
-        <p
-          v-if="resultado.primerFallo"
-          class="motivo"
-        >
-          {{ MOTIVOS[resultado.primerFallo.motivo] }}
-        </p>
-        <p class="total">
-          Eslabones recorridos: {{ resultado.eslabones }}.
-        </p>
+        <span
+          class="icono"
+          aria-hidden="true"
+        >✗</span>
+        <div>
+          <p class="titulo">
+            Cadena comprometida
+          </p>
+          <p v-if="resultado.primerFallo">
+            Primer fallo en la secuencia <strong>{{ resultado.primerFallo.secuencia ?? '—' }}</strong>
+            (evento {{ resultado.primerFallo.eventoId ?? '—' }}).
+          </p>
+          <p
+            v-if="resultado.primerFallo"
+            class="motivo"
+          >
+            {{ MOTIVOS[resultado.primerFallo.motivo] }}
+          </p>
+          <p class="total">
+            Eslabones recorridos: {{ resultado.eslabones }}.
+            <template v-if="verificadaEn">
+              Verificada el {{ verificadaEn.toLocaleString() }}.
+            </template>
+          </p>
+        </div>
       </div>
     </template>
   </main>
 </template>
 
 <style scoped>
-.intro {
+.explicacion {
+  padding: var(--esp-4) 1.25rem;
+}
+.explicacion p {
+  margin: 0 0 var(--esp-4);
   color: var(--color-texto-2);
   font-size: 0.9rem;
 }
-button {
+.explicacion button {
   padding: 0.6rem var(--esp-4);
 }
 /* Más específico que el margen propio de AvisoError */
@@ -106,10 +139,24 @@ button {
   margin-top: 1.25rem;
 }
 .recuadro {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--esp-4);
   margin-top: 1.25rem;
   padding: var(--esp-4) 1.25rem;
   border-radius: var(--radio-m);
   border: 1px solid;
+}
+.icono {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 50%;
+  color: var(--color-superficie);
+  font-size: var(--texto-l);
+  font-weight: 700;
 }
 .recuadro .titulo {
   margin: 0 0 0.4rem;
@@ -124,16 +171,21 @@ button {
   border-color: var(--color-ok);
   color: var(--color-ok-texto);
 }
+.ok .icono {
+  background: var(--color-ok);
+}
 .fallo {
   background: var(--color-peligro-suave);
   border-color: var(--color-peligro);
   color: var(--color-peligro-texto);
+}
+.fallo .icono {
+  background: var(--color-peligro);
 }
 .motivo {
   font-weight: 600;
 }
 .total {
   font-size: 0.82rem;
-  opacity: 0.85;
 }
 </style>

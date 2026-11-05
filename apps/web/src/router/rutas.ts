@@ -7,6 +7,7 @@ declare module 'vue-router' {
     public?: boolean; // ruta accesible sin sesión
     roles?: readonly Rol[]; // roles permitidos; si falta, basta estar autenticado
     menu?: string; // título en el menú principal; si falta, la ruta no aparece en él
+    titulo?: string; // título de la pestaña si la ruta no está en el menú
   }
 }
 
@@ -15,18 +16,19 @@ export const rutas: RouteRecordRaw[] = [
   {
     path: '/login',
     name: 'login',
-    meta: { public: true },
+    meta: { public: true, titulo: 'Iniciar sesión' },
     component: () => import('../views/LoginView.vue'),
   },
   {
     path: '/403',
     name: 'forbidden',
-    meta: { public: true },
+    meta: { public: true, titulo: 'Acceso denegado' },
     component: () => import('../views/ForbiddenView.vue'),
   },
   {
     path: '/',
     name: 'inicio',
+    meta: { titulo: 'Inicio' },
     component: () => import('../views/InicioView.vue'),
   },
   {

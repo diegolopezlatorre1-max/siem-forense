@@ -16,8 +16,26 @@ function buscar(): void {
   void timeline.cargar();
 }
 
-function fecha(iso: string): string {
-  return new Date(iso).toLocaleString();
+type Item = (typeof timeline.items)[number];
+
+function claveDe(i: Item): string {
+  return `${i.tipo}-${i.tipo === 'evento' ? i.evento.id : i.alerta.id}`;
+}
+
+function hora(iso: string): string {
+  return new Date(iso).toLocaleTimeString();
+}
+
+function dia(iso: string): string {
+  return new Date(iso).toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// Separador de día antes del primer elemento y cada vez que cambia la fecha local.
+function cambiaDia(n: number): boolean {
+  const actual = timeline.items[n];
+  const anterior = timeline.items[n - 1];
+  if (actual === undefined) return false;
+  return anterior === undefined || new Date(anterior.ts).toDateString() !== new Date(actual.ts).toDateString();
 }
 
 // Permite enlazar desde otras vistas: /linea-tiempo?src_ip=192.168.56.103
@@ -118,39 +136,51 @@ onMounted(() => {
         v-if="timeline.items.length > 0"
         class="cronologia"
       >
-        <li
-          v-for="i in timeline.items"
-          :key="`${i.tipo}-${i.tipo === 'evento' ? i.evento.id : i.alerta.id}`"
-          class="elemento"
-          :class="i.tipo === 'alerta' ? `alerta sev-${i.alerta.severidad}` : `evento tipo-${i.evento.event_type}`"
+        <template
+          v-for="(i, n) in timeline.items"
+          :key="claveDe(i)"
         >
-          <time class="hora">{{ fecha(i.ts) }}</time>
-          <div
-            v-if="i.tipo === 'evento'"
-            class="detalle"
+          <li
+            v-if="cambiaDia(n)"
+            class="dia"
           >
-            <p class="titulo">
-              {{ i.evento.event_type }}
-              <span class="meta">· {{ i.evento.host }} · {{ i.evento.usuario ?? '—' }} · {{ i.evento.src_ip ?? '—' }} · {{ i.evento.source }}</span>
-            </p>
-            <p class="raw">
-              {{ i.evento.raw }}
-            </p>
-          </div>
-          <div
-            v-else
-            class="detalle"
+            {{ dia(i.ts) }}
+          </li>
+          <li
+            class="elemento"
+            :class="i.tipo === 'alerta' ? `alerta sev-${i.alerta.severidad}` : `evento tipo-${i.evento.event_type}`"
           >
-            <p class="titulo">
-              <ChipSeveridad :severidad="i.alerta.severidad" />
-              {{ i.alerta.regla_id }} · {{ i.alerta.nombre }}
-            </p>
-            <p class="meta">
-              {{ i.alerta.clave }} · cantidad {{ i.alerta.cantidad }} · MITRE {{ i.alerta.mitre }}
-              <ChipEstado :estado="i.alerta.estado" />
-            </p>
-          </div>
-        </li>
+            <time
+              class="hora"
+              :datetime="i.ts"
+            >{{ hora(i.ts) }}</time>
+            <div
+              v-if="i.tipo === 'evento'"
+              class="detalle"
+            >
+              <p class="titulo">
+                {{ i.evento.event_type }}
+                <span class="meta">· {{ i.evento.host }} · {{ i.evento.usuario ?? '—' }} · {{ i.evento.src_ip ?? '—' }} · {{ i.evento.source }}</span>
+              </p>
+              <p class="raw">
+                {{ i.evento.raw }}
+              </p>
+            </div>
+            <div
+              v-else
+              class="detalle"
+            >
+              <p class="titulo">
+                <ChipSeveridad :severidad="i.alerta.severidad" />
+                {{ i.alerta.regla_id }} · {{ i.alerta.nombre }}
+              </p>
+              <p class="meta">
+                {{ i.alerta.clave }} · cantidad {{ i.alerta.cantidad }} · MITRE {{ i.alerta.mitre }}
+                <ChipEstado :estado="i.alerta.estado" />
+              </p>
+            </div>
+          </li>
+        </template>
       </ol>
       <EstadoVacio
         v-else
@@ -163,21 +193,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-2);
-  align-items: end;
-  padding: var(--esp-3);
-  margin-bottom: var(--esp-4);
-}
-.filtros label {
-  display: flex;
-  flex-direction: column;
-  font-size: var(--texto-xs);
-  color: var(--color-texto-2);
-  gap: 0.2rem;
-}
 .truncada {
   color: var(--color-aviso-texto);
 }
@@ -244,8 +259,32 @@ onMounted(() => {
 .elemento.alerta.sev-low::before {
   background: var(--color-sev-low);
 }
+.dia {
+  position: relative;
+  margin: var(--esp-4) 0 var(--esp-1);
+  padding-left: var(--esp-4);
+  color: var(--color-texto-2);
+  font-size: var(--texto-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.dia:first-child {
+  margin-top: 0;
+}
+.dia::before {
+  content: '';
+  position: absolute;
+  left: calc(-1 * var(--esp-3) - 6px);
+  top: 0.2rem;
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--color-texto-3);
+  border-radius: 2px;
+  background: var(--color-fondo);
+}
 .hora {
-  flex: 0 0 11rem;
+  flex: 0 0 6.5rem;
   color: var(--color-texto-2);
   font-family: var(--fuente-mono);
   font-size: 0.78rem;

@@ -157,9 +157,83 @@ th {
   background: var(--color-superficie-2);
 }
 
+/* Barra de filtros (Eventos, Alertas, Línea de tiempo): en el celular, un campo por fila */
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--esp-2);
+  padding: var(--esp-3);
+  margin-bottom: var(--esp-4);
+}
+.filtros label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-2);
+}
+
+.paginador {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--esp-2);
+  margin-top: var(--esp-4);
+  font-size: var(--texto-s);
+  color: var(--color-texto-2);
+}
+.paginador .botones {
+  display: flex;
+  gap: var(--esp-2);
+}
+
 @media (max-width: 640px) {
   .pagina {
     padding: var(--esp-4);
+  }
+  .filtros > input,
+  .filtros > select,
+  .filtros > label,
+  .filtros label input {
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  .filtros > button {
+    flex: 1 1 0;
+  }
+}
+
+/* Accesibilidad: enlace para saltar el menú (visible solo al enfocarlo) y menos movimiento */
+.saltar {
+  position: absolute;
+  left: var(--esp-4);
+  top: -3rem;
+  z-index: 20;
+  padding: var(--esp-2) var(--esp-4);
+  border-radius: var(--radio-s);
+  background: var(--color-primario);
+  color: var(--color-sobre-primario);
+  font-weight: 600;
+  text-decoration: none;
+}
+.saltar:focus {
+  top: var(--esp-2);
+}
+.solo-lector {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
   }
 }
 

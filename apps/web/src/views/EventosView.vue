@@ -117,6 +117,9 @@ onMounted(() => {
     <div
       v-else
       class="panel tabla-contenedor"
+      tabindex="0"
+      role="region"
+      aria-label="Tabla de eventos"
     >
       <table>
         <thead>
@@ -179,21 +182,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-2);
-  align-items: end;
-  padding: var(--esp-3);
-  margin-bottom: var(--esp-4);
-}
-.filtros label {
-  display: flex;
-  flex-direction: column;
-  font-size: var(--texto-xs);
-  color: var(--color-texto-2);
-  gap: 0.2rem;
-}
 .ts {
   white-space: nowrap;
 }
@@ -204,16 +192,5 @@ onMounted(() => {
   min-width: 240px;
   max-width: 520px;
   overflow-wrap: anywhere;
-}
-.paginador {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: var(--esp-4);
-  font-size: var(--texto-s);
-  color: var(--color-texto-2);
-}
-.botones button {
-  margin-left: 0.4rem;
 }
 </style>

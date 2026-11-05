@@ -224,13 +224,6 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.filtros {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--esp-2);
-  padding: var(--esp-3);
-  margin-bottom: var(--esp-4);
-}
 .lista {
   list-style: none;
   margin: 0;
@@ -300,16 +293,5 @@ onMounted(() => {
 .cambiar-estado select {
   margin-left: 0.3rem;
   padding: 0.2rem;
-}
-.paginador {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: var(--esp-4);
-  font-size: var(--texto-s);
-  color: var(--color-texto-2);
-}
-.botones button {
-  margin-left: 0.4rem;
 }
 </style>

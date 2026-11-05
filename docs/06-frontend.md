@@ -49,7 +49,14 @@ apps/web/src/
 
 Los colores salen solo de `styles/tokens.css` (variables CSS); ninguna vista escribe un color fijo. El modo oscuro sigue la preferencia del sistema (`prefers-color-scheme`) y solo redefine colores y sombras. `styles/base.css` da estilo a botones, campos y tablas, así que las vistas solo añaden su maquetación en `<style scoped>`. Los botones son secundarios por defecto y la acción principal lleva `class="primario"`. Los chips usan `class="chip"` con `sev-<severidad>` o `est-<estado>`, pero las vistas los pintan con `ChipSeveridad` y `ChipEstado`.
 
-Cada vista es un `<main class="pagina">`: ancho fluido hasta 1280 px, o `pagina estrecha` (820 px) para formularios y resultados cortos. Arriba va una `cabecera-pagina` con el título y el total. Filtros, tablas y bloques van en un `.panel`, y las tablas dentro de `.tabla-contenedor` para que se desplacen en horizontal en pantallas angostas. Carga, error y vacío se muestran siempre con `IndicadorCarga`, `AvisoError` y `EstadoVacio`.
+Cada vista es un `<main class="pagina">`: ancho fluido hasta 1280 px, o `pagina estrecha` (820 px) para formularios y resultados cortos. Arriba va una `cabecera-pagina` con el título y el total. Filtros, tablas y bloques van en un `.panel`, y las tablas dentro de `.tabla-contenedor` para que se desplacen en horizontal en pantallas angostas. Carga, error y vacío se muestran siempre con `IndicadorCarga`, `AvisoError` y `EstadoVacio`. Las barras de filtros (`.filtros`) y los paginadores (`.paginador`) también son globales; en el celular, los filtros van uno por fila.
+
+## Accesibilidad
+
+- **Contraste AA** en claro y en oscuro para todos los pares texto/fondo de los tokens (4,5:1 en texto y 3:1 en bordes de campos y foco). Si se cambia un color de `tokens.css`, hay que volver a medirlo.
+- **Teclado:** foco visible en todo (`:focus-visible`). El primer Tab lleva a "Saltar al contenido", y las tablas con scroll horizontal son enfocables (`tabindex="0"`, `role="region"`).
+- **Lectores de pantalla:** cada ruta pone el título de la pestaña (`tituloDocumento`, con `meta.titulo` o `meta.menu`). Los errores usan `role="alert"` y la carga `role="status"`. Los campos sin etiqueta visible llevan `aria-label`.
+- **Movimiento:** con `prefers-reduced-motion` se anulan las transiciones y el indicador de carga gira más lento.
 
 ## Menú y layout
 

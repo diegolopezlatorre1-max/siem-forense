@@ -14,7 +14,7 @@
   --color-borde-fuerte: #8794a1;
   --color-texto: #1a202c;
   --color-texto-2: #4a5568;
-  --color-texto-3: #64748b;
+  --color-texto-3: #556274;
 
   /* Acción principal (botones, enlaces, menú activo, foco) */
   --color-primario: #2563eb;
@@ -79,10 +79,10 @@
     --color-superficie: #171e26;
     --color-superficie-2: #1e2731;
     --color-borde: #2a3441;
-    --color-borde-fuerte: #566273;
+    --color-borde-fuerte: #6f7b8b;
     --color-texto: #e6e9ee;
     --color-texto-2: #aab4c0;
-    --color-texto-3: #8b96a3;
+    --color-texto-3: #9aa5b2;
 
     /* Primario claro con texto oscuro encima: el blanco sobre azul no llega a AA en oscuro */
     --color-primario: #60a5fa;
