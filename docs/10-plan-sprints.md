@@ -26,6 +26,7 @@ Leyenda: ✔ hecho · ◐ código hecho con pruebas, falta la demo en el laborat
 | H8 | Como analista, tomo una alerta y cambio su estado sin pisar a otro | S2, B2 | S6 |
 | H9 | Como sistema, recibo eventos de Windows | — | S6 |
 | H10 | Como analista, consulto la línea de tiempo de un host, usuario o IP | — | S6 |
+| H11 | Como usuario, trabajo en una interfaz consistente, legible y con modo oscuro | F1, F2 | Diseño |
 
 ## Sprint 3: Reestructuración al CORE · 19 al 25 oct · ✔
 
@@ -70,6 +71,20 @@ Las cuatro sesiones tienen el código y las pruebas unitarias en `dev`. Para mar
 
 **Al cerrar el S6 (15 nov), el SIEM es funcional.**
 
+## Mejora del diseño del frontend · ▶ en paralelo a las demos del S6, antes de la sesión 30
+
+**Por qué:** el frontend funciona, pero cada vista trae sus propios estilos. Hay unos 150 colores
+fijos repetidos en los `<style scoped>`, botones e inputs redefinidos en cada vista, sin estilos
+globales, sin modo oscuro y con un ancho máximo de 900 px que aprieta las tablas. Las capturas de la
+sesión 30 y el video de la 33 dependen de cómo se vea, así que va antes. Solo toca `apps/web`, por
+lo que se puede hacer en el PC mientras las demos del S6 esperan a la VM.
+
+| Sesión | Qué se hace | Terminado cuando |
+| --- | --- | --- |
+| D1 | Sistema de diseño: `styles/tokens.css` (colores, tipografía, espaciado, radios y sombras) con modo oscuro por `prefers-color-scheme`, y `styles/base.css` (botones, inputs, tablas, chips de severidad y de estado) importados en `main.ts`. Las vistas dejan de usar colores fijos | Ningún color hexadecimal fuera de `tokens.css`; la web se ve bien en claro y en oscuro |
+| D2 | Componentes comunes (`ChipSeveridad`, `ChipEstado`, `EstadoVacio`, `Cargando`, `AvisoError`) y un layout más amplio (contenedor fluido para tablas y barra de navegación renovada) | Las vistas usan los componentes; carga, vacío y error se ven igual en todas |
+| D3 | Pulido por vista: Inicio con resumen de alertas abiertas por severidad, Login, Línea de tiempo y Verificar; accesibilidad (foco visible, contraste AA, `aria`) y diseño responsive | Revisado en la URL real del laboratorio (`http://192.168.56.101:5173`) en escritorio y en móvil; typecheck, lint, test y build en verde |
+
 ## Sprint 7: Cierre y entrega · 16 nov a diciembre
 
 | Sesión | Qué se hace | Terminado cuando |
@@ -81,6 +96,6 @@ Las cuatro sesiones tienen el código y las pruebas unitarias en `dev`. Para mar
 
 ## Si hay atraso
 
-Se recorta en este orden: reglas de Windows → línea de tiempo → asignación de alertas (el ABAC se demuestra con otra política de ownership) → vista Verificar (queda como endpoint).
+Se recorta en este orden: pulido por vista del diseño (D3) → reglas de Windows → línea de tiempo → asignación de alertas (el ABAC se demuestra con otra política de ownership) → vista Verificar (queda como endpoint).
 
 **Nunca se recorta:** los tres pilares del CORE (seguridad, frontend Vue y backend en capas), la cadena forense con verificador, la recolección de Linux, al menos 4 reglas con pruebas y la documentación.
