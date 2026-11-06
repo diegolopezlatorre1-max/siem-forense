@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { seccionesPara } from './menu.js';
+import { seccionesPara, tituloDocumento } from './menu.js';
 import { rutas } from './rutas.js';
 
 const titulos = (rol: Parameters<typeof seccionesPara>[1]): string[] =>
@@ -22,5 +22,14 @@ describe('seccionesPara (menú por rol)', () => {
   it('sin sesión no hay menú, y login/403/inicio nunca aparecen', () => {
     expect(titulos(null)).toEqual([]);
     expect(seccionesPara(rutas, 'admin').map((s) => s.ruta)).not.toContain('/login');
+  });
+});
+
+describe('tituloDocumento', () => {
+  it('usa meta.titulo o, si falta, el título del menú', () => {
+    const porNombre = (n: string) => rutas.find((r) => r.name === n)?.meta ?? {};
+    expect(tituloDocumento(porNombre('login'))).toBe('Iniciar sesión · SIEM Forense');
+    expect(tituloDocumento(porNombre('alertas'))).toBe('Alertas · SIEM Forense');
+    expect(tituloDocumento({})).toBe('SIEM Forense');
   });
 });

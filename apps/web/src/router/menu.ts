@@ -1,5 +1,5 @@
 import type { Rol } from '@siem/shared';
-import type { RouteRecordRaw } from 'vue-router';
+import type { RouteMeta, RouteRecordRaw } from 'vue-router';
 
 export interface Seccion {
   nombre: string; // nombre de la ruta
@@ -15,4 +15,11 @@ export function seccionesPara(rutas: readonly RouteRecordRaw[], rol: Rol | null)
   return rutas
     .filter((r) => r.meta?.menu !== undefined && (r.meta.roles === undefined || r.meta.roles.includes(rol)))
     .map((r) => ({ nombre: String(r.name), ruta: r.path, titulo: r.meta?.menu ?? '' }));
+}
+
+// Título de la pestaña: el de la sección (meta.titulo o meta.menu) seguido del producto.
+// Los lectores de pantalla lo anuncian al cambiar de ruta.
+export function tituloDocumento(meta: RouteMeta): string {
+  const seccion = meta.titulo ?? meta.menu;
+  return seccion === undefined ? 'SIEM Forense' : `${seccion} · SIEM Forense`;
 }

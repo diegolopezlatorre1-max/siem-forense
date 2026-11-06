@@ -241,3 +241,25 @@ MENÚ Y USUARIOS (2 nov)
 [ ] Entrar con el auditor: ve Verificar cadena pero no Usuarios.
 [ ] El login y la página 403 se ven sin menú. Con la ventana angosta (celular), el menú baja a
     su propia fila.
+
+
+DISEÑO DEL FRONTEND D1-D3 (5 nov)
+---------------------------------
+(Tras fusionar los PR #8, #9 y el de D3: en la VM  git pull && pnpm install  y reiniciar la web:
+ pnpm --filter web dev --host  -> http://192.168.56.101:5173. Revisar en escritorio y en el celular,
+ o con la ventana angosta / modo dispositivo de las herramientas del navegador.)
+[ ] Modo claro y oscuro: cambiar el tema del sistema (Windows: Configuración > Personalización >
+    Colores) y recargar. Todo debe leerse bien en los dos; ningún texto gris sobre gris.
+[ ] Login: logo, "Mostrar/Ocultar" la clave, error en recuadro rojo con una clave mala.
+[ ] Inicio: el panel "Alertas abiertas" muestra el total y las cifras por severidad y en progreso.
+    Pulsar "Alta" debe abrir Alertas filtrada por abiertas + Alta. "Actualizar" recarga las cifras.
+[ ] Eventos y Alertas: filtros en un recuadro, tabla/tarjetas a todo el ancho, chips en español
+    (Alta, En progreso...). Con filtros sin resultados aparece el mensaje con la lupa.
+[ ] Con la API apagada, cada vista muestra el error en un recuadro rojo (no una página en blanco).
+[ ] Línea de tiempo: separadores por día y solo la hora en cada elemento.
+[ ] Verificar: explicación arriba; resultado con ícono verde ✓ o rojo ✗ y la hora de verificación.
+[ ] Celular: el menú se desliza de lado, los filtros van uno por fila, la tabla de eventos se
+    desplaza en horizontal sin mover la página.
+[ ] Teclado: con Tab, lo primero es "Saltar al contenido"; el foco se ve en botones, enlaces y
+    campos. La pestaña del navegador dice el nombre de la sección (p. ej. "Alertas · SIEM Forense").
+[ ] Capturas de Inicio, Alertas y Línea de tiempo en claro y en oscuro para la bitácora.

@@ -2,6 +2,9 @@
 import { onMounted, ref } from 'vue';
 import { CrearUsuarioSchema, type Rol, RolSchema } from '@siem/shared';
 
+import AvisoError from '../components/AvisoError.vue';
+import EstadoVacio from '../components/EstadoVacio.vue';
+import IndicadorCarga from '../components/IndicadorCarga.vue';
 import { useAuthStore } from '../stores/auth.js';
 import { useUsersStore } from '../stores/users.js';
 
@@ -46,10 +49,13 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="usuarios">
-    <h1>Usuarios</h1>
+  <main class="pagina estrecha">
+    <header class="cabecera-pagina">
+      <h1>Usuarios</h1>
+      <p>{{ users.lista.length }} usuarios</p>
+    </header>
 
-    <section class="tarjeta">
+    <section class="tarjeta panel">
       <h2>Nuevo usuario</h2>
       <form
         class="formulario"
@@ -97,20 +103,18 @@ onMounted(() => {
       <p class="ayuda">
         {{ rol }}: {{ QUE_PUEDE[rol] }}.
       </p>
-      <p
+      <AvisoError
         v-if="errorLocal"
-        class="aviso error"
-        role="alert"
+        class="aviso-form"
       >
         {{ errorLocal }}
-      </p>
-      <p
+      </AvisoError>
+      <AvisoError
         v-else-if="users.errorCrear"
-        class="aviso error"
-        role="alert"
+        class="aviso-form"
       >
         {{ users.errorCrear.status === 409 ? 'Ese nombre de usuario ya existe.' : (users.errorCrear.detail ?? users.errorCrear.title) }}
-      </p>
+      </AvisoError>
       <p
         v-else-if="aviso"
         class="aviso ok"
@@ -120,76 +124,65 @@ onMounted(() => {
       </p>
     </section>
 
-    <p
-      v-if="users.status === 'loading'"
-      class="aviso"
-    >
-      Cargando…
-    </p>
-    <p
+    <IndicadorCarga v-if="users.status === 'loading'" />
+    <AvisoError
       v-else-if="users.status === 'error'"
-      class="aviso error"
-      role="alert"
+      :problema="users.error"
+      por-defecto="No se pudieron cargar los usuarios"
+    />
+    <div
+      v-else
+      class="panel tabla-contenedor"
+      tabindex="0"
+      role="region"
+      aria-label="Tabla de usuarios"
     >
-      {{ users.error?.detail ?? users.error?.title ?? 'No se pudieron cargar los usuarios' }}
-    </p>
-    <table v-else>
-      <thead>
-        <tr>
-          <th>id</th>
-          <th>usuario</th>
-          <th>rol</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          v-for="u in users.lista"
-          :key="u.id"
-        >
-          <td>{{ u.id }}</td>
-          <td>
-            {{ u.usuario }}
-            <span
-              v-if="u.id === auth.usuario?.id"
-              class="tu"
-            >(tú)</span>
-          </td>
-          <td>
-            <span
-              class="rol"
-              :class="`rol-${u.rol}`"
-            >{{ u.rol }}</span>
-          </td>
-        </tr>
-        <tr v-if="users.lista.length === 0">
-          <td
-            colspan="3"
-            class="vacio"
+      <table>
+        <thead>
+          <tr>
+            <th>id</th>
+            <th>usuario</th>
+            <th>rol</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="u in users.lista"
+            :key="u.id"
           >
-            Sin usuarios.
-          </td>
-        </tr>
-      </tbody>
-    </table>
+            <td>{{ u.id }}</td>
+            <td>
+              {{ u.usuario }}
+              <span
+                v-if="u.id === auth.usuario?.id"
+                class="tu"
+              >(tú)</span>
+            </td>
+            <td>
+              <span
+                class="chip"
+                :class="`rol-${u.rol}`"
+              >{{ u.rol }}</span>
+            </td>
+          </tr>
+          <tr v-if="users.lista.length === 0">
+            <td colspan="3">
+              <EstadoVacio>Sin usuarios.</EstadoVacio>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </main>
 </template>
 
 <style scoped>
-.usuarios {
-  max-width: 800px;
-  margin: 0 auto;
-  padding: var(--esp-5);
-}
 h2 {
   margin: 0 0 var(--esp-3);
 }
 .tarjeta {
-  border: 1px solid var(--color-borde);
-  border-radius: var(--radio-m);
   padding: var(--esp-4) 1.25rem;
   margin-bottom: var(--esp-5);
-  background: var(--color-superficie);
-  box-shadow: var(--sombra-1);
 }
 .formulario {
   display: flex;
@@ -209,20 +202,16 @@ h2 {
   font-size: 0.8rem;
   color: var(--color-texto-2);
 }
+/* Más específico que el margen propio de AvisoError */
+.tarjeta .aviso-form {
+  margin: var(--esp-3) 0 0;
+}
 table {
   font-size: 0.9rem;
 }
 .tu {
   color: var(--color-texto-3);
   font-size: 0.8rem;
-}
-.rol {
-  font-size: var(--texto-xs);
-  font-weight: 700;
-  padding: 0.1rem var(--esp-2);
-  border-radius: var(--radio-pill);
-  background: var(--color-neutro-suave);
-  color: var(--color-neutro-texto);
 }
 .rol-admin {
   background: var(--color-peligro-suave);
