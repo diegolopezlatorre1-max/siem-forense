@@ -88,6 +88,7 @@ onMounted(() => {
         </label>
         <button
           type="submit"
+          class="primario"
           :disabled="users.creando"
         >
           {{ users.creando ? 'Creando…' : 'Crear' }}
@@ -177,109 +178,65 @@ onMounted(() => {
 .usuarios {
   max-width: 800px;
   margin: 0 auto;
-  padding: 1.5rem;
-  color: #1f2933;
-}
-h1 {
-  font-size: 1.25rem;
+  padding: var(--esp-5);
 }
 h2 {
-  margin: 0 0 0.75rem;
-  font-size: 1rem;
+  margin: 0 0 var(--esp-3);
 }
 .tarjeta {
-  border: 1px solid #e4e7eb;
-  border-radius: 8px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.5rem;
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-m);
+  padding: var(--esp-4) 1.25rem;
+  margin-bottom: var(--esp-5);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-1);
 }
 .formulario {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--esp-2);
   align-items: end;
 }
 .formulario label {
   display: flex;
   flex-direction: column;
   gap: 0.2rem;
-  font-size: 0.75rem;
-  color: #52606d;
-}
-.formulario input,
-.formulario select {
-  padding: 0.4rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
-}
-.formulario button {
-  padding: 0.45rem 0.9rem;
-  border: 1px solid #2b6cb0;
-  border-radius: 6px;
-  background: #2b6cb0;
-  color: #fff;
-  cursor: pointer;
-}
-.formulario button:disabled {
-  opacity: 0.6;
-  cursor: default;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-2);
 }
 .ayuda {
   margin: 0.6rem 0 0;
   font-size: 0.8rem;
-  color: #52606d;
+  color: var(--color-texto-2);
 }
 table {
-  width: 100%;
-  border-collapse: collapse;
   font-size: 0.9rem;
 }
-th,
-td {
-  border-bottom: 1px solid #e4e7eb;
-  padding: 0.45rem 0.5rem;
-  text-align: left;
-}
-th {
-  color: #52606d;
-  font-weight: 600;
-}
 .tu {
-  color: #718096;
+  color: var(--color-texto-3);
   font-size: 0.8rem;
 }
 .rol {
-  font-size: 0.75rem;
+  font-size: var(--texto-xs);
   font-weight: 700;
-  padding: 0.1rem 0.5rem;
-  border-radius: 10px;
-  background: #edf0f3;
-  color: #3e4c59;
+  padding: 0.1rem var(--esp-2);
+  border-radius: var(--radio-pill);
+  background: var(--color-neutro-suave);
+  color: var(--color-neutro-texto);
 }
 .rol-admin {
-  background: #fbeaea;
-  color: #9b2c2c;
+  background: var(--color-peligro-suave);
+  color: var(--color-peligro-texto);
 }
 .rol-analista {
-  background: #ebf2fa;
-  color: #2b6cb0;
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
 }
 .rol-auditor {
-  background: #e6f6ec;
-  color: #276749;
+  background: var(--color-ok-suave);
+  color: var(--color-ok-texto);
 }
 .aviso {
-  color: #718096;
-  padding: 0.5rem 0 0;
-  margin: 0;
-}
-.aviso.error {
-  color: #c53030;
-}
-.aviso.ok {
-  color: #276749;
-}
-.vacio {
-  color: #718096;
+  padding: var(--esp-2) 0 0;
 }
 </style>

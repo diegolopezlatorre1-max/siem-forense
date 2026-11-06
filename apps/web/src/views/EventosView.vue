@@ -81,7 +81,10 @@ onMounted(() => {
           type="datetime-local"
         >
       </label>
-      <button type="submit">
+      <button
+        type="submit"
+        class="primario"
+      >
         Buscar
       </button>
       <button
@@ -170,93 +173,41 @@ onMounted(() => {
 .eventos {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 1.5rem;
-  color: #1f2933;
-}
-h1 {
-  font-size: 1.25rem;
+  padding: var(--esp-5);
 }
 .filtros {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--esp-2);
   align-items: end;
-  margin-bottom: 1rem;
-}
-.filtros input,
-.filtros select {
-  padding: 0.4rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
+  margin-bottom: var(--esp-4);
 }
 .filtros label {
   display: flex;
   flex-direction: column;
-  font-size: 0.75rem;
-  color: #52606d;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-2);
   gap: 0.2rem;
 }
-.filtros button {
-  padding: 0.45rem 0.8rem;
-  border: 1px solid #2b6cb0;
-  border-radius: 6px;
-  background: #2b6cb0;
-  color: #fff;
-  cursor: pointer;
-}
-.filtros button[type='button'] {
-  background: #fff;
-  color: #2b6cb0;
-}
 table {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 0.85rem;
-}
-th,
-td {
-  border-bottom: 1px solid #e4e7eb;
-  padding: 0.4rem 0.5rem;
-  text-align: left;
-  vertical-align: top;
-}
-th {
-  color: #52606d;
-  font-weight: 600;
+  background: var(--color-superficie);
 }
 .raw {
-  font-family: Consolas, monospace;
+  font-family: var(--fuente-mono);
   font-size: 0.78rem;
-  color: #52606d;
+  color: var(--color-texto-2);
   max-width: 360px;
   overflow-wrap: anywhere;
-}
-.vacio,
-.aviso {
-  color: #718096;
-  padding: 1rem 0;
-}
-.aviso.error {
-  color: #c53030;
 }
 .paginador {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: #52606d;
+  margin-top: var(--esp-4);
+  font-size: var(--texto-s);
+  color: var(--color-texto-2);
 }
 .botones button {
-  padding: 0.35rem 0.7rem;
   margin-left: 0.4rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-}
-.botones button:disabled {
-  opacity: 0.5;
-  cursor: default;
 }
 </style>

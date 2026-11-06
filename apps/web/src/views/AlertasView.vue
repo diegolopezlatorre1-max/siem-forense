@@ -94,7 +94,10 @@ onMounted(() => {
         v-model="ui.filtrosAlertas.regla_id"
         placeholder="regla (p. ej. LINUX-001)"
       >
-      <button type="submit">
+      <button
+        type="submit"
+        class="primario"
+      >
         Buscar
       </button>
       <button
@@ -153,7 +156,7 @@ onMounted(() => {
           </p>
           <div class="acciones">
             <span
-              class="estado"
+              class="chip estado"
               :class="`est-${a.estado}`"
             >{{ a.estado }}</span>
             <span class="asignada">
@@ -222,35 +225,13 @@ onMounted(() => {
 .alertas {
   max-width: 900px;
   margin: 0 auto;
-  padding: 1.5rem;
-  color: #1f2933;
-}
-h1 {
-  font-size: 1.25rem;
+  padding: var(--esp-5);
 }
 .filtros {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-.filtros input,
-.filtros select {
-  padding: 0.4rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
-}
-.filtros button {
-  padding: 0.45rem 0.8rem;
-  border: 1px solid #2b6cb0;
-  border-radius: 6px;
-  background: #2b6cb0;
-  color: #fff;
-  cursor: pointer;
-}
-.filtros button[type='button'] {
-  background: #fff;
-  color: #2b6cb0;
+  gap: var(--esp-2);
+  margin-bottom: var(--esp-4);
 }
 .lista {
   list-style: none;
@@ -263,42 +244,25 @@ h1 {
 .tarjeta {
   display: flex;
   align-items: flex-start;
-  gap: 0.75rem;
-  border: 1px solid #e4e7eb;
-  border-left: 6px solid #9aa5b1;
-  border-radius: 8px;
-  padding: 0.75rem 1rem;
-  background: #fff;
+  gap: var(--esp-3);
+  border: 1px solid var(--color-borde);
+  border-left: 6px solid var(--color-neutro);
+  border-radius: var(--radio-m);
+  padding: var(--esp-3) var(--esp-4);
+  background: var(--color-superficie);
+  box-shadow: var(--sombra-1);
 }
-.tarjeta.sev-high,
 .tarjeta.sev-critical {
-  border-left-color: #c53030;
+  border-left-color: var(--color-sev-critical);
+}
+.tarjeta.sev-high {
+  border-left-color: var(--color-sev-high);
 }
 .tarjeta.sev-medium {
-  border-left-color: #b7791f;
+  border-left-color: var(--color-sev-medium);
 }
 .tarjeta.sev-low {
-  border-left-color: #2b6cb0;
-}
-.chip {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.15rem 0.5rem;
-  border-radius: 11px;
-  white-space: nowrap;
-}
-.chip.sev-high,
-.chip.sev-critical {
-  background: #fbeaea;
-  color: #9b2c2c;
-}
-.chip.sev-medium {
-  background: #fbf3e2;
-  color: #975a16;
-}
-.chip.sev-low {
-  background: #ebf2fa;
-  color: #2b6cb0;
+  border-left-color: var(--color-sev-low);
 }
 .titulo {
   margin: 0;
@@ -306,92 +270,47 @@ h1 {
 }
 .meta {
   margin: 0.2rem 0 0;
-  color: #52606d;
-  font-size: 0.85rem;
+  color: var(--color-texto-2);
+  font-size: var(--texto-s);
 }
 .pie {
   margin: 0.2rem 0 0;
-  color: #718096;
+  color: var(--color-texto-3);
   font-size: 0.78rem;
-  font-family: Consolas, monospace;
+  font-family: var(--fuente-mono);
 }
 .acciones {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 0.5rem;
-  margin-top: 0.5rem;
+  gap: var(--esp-2);
+  margin-top: var(--esp-2);
   font-size: 0.8rem;
-  color: #52606d;
+  color: var(--color-texto-2);
 }
 .estado {
-  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.02em;
-  padding: 0.1rem 0.5rem;
-  border-radius: 10px;
-  background: #edf0f3;
-  color: #3e4c59;
-}
-.estado.est-abierta {
-  background: #ebf2fa;
-  color: #2b6cb0;
-}
-.estado.est-en_progreso {
-  background: #fbf3e2;
-  color: #975a16;
-}
-.estado.est-cerrada {
-  background: #e6f6ec;
-  color: #276749;
-}
-.estado.est-falso_positivo {
-  background: #edf0f3;
-  color: #616e7c;
 }
 .asignada {
   font-style: italic;
 }
 .accion {
-  padding: 0.25rem 0.6rem;
-  border: 1px solid #2b6cb0;
-  border-radius: 6px;
-  background: #fff;
-  color: #2b6cb0;
-  cursor: pointer;
+  padding: var(--esp-1) 0.6rem;
 }
 .cambiar-estado select {
   margin-left: 0.3rem;
   padding: 0.2rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
-}
-.vacio,
-.aviso {
-  color: #718096;
-  padding: 1rem 0;
-}
-.aviso.error {
-  color: #c53030;
 }
 .paginador {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 1rem;
-  font-size: 0.85rem;
-  color: #52606d;
+  margin-top: var(--esp-4);
+  font-size: var(--texto-s);
+  color: var(--color-texto-2);
 }
 .botones button {
-  padding: 0.35rem 0.7rem;
   margin-left: 0.4rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
-  background: #fff;
-  cursor: pointer;
-}
-.botones button:disabled {
-  opacity: 0.5;
-  cursor: default;
 }
 </style>

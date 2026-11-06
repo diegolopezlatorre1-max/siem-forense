@@ -1,0 +1,166 @@
+/*
+ * Estilos base globales: elementos (texto, enlaces, botones, campos y tablas) y las clases
+ * que comparten varias vistas (.chip, .aviso, .vacio). Solo usa tokens de tokens.css.
+ * Botones: por defecto son secundarios; la acción principal lleva class="primario".
+ */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--fuente);
+  font-size: var(--texto-m);
+  line-height: 1.5;
+  color: var(--color-texto);
+  background: var(--color-fondo);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.25;
+}
+h1 {
+  font-size: var(--texto-l);
+}
+h2 {
+  font-size: var(--texto-m);
+}
+
+a {
+  color: var(--color-primario);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-foco);
+  outline-offset: 2px;
+}
+
+/* Botones */
+button {
+  font: inherit;
+  font-size: var(--texto-s);
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-s);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+  cursor: pointer;
+  transition:
+    background-color 0.15s,
+    border-color 0.15s;
+}
+button:hover:not(:disabled) {
+  background: var(--color-superficie-2);
+  border-color: var(--color-texto-3);
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+button.primario {
+  border-color: var(--color-primario);
+  background: var(--color-primario);
+  color: var(--color-sobre-primario);
+}
+button.primario:hover:not(:disabled) {
+  border-color: var(--color-primario-hover);
+  background: var(--color-primario-hover);
+}
+
+/* Campos */
+input,
+select,
+textarea {
+  font: inherit;
+  font-size: var(--texto-s);
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--color-borde-fuerte);
+  border-radius: var(--radio-s);
+  background: var(--color-superficie);
+  color: var(--color-texto);
+}
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline-offset: 0;
+  border-color: var(--color-foco);
+}
+
+/* Tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--texto-s);
+}
+th,
+td {
+  padding: 0.5rem 0.6rem;
+  border-bottom: 1px solid var(--color-borde);
+  text-align: left;
+  vertical-align: top;
+}
+th {
+  color: var(--color-texto-2);
+  font-size: var(--texto-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+/* Chips de severidad (sev-*) y de estado de alerta (est-*) */
+.chip {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.4;
+  padding: 0.1rem 0.5rem;
+  border-radius: var(--radio-pill);
+  white-space: nowrap;
+  background: var(--color-neutro-suave);
+  color: var(--color-neutro-texto);
+}
+.chip.sev-critical,
+.chip.sev-high {
+  background: var(--color-peligro-suave);
+  color: var(--color-peligro-texto);
+}
+.chip.sev-medium {
+  background: var(--color-aviso-suave);
+  color: var(--color-aviso-texto);
+}
+.chip.sev-low,
+.chip.est-abierta {
+  background: var(--color-primario-suave);
+  color: var(--color-primario);
+}
+.chip.est-en_progreso {
+  background: var(--color-aviso-suave);
+  color: var(--color-aviso-texto);
+}
+.chip.est-cerrada {
+  background: var(--color-ok-suave);
+  color: var(--color-ok-texto);
+}
+.chip.est-falso_positivo {
+  color: var(--color-texto-3);
+}
+
+/* Mensajes de carga, error y listas vacías */
+.aviso,
+.vacio {
+  margin: 0;
+  padding: var(--esp-4) 0;
+  color: var(--color-texto-3);
+}
+.aviso.error {
+  color: var(--color-peligro-texto);
+}
+.aviso.ok {
+  color: var(--color-ok-texto);
+}

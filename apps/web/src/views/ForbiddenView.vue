@@ -18,13 +18,12 @@ import { RouterLink } from 'vue-router';
   display: grid;
   place-items: center;
   align-content: center;
-  gap: 0.5rem;
+  gap: var(--esp-2);
   text-align: center;
-  color: #1f2933;
 }
 h1 {
   margin: 0;
   font-size: 3rem;
-  color: #c53030;
+  color: var(--color-peligro);
 }
 </style>

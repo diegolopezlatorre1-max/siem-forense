@@ -73,6 +73,7 @@ async function enviar(): Promise<void> {
 
       <button
         type="submit"
+        class="primario"
         :disabled="enviando"
       >
         {{ enviando ? 'Entrando…' : 'Entrar' }}
@@ -86,55 +87,41 @@ async function enviar(): Promise<void> {
   min-height: 100vh;
   display: grid;
   place-items: center;
-  background: #f7f9fb;
 }
 .tarjeta {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: var(--esp-3);
   width: min(360px, 90vw);
-  padding: 2rem;
-  background: #fff;
-  border: 1px solid #cbd2d9;
-  border-radius: 10px;
+  padding: var(--esp-6);
+  background: var(--color-superficie);
+  border: 1px solid var(--color-borde);
+  border-radius: var(--radio-l);
+  box-shadow: var(--sombra-2);
 }
 h1 {
   margin: 0;
-  font-size: 1.25rem;
 }
 .sub {
-  margin: 0 0 0.5rem;
-  color: #52606d;
+  margin: 0 0 var(--esp-2);
+  color: var(--color-texto-2);
 }
 label {
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: var(--esp-1);
   font-size: 0.9rem;
-  color: #1f2933;
 }
 input {
-  padding: 0.5rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
+  padding: var(--esp-2);
 }
 button {
-  margin-top: 0.5rem;
+  margin-top: var(--esp-2);
   padding: 0.6rem;
-  border: 0;
-  border-radius: 6px;
-  background: #2b6cb0;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-button:disabled {
-  opacity: 0.6;
-  cursor: default;
 }
 .error {
   margin: 0;
-  color: #c53030;
+  color: var(--color-peligro-texto);
   font-size: 0.9rem;
 }
 </style>

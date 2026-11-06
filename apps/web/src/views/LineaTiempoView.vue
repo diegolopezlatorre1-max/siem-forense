@@ -67,6 +67,7 @@ onMounted(() => {
       </label>
       <button
         type="submit"
+        class="primario"
         :disabled="!timeline.tieneSujeto"
       >
         Consultar
@@ -159,109 +160,96 @@ onMounted(() => {
 .linea {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 1.5rem;
-  color: #1f2933;
-}
-h1 {
-  font-size: 1.25rem;
+  padding: var(--esp-5);
 }
 .filtros {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: var(--esp-2);
   align-items: end;
-  margin-bottom: 1rem;
-}
-.filtros input {
-  padding: 0.4rem;
-  border: 1px solid #9aa5b1;
-  border-radius: 6px;
+  margin-bottom: var(--esp-4);
 }
 .filtros label {
   display: flex;
   flex-direction: column;
-  font-size: 0.75rem;
-  color: #52606d;
+  font-size: var(--texto-xs);
+  color: var(--color-texto-2);
   gap: 0.2rem;
 }
-.filtros button {
-  padding: 0.45rem 0.8rem;
-  border: 1px solid #2b6cb0;
-  border-radius: 6px;
-  background: #2b6cb0;
-  color: #fff;
-  cursor: pointer;
-}
-.filtros button:disabled {
-  opacity: 0.5;
-  cursor: default;
-}
-.filtros button[type='button'] {
-  background: #fff;
-  color: #2b6cb0;
-}
 .resumen {
-  font-size: 0.85rem;
-  color: #52606d;
+  font-size: var(--texto-s);
+  color: var(--color-texto-2);
 }
 .truncada {
-  color: #975a16;
+  color: var(--color-aviso-texto);
 }
 .cronologia {
   list-style: none;
   margin: 0;
-  padding: 0 0 0 0.75rem;
-  border-left: 2px solid #cbd2d9;
+  padding: 0 0 0 var(--esp-3);
+  border-left: 2px solid var(--color-borde);
 }
 .elemento {
   position: relative;
   display: flex;
-  gap: 1rem;
-  padding: 0.5rem 0 0.5rem 1rem;
-  font-size: 0.85rem;
+  gap: var(--esp-4);
+  padding: var(--esp-2) 0 var(--esp-2) var(--esp-4);
+  font-size: var(--texto-s);
 }
 .elemento::before {
   content: '';
   position: absolute;
-  left: -0.75rem;
+  left: calc(-1 * var(--esp-3));
   top: 0.85rem;
   width: 10px;
   height: 10px;
   margin-left: -5px;
   border-radius: 50%;
-  background: #9aa5b1;
+  background: var(--color-neutro);
 }
 .elemento.tipo-login_success::before {
-  background: #276749;
+  background: var(--color-ok);
 }
 .elemento.tipo-user_created::before {
-  background: #975a16;
+  background: var(--color-aviso);
 }
 .elemento.alerta {
-  border: 1px solid #e4e7eb;
-  border-left: 4px solid #c53030;
-  border-radius: 6px;
+  border: 1px solid var(--color-borde);
+  border-left: 4px solid var(--color-sev-high);
+  border-radius: var(--radio-s);
   margin: 0.4rem 0;
-  background: #fffafa;
+  background: var(--color-peligro-suave);
 }
 .elemento.alerta::before {
-  background: #c53030;
+  background: var(--color-sev-high);
   width: 14px;
   height: 14px;
   margin-left: -7px;
 }
+.elemento.alerta.sev-critical {
+  border-left-color: var(--color-sev-critical);
+}
+.elemento.alerta.sev-critical::before {
+  background: var(--color-sev-critical);
+}
 .elemento.alerta.sev-medium {
-  border-left-color: #b7791f;
-  background: #fffcf5;
+  border-left-color: var(--color-sev-medium);
+  background: var(--color-aviso-suave);
+}
+.elemento.alerta.sev-medium::before {
+  background: var(--color-sev-medium);
 }
 .elemento.alerta.sev-low {
-  border-left-color: #2b6cb0;
-  background: #f7fafd;
+  border-left-color: var(--color-sev-low);
+  background: var(--color-primario-suave);
+}
+.elemento.alerta.sev-low::before {
+  background: var(--color-sev-low);
 }
 .hora {
   flex: 0 0 11rem;
-  color: #52606d;
-  font-family: Consolas, monospace;
+  color: var(--color-texto-2);
+  font-family: var(--fuente-mono);
   font-size: 0.78rem;
 }
 .detalle p {
@@ -272,41 +260,16 @@ h1 {
 }
 .meta {
   font-weight: 400;
-  color: #52606d;
+  color: var(--color-texto-2);
 }
 .raw {
-  font-family: Consolas, monospace;
-  font-size: 0.75rem;
-  color: #616e7c;
+  font-family: var(--fuente-mono);
+  font-size: var(--texto-xs);
+  color: var(--color-texto-3);
   overflow-wrap: anywhere;
 }
 .chip {
-  font-size: 0.7rem;
-  font-weight: 700;
-  padding: 0.1rem 0.45rem;
-  border-radius: 10px;
   margin-right: 0.3rem;
-}
-.chip.sev-high,
-.chip.sev-critical {
-  background: #fbeaea;
-  color: #9b2c2c;
-}
-.chip.sev-medium {
-  background: #fbf3e2;
-  color: #975a16;
-}
-.chip.sev-low {
-  background: #ebf2fa;
-  color: #2b6cb0;
-}
-.vacio,
-.aviso {
-  color: #718096;
-  padding: 1rem 0;
-}
-.aviso.error {
-  color: #c53030;
 }
 @media (max-width: 640px) {
   .elemento {

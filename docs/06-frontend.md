@@ -34,7 +34,14 @@ apps/web/src/
   components/
     AppLayout.vue      barra superior: marca, menú por rol y cerrar sesión
   views/               Login, 403, Inicio, Eventos, Alertas, LineaTiempo, Verificar, Usuarios
+  styles/
+    tokens.css         colores, tipografía, espaciado, radios y sombras; modo oscuro
+    base.css           estilos globales de elementos y clases comunes (.chip, .aviso, .vacio)
 ```
+
+## Estilos
+
+Los colores salen solo de `styles/tokens.css` (variables CSS); ninguna vista escribe un color fijo. El modo oscuro sigue la preferencia del sistema (`prefers-color-scheme`) y solo redefine colores y sombras. `styles/base.css` da estilo a botones, campos y tablas, así que las vistas solo añaden su maquetación en `<style scoped>`. Los botones son secundarios por defecto y la acción principal lleva `class="primario"`. Los chips usan `class="chip"` con `sev-<severidad>` o `est-<estado>`.
 
 ## Menú y layout
 

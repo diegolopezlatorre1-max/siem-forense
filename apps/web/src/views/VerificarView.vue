@@ -41,6 +41,7 @@ async function verificar(): Promise<void> {
 
     <button
       type="button"
+      class="primario"
       :disabled="estado === 'loading'"
       @click="verificar"
     >
@@ -96,33 +97,19 @@ async function verificar(): Promise<void> {
 .verificar {
   max-width: 700px;
   margin: 0 auto;
-  padding: 1.5rem;
-  color: #1f2933;
-}
-h1 {
-  font-size: 1.25rem;
+  padding: var(--esp-5);
 }
 .intro {
-  color: #52606d;
+  color: var(--color-texto-2);
   font-size: 0.9rem;
 }
 button {
-  padding: 0.6rem 1rem;
-  border: 0;
-  border-radius: 6px;
-  background: #2b6cb0;
-  color: #fff;
-  font-weight: 600;
-  cursor: pointer;
-}
-button:disabled {
-  opacity: 0.6;
-  cursor: default;
+  padding: 0.6rem var(--esp-4);
 }
 .recuadro {
   margin-top: 1.25rem;
-  padding: 1rem 1.25rem;
-  border-radius: 8px;
+  padding: var(--esp-4) 1.25rem;
+  border-radius: var(--radio-m);
   border: 1px solid;
 }
 .recuadro .titulo {
@@ -134,19 +121,15 @@ button:disabled {
   margin: 0.2rem 0;
 }
 .ok {
-  background: #e6f4ec;
-  border-color: #2f855d;
-  color: #22543d;
+  background: var(--color-ok-suave);
+  border-color: var(--color-ok);
+  color: var(--color-ok-texto);
 }
-.fallo {
-  background: #fde8e8;
-  border-color: #c53030;
-  color: #9b2c2c;
-}
+.fallo,
 .error {
-  background: #fde8e8;
-  border-color: #c53030;
-  color: #9b2c2c;
+  background: var(--color-peligro-suave);
+  border-color: var(--color-peligro);
+  color: var(--color-peligro-texto);
 }
 .motivo {
   font-weight: 600;
