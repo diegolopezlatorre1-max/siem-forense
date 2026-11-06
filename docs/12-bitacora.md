@@ -81,6 +81,241 @@ Reglas YAML con cargador (2 pruebas), motor de ventana deslizante (5 pruebas), t
 - **Decisiones/notas:** se eligió `jose` (ESM, probado) para el JWT; `ioredis` se importa con `{ Redis }` (named) en ESM; `gen_random_uuid()` es nativo en PostgreSQL 16, sin extensión. Se creó el usuario `admin` (clave en `docs/privado/`).
 - **Problema:** `git apply` del parche falló por contexto estricto; se desplegó a la VM con commit + push + pull, que resultó más fiable.
 
+## 26 oct: RBAC, ABAC y rate limiting (sesión 20)
+
+- **RBAC global, denegado por defecto** (`AccesoGuard`): decoradores `@Publico`, `@AgenteKey`, `@Roles`/`@Autenticado`. `/alerts`, `/auth/me`, logout y logout-all ya exigen Bearer; `/ingest` usa la llave de agente; `/health` es público. Nuevo módulo `users`: `GET`/`POST /users` solo admin.
+- **ABAC** (`PolicyGuard`) con políticas puras de ownership de alertas (`alertaPuedeModificar`/`Asignar`), con pruebas; se conectarán a los endpoints de alertas en el Sprint 6.
+- **Rate limiting** con `@nestjs/throttler` y un almacén propio en Redis (`RedisThrottlerStorage`): login 5/min por IP+usuario, refresh 30/min, ingest 600/min, resto 120/min. El 429 sale como problem+json.
+- Verificado en la VM: 48 pruebas unitarias y 17 e2e en verde. En vivo desde el PC: el auditor recibe **403** en `/users`, el admin **200**, y la 6.ª petición de login seguida devuelve **429**.
+- **Problemas:** un e2e fallaba por el servidor efímero de supertest (`req.ip` nulo) —se endureció `getTracker` y el e2e escucha en un puerto real—; y dos access tokens emitidos en el mismo segundo salían idénticos (JWT con `iat`/`exp` por segundos): se añadió un `jti` único a cada uno.
+
+## 26 oct: cadena forense HMAC y cierre del Sprint 4 (sesión 21)
+
+- Migración 0004 (`cadena_forense`). El eslabón **génesis es implícito**: `hash_0 = HMAC(CLAVE_FORENSE, "GENESIS|siem-forense")` se calcula en ejecución, sin meter la clave en una migración. El primer eslabón real es la secuencia 1.
+- **Sellado dentro de la transacción de ingesta**: en vez del `SELECT ... FOR UPDATE` del plan (que bajo concurrencia bifurca por leer una cola móvil), se usa `pg_advisory_xact_lock`, que serializa la escritura de la cadena de forma fiable. Canónico con claves en orden alfabético y `ts` en UTC; `hash_n = HMAC(clave, hash_{n-1}|n|canonico)`. `/ingest` ahora devuelve `{ id, secuencia }`.
+- **`GET /forensics/verify`** (admin, auditor): recorre por secuencia en lotes de 1000 y devuelve el primer fallo: `evento_alterado`, `cadena_rota`, `eslabon_faltante` o `evento_sin_sellar`. `CLAVE_FORENSE` pasó a ser obligatoria en la config.
+- Verificado en la VM: 52 pruebas unitarias y 22 e2e. En vivo: alterar un evento da `integra:false` con `evento_alterado` en el eslabón exacto (secuencia 1, eventoId 179) y restaurarlo vuelve a `integra:true`; 20 ingestas concurrentes dejan la cadena válida (e2e).
+- **Nota operativa:** al habilitar el sellado a mitad del proyecto, quedaron eventos antiguos sin eslabón (el servidor corrió con el código viejo mientras el agente seguía ingiriendo). Se estableció una **línea base limpia** reiniciando solo la tabla `cadena_forense` (los eventos no se tocan); desde ahí todo evento nuevo se sella. En producción el sellado estaría activo desde el primer evento.
+
+**Retro Sprint 4.** Bien: doble token con rotación y detección de reutilización, RBAC/ABAC, rate limiting en Redis y cadena forense, todo verificado en el laboratorio real. Mejorar: desplegar el código a la VM antes de probarlo en vivo (evita el estado mezclado que ensució la cadena); aplicar el `REVOKE UPDATE/DELETE` del usuario de la app (docs/07) para que ni siquiera se pueda alterar `eventos` desde la aplicación. Pendiente: frontend (S5).
+
+## 28–29 oct: frontend Vue y cierre del Sprint 5 (sesiones 22 a 25)
+
+- **Sesión 22 (cliente HTTP, auth, guards):** instancia Axios con interceptores (Bearer +
+  `x-correlation-id`; ante 401, un único refresh en cola y reintento; backoff en GET ante
+  red/5xx); store `auth` con el access **solo en memoria**; guards async (restaurar sesión /
+  `meta.roles` → 403); vistas Login y 403. Prueba del *single-flight* del refresh (3 casos).
+- **Sesión 23 (Eventos):** al construir la vista se descubrió que **`GET /events` no existía**
+  en el backend (estaba documentado pero nunca se implementó). Se creó: `EventoSchema` y
+  `EventosQuerySchema` en `@siem/shared`, `listar` con filtros en el repositorio y
+  `EventsQueryController` (rol: todos), siguiendo el patrón de `GET /alerts`. Frontend: store
+  `events` normalizado (caché 30 s), store `ui` con filtros persistidos en `localStorage` y la
+  vista con tabla, filtros y paginador (`raw` como texto, sin `v-html`).
+- **Sesión 24 (Alertas):** se añadieron filtros `severidad` y `regla_id` a `GET /alerts`
+  (backend) y la vista de Alertas con tarjetas (franja/chip de severidad, MITRE, paginador).
+  El filtro por estado, la asignación y `GET /alerts/:id` quedan para el Sprint 6 (la tabla aún
+  no tiene esas columnas).
+- **Sesión 25 (Verificar cadena + roles):** vista Verificar que llama a `GET /forensics/verify`
+  (verde con nº de eslabones o rojo con la secuencia y el motivo del primer fallo) y rutas por
+  rol (`/verificar` solo admin/auditor; el guard manda a `/403` a quien no corresponde).
+- **Demo en vivo (29 oct):** stack completo arriba en la VM con el código de los Sprints 5
+  (`git pull` de `dev`). Verificado desde el PC: `/health` 200, login `admin` 200,
+  `GET /events` 169 eventos (116 `login_failed`), `GET /alerts` 18 alertas (LINUX-001: 6,
+  LINUX-003: 5), `GET /forensics/verify` **íntegra** con 13 eslabones. Login en el navegador
+  funcionando tras corregir el bug de abajo.
+- **Bug corregido (commit `c6e80f5`):** el login en el navegador fallaba **sin enviar la
+  petición** porque el interceptor generaba el `x-correlation-id` con `crypto.randomUUID()`,
+  que solo existe en contexto seguro (HTTPS/localhost). La web se sirve por `http://192.168.56.101`
+  (HTTP + IP), así que la función era `undefined` y Axios rechazaba cada petición. Se añadió un
+  generador con respaldo en `crypto.getRandomValues`. Afectaba a todo el frontend, no solo al login.
+- **Correcciones de documentación:** se aclaró en [11](11-laboratorio.md) que la contraseña del
+  SO de las máquinas no está en el repo (solo las de servicios/app); se añadió a [08](08-api.md)
+  una nota de estado de implementación (qué endpoints existen y cuáles son del Sprint 6).
+
+**Retro Sprint 5.** Bien: frontend completo (login con sesión persistente, eventos, alertas y
+verificación) con TS estricto, stores normalizados y acceso por rol; el bug de `crypto.randomUUID`
+se encontró y corrigió en la demo en vivo. Mejorar: **probar el frontend en la URL real del
+laboratorio** (HTTP + IP), no solo contra la API o en `localhost`; verificar el contrato del
+backend antes de construir una vista (la ausencia de `GET /events` apareció a mitad de la sesión).
+Pendiente S6: agente de Windows, reglas WIN, flujo de alertas (estado/asignación, migración 0005)
+y línea de tiempo.
+
+## 29–30 oct: Sprint 6 en código (sesiones 26 a 29)
+
+Todo el código del Sprint 6 quedó en `dev` con pruebas unitarias, dos semanas antes de lo planeado.
+Falta la demo de cada sesión en el laboratorio; los pasos están en `docs/tareas-manuales.txt`.
+
+- **Sesión 28 (flujo de alertas, Carlos, PR #5 y #6):** migración 0005 (`estado`, `asignada_a`,
+  `version`), `GET /alerts/:id`, `POST /alerts/:id/asignar` y `PATCH /alerts/:id`, con 409 si la
+  `version` no coincide (bloqueo optimista con un `UPDATE ... WHERE version = :v`). El ABAC
+  reutiliza `alerta.policy.ts`. En la vista de Alertas: filtro por estado, etiqueta de estado,
+  "Asignármela" y selector de estado. Ante un 409 se muestra el aviso y se recarga la lista.
+  9 pruebas del servicio y 4 del store.
+- **Sesión 26 (agente Windows):** `agents/windows/` en PowerShell 5.1, sin dependencias. El parser
+  (`ParserWindows.psm1`) va separado del bucle (`agente_windows.ps1`), igual que en Linux, y recibe
+  el XML del registro, así se prueba sin el Event Log (`Probar-Parser.ps1`, 17 pruebas). Detalles:
+  - Lee 4625, 4624 y 4720 con `Get-WinEvent -FilterXPath` por `EventRecordID` y reanuda desde
+    `.ultimo-registro`.
+  - Descarta el ruido del 4624: logons de servicio, cuentas `...$`, `DWM-n` y `NT AUTHORITY`.
+  - Normaliza la IP (`-` pasa a null y `::ffff:` a IPv4).
+  - El `event_id` es el SHA-256 del XML y `ts` va en ISO UTC con milisegundos.
+  - El cuerpo se envía como bytes UTF-8, para no depender de cómo PowerShell 5.1 codifica las
+    cadenas (las tildes en nombres de usuario podrían llegar rotas).
+- **Sesión 27 (reglas WIN):** `windows_fuerza_bruta.yml` (WIN-001, 4625 por IP, 5 en 60 s, T1110)
+  y `windows_usuario_creado.yml` (WIN-002, 4720 por host, umbral 1, T1136.001).
+  - **Problema encontrado al diseñarlas:** las reglas solo filtraban por `event_type`, y Linux y
+    Windows comparten `login_failed`. Una fuerza bruta a Windows habría disparado también
+    LINUX-001/002/003, y fallos repartidos entre los dos sistemas sumaban para el umbral.
+  - **Solución:** campo opcional `source` en `ReglaSchema`. El motor descarta los eventos de otro
+    origen y `recientes()` ahora trae `source`. Las 4 reglas de Linux llevan `source: auth.log` y
+    las de Windows `source: windows-security`. Las reglas sin `source` se comportan como antes.
+  - 5 pruebas nuevas del motor, entre ellas "no mezcla orígenes para llegar al umbral" y "LINUX-001
+    ignora Windows", y 1 del cargador (las 6 reglas del repo cargan y todas declaran su origen).
+- **Sesión 29 (línea de tiempo):**
+  - **Contrato:** `LineaTiempoQuerySchema` y `LineaTiempoSchema` en `@siem/shared`. La query exige
+    al menos host, usuario o IP y un rango válido.
+  - **Backend:** módulo `timeline/` con la función pura `mezclar()` (orden ascendente; a igual
+    `ts`, el evento va antes que su alerta), `TimelineService` y `GET /timeline`. Los eventos
+    cumplen todos los sujetos; las alertas, una `clave` igual a cualquiera de ellos (nuevo
+    `AlertasRepository.porClaves`). Tope de 500 por tipo, con `truncada`.
+  - **Frontend:** store `timeline`, vista `LineaTiempoView` en `/linea-tiempo` (todos los roles)
+    con cronología vertical (alertas resaltadas por severidad), rango por defecto de 24 h y
+    atajo por URL (`?src_ip=...`). El enlace está en Inicio.
+  - **Pruebas:** 4 del servicio, 3 del schema, 4 del store y `/timeline` en la prueba de OpenAPI.
+- **Verificado en el PC (30 oct):** `pnpm typecheck`, `pnpm lint` y `pnpm test` en verde (API 71,
+  web 11 y shared 7 pruebas), `build` de la API y de la web, y las 17 pruebas del parser de Windows.
+  - **No verificado:** el agente contra el Event Log real. Sin permisos de administrador, el
+    registro Security da "operación no válida"; se probará en la VM Windows.
+  - **No ejecutados:** los e2e, que necesitan la base de la VM.
+- **Limitaciones conocidas:**
+  - WIN-002 deduplica por host en 60 s: dos usuarios creados en el mismo minuto en el mismo
+    equipo dan una sola alerta.
+  - En la línea de tiempo, el filtro de alertas es por `clave` y no sabe si esa clave era una IP,
+    un usuario o un host (la alerta no guarda el `agrupar_por`).
+  - Siguen pendientes `GET /events/:id` y que `GET /alerts/:id` incluya los eventos que provocaron
+    la alerta.
+
+## 2 nov: menú común y vista de Usuarios (frontend)
+
+Al repasar el frontend contra [06](06-frontend.md) aparecieron dos huecos: no había menú (desde
+Eventos, Alertas, Verificar o Línea de tiempo solo se volvía con "atrás" del navegador, y cerrar
+sesión solo estaba en Inicio) y faltaba la vista `/admin`.
+
+- **Menú:** `components/AppLayout.vue` con marca, secciones por rol y cerrar sesión, aplicado por
+  `App.vue` a toda ruta no pública. El menú se genera desde las rutas (`meta.menu` y
+  `meta.roles`, en `router/menu.ts`), así coincide siempre con lo que permite el guard. Las rutas
+  pasaron a `router/rutas.ts` para poder probar el menú sin navegador. Inicio pasó a ser una
+  portada con las secciones del rol.
+- **Usuarios (`/admin`, solo admin):**
+  - Store `users` normalizado y `users.api.ts`.
+  - Tabla con id, usuario y rol, y formulario de alta validado con `CrearUsuarioSchema`. Un 409
+    se muestra como "Ese nombre de usuario ya existe".
+  - `ListaUsuariosSchema` pasó a `@siem/shared`, y el backend también lo usa en el OpenAPI de
+    `GET /users`.
+  - Los agentes siguen fuera de la web porque no hay endpoints `/agents`. Cambiar el rol o
+    desactivar un usuario tampoco existe en el backend.
+- **Pruebas:** 4 del menú por rol (admin ve 5 secciones, analista 3, auditor 4 y sin sesión
+  ninguna) y 3 del store de usuarios. Web: 18 pruebas; todo el monorepo con typecheck, lint, test
+  y build en verde.
+- **No verificado aún en el navegador:** el menú, Usuarios y Línea de tiempo (no hay API local en
+  el PC). Pasos en `tareas-manuales.txt`.
+
+## 5 nov: diseño del frontend, sesión D1 (sistema de diseño)
+
+- **Problema:** cada vista definía sus propios estilos: unos 150 colores fijos repetidos, botones e
+  inputs redefinidos en cada `<style scoped>` y ningún estilo global (el `body` usaba la fuente y
+  el margen por defecto del navegador).
+- **Tokens:** `styles/tokens.css` con colores semánticos (superficie, texto, primario, peligro,
+  aviso, ok, neutro y severidades), tipografía, espaciado, radios y sombras. Modo oscuro por
+  `prefers-color-scheme`. En oscuro el primario es un azul claro con texto oscuro encima, porque
+  el blanco sobre azul no llega al contraste AA.
+- **Base:** `styles/base.css` con fuente del sistema, fondo, foco visible, botones (secundario por
+  defecto y `.primario`), campos, tablas, `.chip` con `sev-*` y `est-*`, y `.aviso`/`.vacio`.
+- **Vistas:** sin colores fijos (ningún hexadecimal fuera de `tokens.css`) y sin estilos de
+  elementos duplicados. Tarjetas y tablas sobre superficie con sombra suave, y el menú activo pasa
+  a un fondo suave en vez de azul sólido. La severidad `critical` tiene un rojo propio.
+- **Verificado:** typecheck, lint, test (web 18) y build en verde.
+  - **No verificado aún en el navegador:** se revisa en la URL del laboratorio en D3.
+## 4–5 nov: puesta en marcha del laboratorio y agente Windows en vivo (sesión 26)
+
+Jornada de demo en el laboratorio real: se subió el trabajo del menú/Usuarios (commit `f8a6f48`,
+verificado antes con typecheck, lint y test en verde) y se levantó el stack en la VM Ubuntu. El
+**agente Windows quedó enviando eventos de verdad** por primera vez.
+
+- **Agente Windows (sesión 26) funcionando:** auditoría de Inicio de sesión activada por GUID,
+  los tres archivos de `agents/windows/` en `C:\siem\agente\`, el agente arranca como administrador
+  en Windows PowerShell 5.1 y, al cerrar e iniciar sesión, imprime `202 login_success Usuario10`.
+  La API acepta el evento con `source: windows-security`.
+- **Hallazgo sobre la llave de agente:** la autenticación (`AgentesService.autenticar`) valida la
+  llave contra el hash de *cualquier* agente y **no exige que el host coincida**; el `host` se toma
+  del propio evento. Por eso la demo funcionó usando la llave del agente `ubuntu` (id 1). Para que
+  los eventos de Windows queden atribuidos a su agente, conviene crear la llave `windows10` y
+  cambiarla; no es bloqueante.
+- **Tropiezos del laboratorio (todos resueltos), documentados en [11](11-laboratorio.md):**
+  - **pnpm/corepack roto** en la VM (`Cannot find module .../corepack/pnpm/12.15.0/bin/pnpm.cjs`);
+    `corepack prepare` no redescargaba ni tras borrar la caché. Se reinstaló con `sudo apt install
+    npm` + `sudo npm install -g pnpm@12.15.0` (quedó en `/usr/local/bin/pnpm`).
+  - **La VM Windows se congelaba** con el `git clone` del monorepo. Causa de fondo: pocos recursos y
+    el conflicto de Hyper-V/Integridad de memoria del **anfitrión Windows 11**. Se desactivó en el
+    anfitrión (`bcdedit /set hypervisorlaunchtype off` + Integridad de memoria) y se apagó Kali para
+    liberar RAM (solo se necesita en la Fase 3).
+  - **No se pudo copiar/pegar del PC a la VM:** se instalaron las Guest Additions y se activó
+    Portapapeles compartido → Bidireccional.
+  - **Llevar el agente a Windows sin `git clone`** (que es lo que congelaba): se descargaron los 3
+    archivos con `Invoke-WebRequest`/`WebClient` desde el `raw` de GitHub (rama `dev`).
+  - **`auditpol` fallaba en PowerShell** (reinterpreta `{}` y `/...`); se corre desde **cmd como
+    administrador** (o con el token `--%` en PowerShell).
+- **Pendiente de la jornada:** la subcategoría de auditoría "Administración de cuentas" (para 4720 /
+  WIN-002), el agente Linux en paralelo y la **Fase 3** (WIN-002 con `net user`, y fuerza bruta
+  desde Kali para WIN-001 / LINUX-001).
+
+## 5 nov: diseño del frontend, sesión D2 (componentes y layout)
+
+- **Componentes comunes** en `components/`: `ChipSeveridad`, `ChipEstado`, `IndicadorCarga`,
+  `AvisoError` y `EstadoVacio`. Los textos de severidades y estados están en `etiquetas.ts`, con
+  un `Record` por enum, así que si el schema gana una opción falla el typecheck. Las alertas
+  muestran "Alta" o "En progreso" en vez de `high` o `en_progreso`, también en los selectores.
+- **Vistas:** carga, error y vacío se ven igual en todas. Antes eran un `<p>` gris o rojo distinto
+  en cada vista. `AvisoError` también reemplaza el recuadro de error de Verificar y los errores
+  del formulario de Usuarios (el texto del 409 va por slot).
+- **Layout:**
+  - `.pagina` con ancho fluido hasta 1280 px (antes 700–1100 px según la vista), `.pagina estrecha`
+    para Usuarios y Verificar, y una cabecera con título y total.
+  - Filtros y tablas van en paneles. Las tablas se desplazan en horizontal en el celular, en vez
+    de desbordar la página.
+- **Barra de navegación:** queda fija arriba y alineada con el contenido. Lleva un logo SVG, un
+  avatar con la inicial, el usuario y su rol en dos líneas. En el celular, el menú se desplaza en
+  horizontal en vez de partirse en varias filas.
+- **Verificado:** typecheck, lint, test (web 18) y build en verde.
+  - **No verificado aún en el navegador:** se revisa en D3.
+
+## 5 nov: diseño del frontend, sesión D3 (pulido y accesibilidad)
+
+- **Inicio:** panel "Alertas abiertas" con el total y las cifras por severidad y en progreso.
+  - Cada cifra abre Alertas ya filtrada.
+  - No hay endpoint de conteos, así que el store `resumen` pide `GET /alerts` con `tamano=1` por
+    filtro (5 consultas) y lee el `total`. Tiene caché de 30 s, como los otros stores.
+- **Login:** logo, botón "Mostrar/Ocultar" para la clave, error con `AvisoError`, nota de acceso
+  restringido y un fondo con degradado suave.
+- **Línea de tiempo:** un separador por día y solo la hora en cada elemento. Antes cada línea
+  repetía la fecha completa en una columna de 11rem.
+- **Verificar:** explicación de la cadena HMAC en un panel, resultado con ícono ✓/✗ y la hora de
+  la verificación.
+- **Accesibilidad:**
+  - **Contraste:** se midió con un script cada par texto/fondo de los tokens. Fallaban 6 en claro
+    (el texto terciario sobre el fondo y sobre los fondos suaves, entre 4,2 y 4,4) y 2 en oscuro (el
+    borde de los campos quedaba en 2,7:1). Se oscurecieron `--color-texto-3` y se aclararon
+    `--color-borde-fuerte` y `--color-texto-3` en oscuro; ahora pasan los 42 pares.
+  - **Navegación:** enlace "Saltar al contenido", título de la pestaña por ruta y tablas
+    enfocables con teclado.
+  - **Celular:** filtros uno por fila.
+  - **Duplicados:** `.filtros` y `.paginador` pasaron a `base.css`.
+- **Pruebas:** 3 del store `resumen` y 1 de `tituloDocumento`. Web: 22 pruebas. Typecheck, lint,
+  test y build en verde.
+- **No verificado aún en el navegador:** falta la revisión en la URL del laboratorio, en claro,
+  oscuro y celular. Los pasos están en `tareas-manuales.txt`. Hasta hacerla, D1–D3 quedan con el
+  código terminado y la demo pendiente.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

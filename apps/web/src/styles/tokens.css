@@ -1,0 +1,112 @@
+/*
+ * Tokens de diseño: la única fuente de colores, tipografía, espaciado, radios y sombras.
+ * Las vistas usan var(--...) y nunca colores fijos. El modo oscuro solo redefine colores
+ * y sombras; el resto de tokens es igual en los dos temas.
+ */
+:root {
+  color-scheme: light;
+
+  /* Superficies y texto */
+  --color-fondo: #f4f6f9;
+  --color-superficie: #ffffff;
+  --color-superficie-2: #f8fafc;
+  --color-borde: #e2e8f0;
+  --color-borde-fuerte: #8794a1;
+  --color-texto: #1a202c;
+  --color-texto-2: #4a5568;
+  --color-texto-3: #556274;
+
+  /* Acción principal (botones, enlaces, menú activo, foco) */
+  --color-primario: #2563eb;
+  --color-primario-hover: #1d4ed8;
+  --color-primario-suave: #eaf1fe;
+  --color-sobre-primario: #ffffff;
+  --color-foco: #2563eb;
+
+  /* Estados semánticos: color fuerte (bordes y puntos), texto sobre fondo suave y fondo suave */
+  --color-peligro: #c53030;
+  --color-peligro-texto: #9b2c2c;
+  --color-peligro-suave: #fdecec;
+  --color-aviso: #b7791f;
+  --color-aviso-texto: #8a5a12;
+  --color-aviso-suave: #fdf5e4;
+  --color-ok: #2f855a;
+  --color-ok-texto: #22663f;
+  --color-ok-suave: #e7f5ed;
+  --color-neutro: #94a3b8;
+  --color-neutro-texto: #3e4c59;
+  --color-neutro-suave: #edf0f3;
+
+  /* Severidad de alertas */
+  --color-sev-critical: #9b1c1c;
+  --color-sev-high: var(--color-peligro);
+  --color-sev-medium: var(--color-aviso);
+  --color-sev-low: var(--color-primario);
+
+  /* Tipografía */
+  --fuente: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --fuente-mono: ui-monospace, 'Cascadia Mono', Consolas, 'Liberation Mono', monospace;
+  --texto-xs: 0.75rem;
+  --texto-s: 0.85rem;
+  --texto-m: 1rem;
+  --texto-l: 1.25rem;
+  --texto-xl: 1.6rem;
+
+  /* Espaciado */
+  --esp-1: 0.25rem;
+  --esp-2: 0.5rem;
+  --esp-3: 0.75rem;
+  --esp-4: 1rem;
+  --esp-5: 1.5rem;
+  --esp-6: 2rem;
+
+  /* Radios */
+  --radio-s: 6px;
+  --radio-m: 8px;
+  --radio-l: 12px;
+  --radio-pill: 999px;
+
+  /* Sombras */
+  --sombra-1: 0 1px 2px rgb(16 24 40 / 0.06), 0 1px 3px rgb(16 24 40 / 0.08);
+  --sombra-2: 0 4px 12px rgb(16 24 40 / 0.1), 0 2px 4px rgb(16 24 40 / 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --color-fondo: #0f141a;
+    --color-superficie: #171e26;
+    --color-superficie-2: #1e2731;
+    --color-borde: #2a3441;
+    --color-borde-fuerte: #6f7b8b;
+    --color-texto: #e6e9ee;
+    --color-texto-2: #aab4c0;
+    --color-texto-3: #9aa5b2;
+
+    /* Primario claro con texto oscuro encima: el blanco sobre azul no llega a AA en oscuro */
+    --color-primario: #60a5fa;
+    --color-primario-hover: #93c5fd;
+    --color-primario-suave: #1a2a44;
+    --color-sobre-primario: #0b1220;
+    --color-foco: #93c5fd;
+
+    --color-peligro: #f87171;
+    --color-peligro-texto: #fca5a5;
+    --color-peligro-suave: #3a1d1f;
+    --color-aviso: #f6ad55;
+    --color-aviso-texto: #fbd38d;
+    --color-aviso-suave: #3a2c14;
+    --color-ok: #68d391;
+    --color-ok-texto: #9ae6b4;
+    --color-ok-suave: #173126;
+    --color-neutro: #64748b;
+    --color-neutro-texto: #c3cbd4;
+    --color-neutro-suave: #26303b;
+
+    --color-sev-critical: #ff8a8a;
+
+    --sombra-1: 0 1px 2px rgb(0 0 0 / 0.4);
+    --sombra-2: 0 4px 12px rgb(0 0 0 / 0.5);
+  }
+}

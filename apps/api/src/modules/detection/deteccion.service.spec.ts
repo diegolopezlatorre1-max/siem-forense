@@ -25,15 +25,19 @@ function crear(eventosGuardados: EventoEvaluable[]) {
     insertar: async () => 0,
     recientes: async (tipo, desde) =>
       eventosGuardados.filter((e) => e.event_type === tipo && e.ts.getTime() >= desde.getTime()),
+    listar: async () => [[], 0],
   };
   const repoAlertas: AlertasRepository = {
     listar: async () => [[], 0],
+    buscarPorId: async () => null,
+    actualizarConVersion: async () => null,
     existeDesde: async (regla, clave, desde) =>
       alertas.some((a) => a.regla_id === regla && a.clave === clave && a.ts.getTime() >= desde.getTime()),
     insertar: async (a) => {
       alertas.push(a);
       return true;
     },
+    porClaves: async () => [[], 0],
   };
   const ds = {
     transaction: (trabajo: (em: EntityManager) => Promise<void>) => trabajo({} as EntityManager),

@@ -59,6 +59,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
     if (error instanceof HttpException) {
       const status = error.getStatus();
+      if (status === HttpStatus.TOO_MANY_REQUESTS) {
+        return problema(status, 'rate-limit', 'Demasiadas peticiones');
+      }
       const titulo = status === HttpStatus.NOT_FOUND ? 'Recurso no encontrado' : error.message;
       return problema(status, `http-${status}`, titulo);
     }

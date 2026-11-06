@@ -17,6 +17,9 @@ export const UsuarioPublicoSchema = z.object({
 });
 export type UsuarioPublico = z.infer<typeof UsuarioPublicoSchema>;
 
+// Respuesta de GET /users.
+export const ListaUsuariosSchema = z.array(UsuarioPublicoSchema);
+
 export const LoginRespuestaSchema = z.object({
   accessToken: z.string(),
   usuario: UsuarioPublicoSchema,
@@ -25,3 +28,12 @@ export type LoginRespuesta = z.infer<typeof LoginRespuestaSchema>;
 
 export const RefreshRespuestaSchema = z.object({ accessToken: z.string() });
 export type RefreshRespuesta = z.infer<typeof RefreshRespuestaSchema>;
+
+export const CrearUsuarioSchema = z
+  .object({
+    usuario: z.string().min(1).max(60),
+    clave: z.string().min(8).max(200),
+    rol: RolSchema,
+  })
+  .strict();
+export type CrearUsuario = z.infer<typeof CrearUsuarioSchema>;

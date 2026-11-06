@@ -1,14 +1,14 @@
 # Documentación: SIEM Forense Centralizado
 
-Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026 (tarde)
+Proyecto de la carrera de Ciberseguridad · Actualizado el 5 de noviembre de 2026
 
 ## Dónde vamos
 
 | Indicador | Estado |
 | --- | --- |
 | Metodología | Scrum (sprints de ~1 semana, demo y retro al final de cada uno) |
-| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ▶ Sprint 4: seguridad y forense (sesiones 18-19 hechas: doble token) |
-| Siguiente | Código del Sprint 3 terminado (monorepo, API Nest, ingesta con llave, motor, worker, OpenAPI; backend Python retirado). Sprint 4 en curso: autenticación con doble token (login, refresh rotativo, logout-all) verificada en la VM. Siguen la sesión 20 (RBAC/ABAC y rate limiting) y la 21 (cadena HMAC forense) |
+| Avance | ✔ Sprint 0 · ✔ Sprint 1 · ✔ Sprint 2 · ✔ Sprint 3 · ✔ Sprint 4 (doble token, RBAC/ABAC, rate limiting y cadena forense) · ✔ Sprint 5 (frontend Vue) · ◐ Sprint 6: código completo (agente Windows, reglas WIN, flujo de alertas y línea de tiempo), falta la demo en el laboratorio |
+| Siguiente | Verificar el Sprint 6 en el laboratorio (pasos en `tareas-manuales.txt`): migración 0005 y demo del 409, agente en la VM Windows 10, alertas WIN-001/WIN-002 y línea de tiempo. En paralelo, en el PC: mejora del diseño del frontend (sesiones D1–D3: tokens con modo oscuro, componentes comunes y pulido por vista). Después, PR de `dev` a `main` y Sprint 7 (escenarios, pruebas de seguridad, Docker Compose completo y entrega) |
 | Meta | SIEM funcional para el 15 de noviembre; margen hasta diciembre |
 | Estándar | [Estándar técnico obligatorio "CORE"](02-estandar-core.md), obligatorio para todos los proyectos |
 
@@ -30,6 +30,7 @@ Proyecto de la carrera de Ciberseguridad · Actualizado el 26 de octubre de 2026
 | 10 | [Plan por sprints](10-plan-sprints.md) | Backlog, sprints y orden de recorte |
 | 11 | [Laboratorio](11-laboratorio.md) | Máquinas, red y cómo encender todo |
 | 12 | [Bitácora](12-bitacora.md) | Diario, retros y problemas resueltos |
+| 13 | [Demostración de ataque](13-demo-ataque.md) | Guion paso a paso del ataque Hydra, detección y verificación forense (con registro de la ejecución en vivo) |
 | — | [Decisiones (ADR)](adr/) | Por qué se eligió cada cosa |
 | — | [Plan de reestructuración por fases](plan-reestructuracion.md) | Fases 0–3 de la migración al CORE (Fases 0 y 1 hechas salvo rotar la clave; Fase 3 en el Sprint 3) |
 

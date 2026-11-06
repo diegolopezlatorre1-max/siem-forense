@@ -16,6 +16,13 @@ describe('cargador de reglas', () => {
     expect(ids).toContain('LINUX-001');
   });
 
+  it('carga las 6 reglas del repo y todas indican su origen', async () => {
+    const reglas = await cargarReglas(REGLAS);
+    expect(reglas.map((r) => r.id).sort()).toEqual(['LINUX-001', 'LINUX-002', 'LINUX-003', 'LINUX-004', 'WIN-001', 'WIN-002']);
+    expect(reglas.filter((r) => r.id.startsWith('WIN-')).every((r) => r.source === 'windows-security')).toBe(true);
+    expect(reglas.filter((r) => r.id.startsWith('LINUX-')).every((r) => r.source === 'auth.log')).toBe(true);
+  });
+
   it('rechaza una regla incompleta indicando el archivo', async () => {
     const carpeta = await mkdtemp(join(tmpdir(), 'reglas-'));
     const archivo = join(carpeta, 'mala.yml');

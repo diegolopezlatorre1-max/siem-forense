@@ -2,6 +2,7 @@ id: LINUX-002
 nombre: Fuerza bruta SSH lenta
 descripcion: 10 logins fallidos de la misma IP en 10 minutos
 event_type: login_failed
+source: auth.log
 agrupar_por: src_ip
 umbral: 10
 ventana_segundos: 600

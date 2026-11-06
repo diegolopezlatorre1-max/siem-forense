@@ -11,3 +11,4 @@ coverage/
 .pnpm-store/
 docs/privado/
 docs/*.docx
+agents/windows/.ultimo-registro

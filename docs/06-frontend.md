@@ -17,18 +17,52 @@ apps/web/src/
     alerts.api.ts
     events.api.ts
     forensics.api.ts
+    timeline.api.ts
+    users.api.ts
   stores/
     auth.ts            usuario, accessToken (en memoria), estado de sesión
     alerts.ts          normalizado
     events.ts          normalizado
+    users.ts           normalizado (solo admin)
+    timeline.ts        última consulta de la línea de tiempo
     ui.ts              filtros y preferencias (persistencia selectiva)
   router/
+    rutas.ts           lista de rutas con meta.public / meta.roles / meta.menu
+    menu.ts            seccionesPara(rutas, rol): el menú sale de las rutas
     index.ts
     guards.ts
-  views/               LoginView, EventosView, AlertasView, VerificarView, LineaTiempoView
   components/
-  composables/
+    AppLayout.vue      barra superior fija: marca, menú por rol, usuario y cerrar sesión
+    ChipSeveridad.vue  severidad de una alerta (Baja, Media, Alta, Crítica)
+    ChipEstado.vue     estado de una alerta (Abierta, En progreso, …)
+    IndicadorCarga.vue "Cargando…" con indicador animado (role=status)
+    AvisoError.vue     problem+json de la API (detail › title › texto por defecto) o slot
+    EstadoVacio.vue    listas y tablas sin resultados
+    etiquetas.ts       textos visibles de severidades y estados
+  views/               Login, 403, Inicio, Eventos, Alertas, LineaTiempo, Verificar, Usuarios
+  styles/
+    tokens.css         colores, tipografía, espaciado, radios y sombras; modo oscuro
+    base.css           elementos, maquetación (.pagina, .panel, .tabla-contenedor) y .chip/.aviso
 ```
+
+## Estilos
+
+Los colores salen solo de `styles/tokens.css` (variables CSS); ninguna vista escribe un color fijo. El modo oscuro sigue la preferencia del sistema (`prefers-color-scheme`) y solo redefine colores y sombras. `styles/base.css` da estilo a botones, campos y tablas, así que las vistas solo añaden su maquetación en `<style scoped>`. Los botones son secundarios por defecto y la acción principal lleva `class="primario"`. Los chips usan `class="chip"` con `sev-<severidad>` o `est-<estado>`, pero las vistas los pintan con `ChipSeveridad` y `ChipEstado`.
+
+Cada vista es un `<main class="pagina">`: ancho fluido hasta 1280 px, o `pagina estrecha` (820 px) para formularios y resultados cortos. Arriba va una `cabecera-pagina` con el título y el total. Filtros, tablas y bloques van en un `.panel`, y las tablas dentro de `.tabla-contenedor` para que se desplacen en horizontal en pantallas angostas. Carga, error y vacío se muestran siempre con `IndicadorCarga`, `AvisoError` y `EstadoVacio`. Las barras de filtros (`.filtros`) y los paginadores (`.paginador`) también son globales; en el celular, los filtros van uno por fila.
+
+## Accesibilidad
+
+- **Contraste AA** en claro y en oscuro para todos los pares texto/fondo de los tokens (4,5:1 en texto y 3:1 en bordes de campos y foco). Si se cambia un color de `tokens.css`, hay que volver a medirlo.
+- **Teclado:** foco visible en todo (`:focus-visible`). El primer Tab lleva a "Saltar al contenido", y las tablas con scroll horizontal son enfocables (`tabindex="0"`, `role="region"`).
+- **Lectores de pantalla:** cada ruta pone el título de la pestaña (`tituloDocumento`, con `meta.titulo` o `meta.menu`). Los errores usan `role="alert"` y la carga `role="status"`. Los campos sin etiqueta visible llevan `aria-label`.
+- **Movimiento:** con `prefers-reduced-motion` se anulan las transiciones y el indicador de carga gira más lento.
+
+## Menú y layout
+
+`App.vue` envuelve en `AppLayout` toda ruta que no sea pública: Login y 403 van sin menú. Antes de la primera navegación (`matched` vacío) tampoco se pinta, para que el menú no aparezca un instante a quien el guard va a mandar al login.
+
+El menú no se escribe a mano. Una ruta aparece en él si tiene `meta.menu` (su título), y `meta.roles` decide quién la ve, con la misma regla que el guard. Así el menú nunca ofrece una ruta que daría 403, y agregar una sección es agregar una ruta. Inicio muestra las mismas secciones como tarjetas, con una línea de descripción.
 
 ## F1 · TypeScript estricto
 
@@ -77,4 +111,8 @@ interface ColeccionState<T extends { id: number }> {
 | Alertas (MITRE, severidad, estado, asignación) | `/alertas` | todos (editar: admin y analista) |
 | Verificar cadena (verde/rojo y eslabón roto) | `/verificar` | admin, auditor |
 | Línea de tiempo | `/linea-tiempo` | todos |
-| Usuarios y agentes | `/admin` | admin |
+| Usuarios (lista y alta con rol) | `/admin` | admin |
+
+**Usuarios (`/admin`):** lista los usuarios (`GET /users`) y crea uno nuevo (`POST /users`) con usuario, contraseña de 8 caracteres o más y rol. Antes de enviar, valida con el mismo `CrearUsuarioSchema` del backend. Un nombre repetido (409) se muestra como "Ese nombre de usuario ya existe", y la contraseña se borra del formulario tras crear. **Fuera de alcance por ahora:** cambiar el rol, desactivar usuarios (`PATCH /users/:id`, que no existe en el backend) y gestionar agentes desde la web (no hay `GET/POST /agents`; las llaves se crean con `pnpm --filter api agente:crear`).
+
+**Nota sobre el 409 en Alertas:** la vista no aplica el cambio antes de la respuesta, como pedía el plan original. Envía la acción, aplica la alerta que devuelve el backend y, ante un 409, muestra el aviso y recarga la lista. Es más simple y evita estados intermedios incoherentes; el usuario ve el mismo resultado.

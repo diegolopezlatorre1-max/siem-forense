@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 430" font-family="'Segoe UI',Arial,sans-serif" font-size="14">
+  <style>
+    .box{fill:#ebf2fa;stroke:#2b6cb0;stroke-width:1.5;rx:8}
+    .atk{fill:#fde8e8;stroke:#c53030;stroke-width:1.5}
+    .srv{fill:#e6f4ec;stroke:#2f855d;stroke-width:1.5}
+    .ink{fill:#1f2933}.mut{fill:#52606d;font-size:12px}
+    .ip{fill:#52606d;font-size:11px;font-family:Consolas,monospace}
+    .lbl{fill:#1f2933;font-weight:600}
+    .edge{stroke:#9aa5b1;stroke-width:1.5;fill:none}
+    .atkedge{stroke:#c53030;stroke-width:2;fill:none}
+    .cap{fill:#718096;font-size:11px}
+  </style>
+
+  <rect x="0" y="0" width="860" height="430" fill="#ffffff"/>
+  <text x="24" y="34" class="ink" font-size="16" font-weight="700">Figura 1 · Laboratorio del ataque — red solo-anfitrión 192.168.56.0/24</text>
+
+  <!-- Kali attacker -->
+  <rect x="24" y="90" width="200" height="110" rx="10" class="atk"/>
+  <text x="124" y="122" text-anchor="middle" class="lbl">Kali Linux</text>
+  <text x="124" y="144" text-anchor="middle" class="mut">Atacante · Hydra</text>
+  <text x="124" y="176" text-anchor="middle" class="ip">192.168.56.103</text>
+
+  <!-- Ubuntu server/victim -->
+  <rect x="330" y="60" width="240" height="170" rx="10" class="srv"/>
+  <text x="450" y="90" text-anchor="middle" class="lbl">Ubuntu 26.04 — Servidor + Víctima</text>
+  <text x="450" y="112" text-anchor="middle" class="ip">192.168.56.101</text>
+  <rect x="350" y="126" width="200" height="30" rx="6" fill="#ffffff" stroke="#9aa5b1"/>
+  <text x="450" y="146" text-anchor="middle" class="mut">sshd → /var/log/auth.log</text>
+  <rect x="350" y="164" width="95" height="52" rx="6" fill="#ffffff" stroke="#9aa5b1"/>
+  <text x="397" y="184" text-anchor="middle" class="mut">Agente</text>
+  <text x="397" y="202" text-anchor="middle" class="cap">Python</text>
+  <rect x="455" y="164" width="95" height="52" rx="6" fill="#ffffff" stroke="#9aa5b1"/>
+  <text x="502" y="184" text-anchor="middle" class="mut">API :3000</text>
+  <text x="502" y="202" text-anchor="middle" class="cap">NestJS</text>
+
+  <!-- Worker + DB -->
+  <rect x="640" y="60" width="196" height="76" rx="10" class="box"/>
+  <text x="738" y="88" text-anchor="middle" class="lbl">Worker de detección</text>
+  <text x="738" y="110" text-anchor="middle" class="mut">motor + reglas YAML</text>
+  <text x="738" y="126" text-anchor="middle" class="cap">BullMQ / Redis</text>
+
+  <rect x="640" y="154" width="196" height="76" rx="10" class="box"/>
+  <text x="738" y="182" text-anchor="middle" class="lbl">PostgreSQL 16</text>
+  <text x="738" y="204" text-anchor="middle" class="mut">eventos + cadena HMAC</text>
+  <text x="738" y="220" text-anchor="middle" class="cap">alertas</text>
+
+  <!-- Analyst / web -->
+  <rect x="330" y="300" width="240" height="90" rx="10" class="box"/>
+  <text x="450" y="330" text-anchor="middle" class="lbl">Web (Vue 3) :5173</text>
+  <text x="450" y="352" text-anchor="middle" class="mut">Analista revisa alertas</text>
+  <text x="450" y="372" text-anchor="middle" class="cap">y verifica la cadena forense</text>
+
+  <!-- edges -->
+  <path class="atkedge" d="M224 145 H318" marker-end="url(#ar)"/>
+  <text x="270" y="136" text-anchor="middle" class="cap" fill="#c53030">SSH brute force</text>
+
+  <path class="edge" d="M450 156 V160" />
+  <path class="edge" d="M445 190 H410" marker-end="url(#ar)"/>
+  <path class="edge" d="M445 190 H410" />
+  <path class="edge" d="M550 190 H636" marker-end="url(#ar)"/>
+  <text x="593" y="182" text-anchor="middle" class="cap">POST /events</text>
+  <path class="edge" d="M738 136 V150" marker-end="url(#ar)"/>
+  <path class="edge" d="M640 196 H572" marker-end="url(#ar)"/>
+  <text x="606" y="248" text-anchor="middle" class="cap">consulta</text>
+  <path class="edge" d="M450 230 V296" marker-end="url(#ar)"/>
+
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto">
+      <path d="M0 0 L9 4.5 L0 9 z" fill="#9aa5b1"/>
+    </marker>
+  </defs>
+</svg>

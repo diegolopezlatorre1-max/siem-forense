@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 360" font-family="'Segoe UI',Arial,sans-serif" font-size="13">
+  <rect x="0" y="0" width="860" height="360" fill="#ffffff"/>
+  <text x="24" y="34" fill="#1f2933" font-size="16" font-weight="700">Figura 4 · Cómo se ve la alerta en la web (maqueta de referencia)</text>
+
+  <!-- window chrome -->
+  <rect x="24" y="56" width="812" height="284" rx="10" fill="#f7f9fb" stroke="#cbd2d9"/>
+  <rect x="24" y="56" width="812" height="40" rx="10" fill="#1f2933"/>
+  <rect x="24" y="80" width="812" height="16" fill="#1f2933"/>
+  <circle cx="46" cy="76" r="5" fill="#e05252"/><circle cx="64" cy="76" r="5" fill="#e0b152"/><circle cx="82" cy="76" r="5" fill="#52c06a"/>
+  <text x="430" y="81" text-anchor="middle" fill="#cbd2d9" font-size="12" font-family="Consolas,monospace">http://192.168.56.101:5173/alertas</text>
+
+  <text x="48" y="128" fill="#1f2933" font-size="15" font-weight="700">Alertas</text>
+  <text x="788" y="128" text-anchor="end" fill="#718096" font-size="12">2 nuevas · ordenadas por fecha</text>
+
+  <!-- alert card 1: LINUX-001 -->
+  <rect x="48" y="146" width="764" height="78" rx="8" fill="#ffffff" stroke="#e2b4b4"/>
+  <rect x="48" y="146" width="6" height="78" fill="#c53030"/>
+  <rect x="68" y="160" width="58" height="22" rx="11" fill="#fbeaea" stroke="#c53030"/>
+  <text x="97" y="175" text-anchor="middle" fill="#9b2c2c" font-size="11" font-weight="700">HIGH</text>
+  <text x="140" y="172" fill="#1f2933" font-weight="700">LINUX-001 · Fuerza bruta SSH</text>
+  <text x="140" y="194" fill="#52606d" font-size="12">clave src_ip = 192.168.56.103 · cantidad = 5 · ventana 60 s</text>
+  <text x="140" y="212" fill="#718096" font-size="11" font-family="Consolas,monospace">MITRE T1110 · 2026-10-28 09:14:07 -05:00</text>
+  <text x="792" y="172" text-anchor="end" fill="#2b6cb0" font-size="12">ver eventos →</text>
+
+  <!-- alert card 2: LINUX-003 -->
+  <rect x="48" y="234" width="764" height="78" rx="8" fill="#ffffff" stroke="#e2b4b4"/>
+  <rect x="48" y="234" width="6" height="78" fill="#c53030"/>
+  <rect x="68" y="248" width="58" height="22" rx="11" fill="#fbeaea" stroke="#c53030"/>
+  <text x="97" y="263" text-anchor="middle" fill="#9b2c2c" font-size="11" font-weight="700">HIGH</text>
+  <text x="140" y="260" fill="#1f2933" font-weight="700">LINUX-003 · Ataque contra un solo usuario</text>
+  <text x="140" y="282" fill="#52606d" font-size="12">clave usuario = intruso · cantidad = 5 · ventana 120 s</text>
+  <text x="140" y="300" fill="#718096" font-size="11" font-family="Consolas,monospace">MITRE T1110.001 · 2026-10-28 09:14:09 -05:00</text>
+  <text x="792" y="260" text-anchor="end" fill="#2b6cb0" font-size="12">ver eventos →</text>
+</svg>

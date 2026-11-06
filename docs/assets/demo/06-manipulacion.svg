@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 310" font-family="'Segoe UI',Arial,sans-serif" font-size="12">
+  <rect x="0" y="0" width="860" height="310" fill="#ffffff"/>
+  <text x="24" y="34" fill="#1f2933" font-size="16" font-weight="700">Figura 6 · Prueba de manipulación: la cadena delata la alteración</text>
+
+  <defs>
+    <marker id="a6" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#c53030"/>
+    </marker>
+  </defs>
+
+  <!-- tamper command -->
+  <rect x="24" y="60" width="812" height="34" rx="6" fill="#1f2933"/>
+  <text x="40" y="82" fill="#f7a8a8" font-size="12" font-family="Consolas,monospace">dbeaver$  UPDATE eventos SET raw = 'x' WHERE secuencia = 41;   -- con el usuario dueño de la tabla</text>
+
+  <!-- chain with tampered link -->
+  <rect x="214" y="120" width="178" height="80" rx="8" fill="#e6f4ec" stroke="#2f855d"/>
+  <text x="303" y="146" text-anchor="middle" fill="#1f2933" font-weight="600">seq 40 (intacto)</text>
+  <text x="303" y="168" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">hash guardado = a3f9…</text>
+  <text x="303" y="186" text-anchor="middle" fill="#2f855d" font-size="11">recalculado = a3f9… ✓</text>
+
+  <rect x="432" y="120" width="178" height="80" rx="8" fill="#fde8e8" stroke="#c53030" stroke-width="2"/>
+  <text x="521" y="146" text-anchor="middle" fill="#9b2c2c" font-weight="700">seq 41 (ALTERADO)</text>
+  <text x="521" y="168" text-anchor="middle" fill="#718096" font-family="Consolas,monospace" font-size="10">guardado   = 7c2e…</text>
+  <text x="521" y="186" text-anchor="middle" fill="#c53030" font-size="11">recalculado = 9d41… ✗</text>
+
+  <path d="M392 160 H430" stroke="#c53030" stroke-width="1.6" marker-end="url(#a6)"/>
+
+  <!-- verify result -->
+  <rect x="214" y="230" width="430" height="56" rx="8" fill="#fde8e8" stroke="#c53030" stroke-width="1.5"/>
+  <text x="236" y="255" fill="#9b2c2c" font-size="13" font-weight="700">GET /forensics/verify → { integra: false, primerFallo:</text>
+  <text x="236" y="276" fill="#9b2c2c" font-size="13" font-weight="700">{ secuencia: 41, motivo: "evento_alterado" } }</text>
+  <text x="624" y="266" text-anchor="end" fill="#c53030" font-size="18">✗</text>
+
+  <text x="24" y="302" fill="#718096" font-size="11">El hash recalculado ya no coincide con el guardado. La UI lo marca en rojo y el servidor registra forense.verificacion_fallida.</text>
+</svg>
