@@ -11,6 +11,7 @@ import { EsquemaBase1760900000000 } from './migrations/1760900000000-EsquemaBase
 import { Agentes1760900100000 } from './migrations/1760900100000-Agentes.js';
 import { Usuarios1760900200000 } from './migrations/1760900200000-Usuarios.js';
 import { CadenaForense1760900300000 } from './migrations/1760900300000-CadenaForense.js';
+import { FlujoAlertas1760900400000 } from './migrations/1760900400000-FlujoAlertas.js';
 
 export const ENTIDADES = [EventoEntity, AlertaEntity, AgenteEntity, UsuarioEntity, RefreshTokenEntity, EslabonEntity];
 export const MIGRACIONES = [
@@ -18,6 +19,7 @@ export const MIGRACIONES = [
   Agentes1760900100000,
   Usuarios1760900200000,
   CadenaForense1760900300000,
+  FlujoAlertas1760900400000,
 ];
 
 // synchronize siempre en false: el esquema solo cambia con migraciones (docs/07-datos.md).
