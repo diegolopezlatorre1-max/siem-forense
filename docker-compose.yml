@@ -8,6 +8,11 @@ services:
       - 5432:5432
     volumes:
       - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB']
+      interval: 5s
+      timeout: 5s
+      retries: 10
 
   redis:
     image: redis:7
@@ -17,6 +22,80 @@ services:
       - 127.0.0.1:6379:6379
     volumes:
       - redisdata:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Aplica las migraciones y termina. La API y el worker esperan a que acabe bien.
+  migrate:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    image: siem-api
+    container_name: siem-migrate
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      REGLAS_DIR: /repo/rules
+    command: ['pnpm', '--filter', 'api', 'migration:run']
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: 'no'
+
+  api:
+    image: siem-api
+    container_name: siem-api
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      REGLAS_DIR: /repo/rules
+      PORT: 3000
+    ports:
+      - 3000:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  worker:
+    image: siem-api
+    container_name: siem-worker
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      NODE_ENV: production
+      POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      REGLAS_DIR: /repo/rules
+    command: ['node', 'dist/main.worker.js']
+    depends_on:
+      redis:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    image: siem-web
+    container_name: siem-web
+    restart: unless-stopped
+    ports:
+      - 80:80
+    depends_on:
+      - api
 
 volumes:
   pgdata:

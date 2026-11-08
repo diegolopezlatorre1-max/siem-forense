@@ -1,0 +1,16 @@
+# No enviar al contexto de build (ni secretos ni lo que se reconstruye dentro)
+node_modules
+**/node_modules
+**/dist
+.git
+.github
+.vscode
+docs
+agents
+scripts
+coverage
+*.log
+.env
+.env.*
+!.env.example
+**/.turbo
