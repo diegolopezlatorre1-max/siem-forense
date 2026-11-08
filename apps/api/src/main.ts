@@ -14,6 +14,9 @@ const app = await oSalir(() =>
   NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true, bodyParser: false, abortOnError: false }),
 );
 app.useLogger(app.get(Logger));
+// Las respuestas son datos en vivo: sin ETag el navegador no revalida ni devuelve 304
+// (que el cliente Axios trataría como error al no estar en el rango 2xx).
+app.disable('etag');
 configurarApp(app);
 if (!app.get(ConfigService).esProduccion) montarOpenApi(app);
 app.enableShutdownHooks();
