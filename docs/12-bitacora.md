@@ -316,6 +316,51 @@ verificado antes con typecheck, lint y test en verde) y se levantó el stack en 
   oscuro y celular. Los pasos están en `tareas-manuales.txt`. Hasta hacerla, D1–D3 quedan con el
   código terminado y la demo pendiente.
 
+## 7–8 nov: demo del laboratorio y Fase 3 completa (sesiones 26 y 27)
+
+Jornada larga de demo en el laboratorio real. Se desplegaron los arreglos de la API a la VM y se
+demostraron de punta a punta los tres escenarios de ataque: **WIN-002, WIN-001 y LINUX-001**.
+
+- **Resuelto el error 500 de `GET /alerts`** (bloqueaba la vista de Alertas), una cadena de tres
+  fallos encadenados:
+  1. **Migración 0005 sin registrar:** `FlujoAlertas` no estaba en el array `MIGRACIONES` de
+     `opciones.ts`, así que `migration:run` siempre decía "No migrations are pending" y la columna
+     `estado` nunca se creó → 500 "column estado does not exist". Arreglado en `f9bdc88` (+ `ALTER
+     TABLE` manual en la VM para los datos ya existentes).
+  2. **ETag/304:** la API devolvía `304 Not Modified` y el cliente Axios lo trataba como error (no
+     está en el rango 2xx). Arreglado con `app.disable('etag')` en `main.ts` (`55a12c8`).
+  3. **Espacios al final:** al aplicar el `ALTER` a mano se colaron espacios en los datos (`'abierta '`)
+     y en los literales de la restricción `CHECK`, y Zod rechazaba el enum. Se recortaron los datos y
+     se recreó la restricción limpia en la VM.
+  Los puntos 1 y 2 quedaron en el código (`dev`); el 3 era solo de la aplicación manual (la migración
+  real `1760900400000-FlujoAlertas.ts` está limpia). Lección: desplegar el código a la VM antes de
+  tocar el esquema a mano.
+- **Agente Windows reconstruido:** la VM Windows se restauró a un estado previo y se rehízo el agente
+  (descarga de los 2 archivos desde el `raw` de GitHub, auditoría por GUID, llave real, arranque como
+  administrador).
+- **Fase 3 — tres escenarios demostrados en vivo:**
+  - **WIN-002** (creación de usuario): `net user backdoor ... /add` → evento 4720 → `202 user_created`
+    → alerta WIN-002 (host DESKTOP-KR321JU, T1136.001, alta).
+  - **WIN-001** (fuerza bruta SMB): `New-NetFirewallRule` para abrir el 445 a la red del lab, y desde
+    Kali un bucle de `smbclient` con 12 claves contra `Usuario10`. 10 `LOGON_FAILURE` → 10 eventos
+    4625 → alerta WIN-001 (clave 192.168.56.103, T1110). `nxc` se comportó errático en esta Kali, por
+    eso se usó `smbclient` en bucle.
+  - **LINUX-001** (fuerza bruta SSH): `hydra -l intruso -P` con 12 claves contra el SSH de Ubuntu
+    desde Kali → alerta LINUX-001 (clave 192.168.56.103, T1110). La misma demo del Sprint 3, revalidada.
+- **Tropiezos del laboratorio (resueltos), documentados en [11](11-laboratorio.md):**
+  - **Los procesos en segundo plano (`&`) morían** al cerrar la terminal o reiniciar la VM (la API
+    apareció caída: nada en el puerto 3000). Se relanzan con `nohup ... &` para que sobrevivan.
+  - **La VM Windows perdió la IP host-only** (`.102`): el adaptador quedaba "Up" pero sin dirección
+    (el DHCP del host-only no la asignó). Se le puso **IP fija** con `New-NetIPAddress -InterfaceAlias
+    "Ethernet 2" -IPAddress 192.168.56.102 -PrefixLength 24`. Sin eso, Kali daba `HOST_UNREACHABLE`.
+  - **La cuenta `Usuario10` se bloqueó** tras 10 intentos fallidos (`ACCOUNT_LOCKED_OUT`): hay política
+    de bloqueo. Se desbloquea en `lusrmgr.msc` o esperando la duración del bloqueo.
+  - **El Firewall de Windows bloquea el ICMP (ping) por defecto:** el ping desde Kali fallaba aunque el
+    SMB (445) sí respondía. No fiarse del ping; probar el puerto con `nc -zv`.
+  - **Erratas de VM/sintaxis:** correr un comando de Linux (`ping -c`, `smbclient`, `hydra`) en Windows
+    o al revés; y `SIEM_AGENT_KEY ='...'` con espacio en vez de `=` (bash lo toma como una orden).
+    Cuidar en qué VM se corre cada cosa y la sintaxis `VARIABLE=valor` sin espacios.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

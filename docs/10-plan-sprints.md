@@ -62,12 +62,12 @@ Leyenda: ✔ hecho · ◐ código hecho con pruebas, falta la demo en el laborat
 
 | Sesión | Qué se hace | Terminado cuando |
 | --- | --- | --- |
-| ◐ 26 | Agente PowerShell (4624, 4625 y 4720) con llave de agente | Los eventos de Windows llegan a la base |
-| ◐ 27 | Reglas WIN-001 y WIN-002 con pruebas | Crear un usuario en Windows genera una alerta |
+| ✔ 26 | Agente PowerShell (4624, 4625 y 4720) con llave de agente | Los eventos de Windows llegan a la base |
+| ✔ 27 | Reglas WIN-001 y WIN-002 con pruebas | Crear un usuario en Windows genera una alerta |
 | ◐ 28 | Asignación y estados de alertas con bloqueo optimista (migración 0005) | Dos pestañas editando a la vez: la segunda recibe 409 |
 | ◐ 29 | Línea de tiempo (API y vista) | Sale ordenada y mezcla eventos y alertas |
 
-Las cuatro sesiones tienen el código y las pruebas unitarias en `dev`. Para marcarlas ✔ falta su demo en el laboratorio: VM Windows 10 (.102), migración 0005 en la VM y e2e. Los pasos están en `docs/tareas-manuales.txt`.
+Las cuatro sesiones tienen el código y las pruebas unitarias en `dev`. Las **sesiones 26 y 27 ya están demostradas en el laboratorio** (8 nov: agente Windows en vivo, WIN-002, WIN-001 y LINUX-001 revalidada; migración 0005 desplegada a la VM). Quedan por demostrar la **28** (estados/asignación: el 409 con dos pestañas) y la **29** (línea de tiempo). Los pasos están en `docs/tareas-manuales.txt`.
 
 **Al cerrar el S6 (15 nov), el SIEM es funcional.**
 
