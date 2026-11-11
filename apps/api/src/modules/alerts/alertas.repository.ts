@@ -29,6 +29,8 @@ export interface AlertasRepository {
   insertar(alerta: AlertaNueva, em?: EntityManager): Promise<boolean>;
   /** Línea de tiempo: alertas cuya clave es alguno de los valores, en el rango; las más recientes primero. */
   porClaves(claves: readonly string[], desde: Date, hasta: Date, limite: number): Promise<[AlertaEntity[], number]>;
+  /** Borra todas las alertas y devuelve cuántas se borraron. Solo para admin (limpiar el tablero en la demo). */
+  borrarTodas(): Promise<number>;
 }
 
 @Injectable()
@@ -80,5 +82,10 @@ export class TypeOrmAlertasRepository implements AlertasRepository {
       order: { ts: 'DESC', id: 'DESC' },
       take: limite,
     });
+  }
+
+  async borrarTodas(): Promise<number> {
+    const { affected } = await this.ds.createQueryBuilder().delete().from(AlertaEntity).execute();
+    return affected ?? 0;
   }
 }

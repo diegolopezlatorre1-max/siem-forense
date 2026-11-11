@@ -25,6 +25,14 @@ const totalPaginas = computed(() => Math.max(1, Math.ceil(alerts.total / ui.tama
 // mismo y solo modifica las alertas que tiene asignadas; el admin, cualquiera.
 const puedeAsignarse = computed(() => auth.rol === 'admin' || auth.rol === 'analista');
 
+// Solo el admin puede borrar todas las alertas (limpiar el tablero antes de una demo).
+const puedeBorrar = computed(() => auth.rol === 'admin');
+
+async function borrarTodas(): Promise<void> {
+  if (!window.confirm('¿Borrar TODAS las alertas? Esta acción no se puede deshacer.')) return;
+  await alerts.borrarTodas();
+}
+
 function puedeModificar(a: Alerta): boolean {
   return auth.rol === 'admin' || (auth.rol === 'analista' && a.asignada_a === auth.usuario?.id);
 }
@@ -80,6 +88,14 @@ onUnmounted(() => {
     <header class="cabecera-pagina">
       <h1>Alertas</h1>
       <p>{{ alerts.total }} alertas</p>
+      <button
+        v-if="puedeBorrar"
+        type="button"
+        class="borrar-todas"
+        @click="borrarTodas"
+      >
+        Borrar alertas
+      </button>
     </header>
 
     <form
@@ -304,5 +320,10 @@ onUnmounted(() => {
 .cambiar-estado select {
   margin-left: 0.3rem;
   padding: 0.2rem;
+}
+.borrar-todas {
+  margin-left: auto;
+  color: var(--color-sev-critical, #b91c1c);
+  border-color: var(--color-sev-critical, #b91c1c);
 }
 </style>

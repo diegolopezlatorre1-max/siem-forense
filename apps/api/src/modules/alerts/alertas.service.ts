@@ -35,6 +35,11 @@ export class AlertasService {
     return this.alertas.buscarPorId(id);
   }
 
+  /** Borra todas las alertas (limpiar el tablero). Solo admin; la ruta lo exige con @Roles. */
+  borrarTodas(): Promise<number> {
+    return this.alertas.borrarTodas();
+  }
+
   private async aplicar(id: number, version: number, cambios: Parameters<AlertasRepository['actualizarConVersion']>[2]): Promise<AlertaEntity> {
     const actualizada = await this.alertas.actualizarConVersion(id, version, cambios);
     if (!actualizada) throw new ConflictoError('La alerta fue modificada por otra persona', 'Recargue y vuelva a intentarlo');

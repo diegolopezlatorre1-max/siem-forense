@@ -35,3 +35,9 @@ export async function cambiarEstadoAlerta(id: number, estado: EstadoAlerta, vers
   const { data } = await http.patch(`/alerts/${id}`, { estado, version });
   return AlertaSchema.parse(data);
 }
+
+// Borra todas las alertas (solo admin). Devuelve cuántas se borraron.
+export async function borrarAlertas(): Promise<number> {
+  const { data } = await http.delete('/alerts');
+  return (data as { borradas: number }).borradas;
+}

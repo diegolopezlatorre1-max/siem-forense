@@ -59,6 +59,7 @@ function crear(eventos: EventoEntity[], alertas: AlertaEntity[], totales = { eve
       llamadas.claves = claves;
       return [alertas, totales.alertas];
     },
+    borrarTodas: async () => 0,
   };
   return { servicio: new TimelineService(repoEventos, repoAlertas), llamadas };
 }

@@ -38,6 +38,7 @@ function crear(eventosGuardados: EventoEvaluable[]) {
       return true;
     },
     porClaves: async () => [[], 0],
+    borrarTodas: async () => 0,
   };
   const ds = {
     transaction: (trabajo: (em: EntityManager) => Promise<void>) => trabajo({} as EntityManager),

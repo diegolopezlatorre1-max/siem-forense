@@ -4,7 +4,7 @@ import type { Alerta, Problem } from '@siem/shared';
 
 import type { EstadoAlerta } from '@siem/shared';
 
-import { asignarAlerta, cambiarEstadoAlerta, listarAlertas } from '../api/alerts.api.js';
+import { asignarAlerta, borrarAlertas, cambiarEstadoAlerta, listarAlertas } from '../api/alerts.api.js';
 import { extraerProblem } from '../api/http.js';
 import { useUiStore } from './ui.js';
 
@@ -90,5 +90,18 @@ export const useAlertsStore = defineStore('alerts', () => {
     return ejecutarAccion(() => cambiarEstadoAlerta(id, estado, actual.version));
   }
 
-  return { byId, allIds, total, pagina, status, error, accionError, lista, cargar, asignarme, cambiarEstado };
+  // Borra todas las alertas (solo admin) y recarga el tablero vacío.
+  async function borrarTodas(): Promise<boolean> {
+    accionError.value = null;
+    try {
+      await borrarAlertas();
+      await cargar(1, true);
+      return true;
+    } catch (e) {
+      accionError.value = extraerProblem(e);
+      return false;
+    }
+  }
+
+  return { byId, allIds, total, pagina, status, error, accionError, lista, cargar, asignarme, cambiarEstado, borrarTodas };
 });

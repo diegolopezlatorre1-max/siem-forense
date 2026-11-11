@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiBearerAuth, ApiQuery, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   type Alerta,
@@ -77,6 +77,13 @@ export class AlertsController {
     @UsuarioActual() usuario: ClaimsAcceso,
   ): Promise<Alerta> {
     return alertaADto(await this.servicio.asignar(id, usuario, cuerpo.usuarioId, cuerpo.version));
+  }
+
+  @Delete()
+  @Roles('admin')
+  @ApiResponse({ status: 200, schema: { type: 'object', properties: { borradas: { type: 'integer' } } } })
+  async borrarTodas(): Promise<{ borradas: number }> {
+    return { borradas: await this.servicio.borrarTodas() };
   }
 
   @Patch(':id')
