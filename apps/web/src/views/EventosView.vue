@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 import { TipoEventoSchema } from '@siem/shared';
 
 import AvisoError from '../components/AvisoError.vue';
@@ -33,8 +33,19 @@ function fecha(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
+// Auto-refresco: recarga la página actual cada 4 s para que los eventos
+// nuevos aparezcan solos durante una demo, sin pulsar "Buscar".
+let temporizador: ReturnType<typeof setInterval> | undefined;
+
 onMounted(() => {
   void events.cargar(1);
+  temporizador = setInterval(() => {
+    void events.cargar(events.pagina, true);
+  }, 4000);
+});
+
+onUnmounted(() => {
+  if (temporizador !== undefined) clearInterval(temporizador);
 });
 </script>
 

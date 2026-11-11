@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, onUnmounted } from 'vue';
 import { type Alerta, type EstadoAlerta, EstadoAlertaSchema, SeveridadSchema } from '@siem/shared';
 
 import AvisoError from '../components/AvisoError.vue';
@@ -59,8 +59,19 @@ function fecha(iso: string): string {
   return new Date(iso).toLocaleString();
 }
 
+// Auto-refresco: recarga la página actual cada 4 s para que las alertas
+// nuevas aparezcan solas durante una demo, sin pulsar "Buscar".
+let temporizador: ReturnType<typeof setInterval> | undefined;
+
 onMounted(() => {
   void alerts.cargar(1);
+  temporizador = setInterval(() => {
+    void alerts.cargar(alerts.pagina, true);
+  }, 4000);
+});
+
+onUnmounted(() => {
+  if (temporizador !== undefined) clearInterval(temporizador);
 });
 </script>
 
