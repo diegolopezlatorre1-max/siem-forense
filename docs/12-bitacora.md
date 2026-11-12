@@ -361,6 +361,20 @@ demostraron de punta a punta los tres escenarios de ataque: **WIN-002, WIN-001 y
     o al revés; y `SIEM_AGENT_KEY ='...'` con espacio en vez de `=` (bash lo toma como una orden).
     Cuidar en qué VM se corre cada cosa y la sintaxis `VARIABLE=valor` sin espacios.
 
+## 12 nov: alertas agrupadas por ataque (frontend)
+
+- **Problema:** un solo ataque (hydra desde una IP) dispara varias reglas (LINUX-001 y LINUX-002) y
+  repite LINUX-001 tras cada ventana. En la vista Alertas parecían varios ataques distintos.
+- **Solución (solo frontend):** `stores/agrupar-alertas.ts` agrupa las alertas de la página por
+  `clave` y las separa en otro grupo si pasan más de 30 min entre una y la siguiente. Cada grupo
+  muestra las reglas disparadas, la severidad máxima, el rango de fechas y el estado (común o
+  "Mixto"). Se despliega para ver sus alertas, que conservan sus controles.
+- **Triage por grupo:** "Asignarme el ataque" y "estado del ataque" lanzan una petición por alerta,
+  en secuencia y con su propia `version`. Ante un 409 recargan una sola vez al final.
+- **Limitaciones:** LINUX-003 agrupa por usuario, no por IP, así que forma su propio grupo. La
+  agrupación se hace sobre la página cargada, de modo que un ataque muy largo puede partirse entre
+  páginas.
+
 ## Problemas resueltos (Sprints 0 a 2)
 
 | Problema | Solución |

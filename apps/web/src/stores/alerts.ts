@@ -6,6 +6,7 @@ import type { EstadoAlerta } from '@siem/shared';
 
 import { asignarAlerta, borrarAlertas, cambiarEstadoAlerta, listarAlertas } from '../api/alerts.api.js';
 import { extraerProblem } from '../api/http.js';
+import { agruparAlertas, type GrupoAlertas } from './agrupar-alertas.js';
 import { useUiStore } from './ui.js';
 
 type Estado = 'idle' | 'loading' | 'success' | 'error';
@@ -27,6 +28,9 @@ export const useAlertsStore = defineStore('alerts', () => {
   const lista = computed<Alerta[]>(() =>
     allIds.value.map((id) => byId.value[id]).filter((a): a is Alerta => a !== undefined),
   );
+
+  // Alertas de la página agrupadas por ataque (misma clave y cercanas en el tiempo).
+  const grupos = computed<GrupoAlertas[]>(() => agruparAlertas(lista.value));
 
   async function cargar(paginaNueva: number, force = false): Promise<void> {
     const ui = useUiStore();
@@ -90,6 +94,46 @@ export const useAlertsStore = defineStore('alerts', () => {
     return ejecutarAccion(() => cambiarEstadoAlerta(id, estado, actual.version));
   }
 
+  // Acción en lote sobre las alertas de un grupo: una petición por alerta, en
+  // secuencia y cada una con su propia version. Guarda el primer error y, si
+  // alguna falló (409 incluido), recarga una sola vez al final.
+  async function ejecutarEnLote(
+    ids: readonly number[],
+    omitir: (a: Alerta) => boolean,
+    accion: (a: Alerta) => Promise<Alerta>,
+  ): Promise<boolean> {
+    accionError.value = null;
+    let fallo = false;
+    for (const id of ids) {
+      const actual = byId.value[id];
+      if (actual === undefined || omitir(actual)) continue;
+      try {
+        reemplazar(await accion(actual));
+      } catch (e) {
+        if (!fallo) accionError.value = extraerProblem(e);
+        fallo = true;
+      }
+    }
+    if (fallo) await cargar(pagina.value, true);
+    return !fallo;
+  }
+
+  function asignarmeVarias(ids: readonly number[], usuarioId: number): Promise<boolean> {
+    return ejecutarEnLote(
+      ids,
+      (a) => a.asignada_a === usuarioId,
+      (a) => asignarAlerta(a.id, usuarioId, a.version),
+    );
+  }
+
+  function cambiarEstadoVarias(ids: readonly number[], estado: EstadoAlerta): Promise<boolean> {
+    return ejecutarEnLote(
+      ids,
+      (a) => a.estado === estado,
+      (a) => cambiarEstadoAlerta(a.id, estado, a.version),
+    );
+  }
+
   // Borra todas las alertas (solo admin) y recarga el tablero vacío.
   async function borrarTodas(): Promise<boolean> {
     accionError.value = null;
@@ -103,5 +147,21 @@ export const useAlertsStore = defineStore('alerts', () => {
     }
   }
 
-  return { byId, allIds, total, pagina, status, error, accionError, lista, cargar, asignarme, cambiarEstado, borrarTodas };
+  return {
+    byId,
+    allIds,
+    total,
+    pagina,
+    status,
+    error,
+    accionError,
+    lista,
+    grupos,
+    cargar,
+    asignarme,
+    cambiarEstado,
+    asignarmeVarias,
+    cambiarEstadoVarias,
+    borrarTodas,
+  };
 });
