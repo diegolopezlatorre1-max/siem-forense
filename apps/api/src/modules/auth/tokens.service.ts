@@ -8,7 +8,7 @@ import { ConfigService } from '../../config/config.service.js';
 
 export interface ClaimsAcceso {
   sub: number; // id del usuario
-  rol: Rol;
+  rol: Rol;                              // rol del usuario en la pagina
   sid: string; // familia_id de la sesión
 }
 

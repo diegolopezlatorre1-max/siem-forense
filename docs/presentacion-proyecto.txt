@@ -1,0 +1,145 @@
+================================================================
+  SIEM FORENSE CENTRALIZADO - COMO PRESENTAR EL PROYECTO
+  Chuleta de defensa. Empezar SIEMPRE por el problema, no por la tecnologia.
+================================================================
+
+
+----------------------------------------------------------------
+  1. VERSION 30 SEGUNDOS  (lo primero que dices)
+----------------------------------------------------------------
+"Mi proyecto es un SIEM forense centralizado. Un SIEM es un sistema que
+recoge los registros de seguridad de varias maquinas, los centraliza en un
+solo sitio y detecta ataques automaticamente aplicando reglas. El mio vigila
+una maquina Linux y una Windows, detecta ataques como fuerza bruta o creacion
+de cuentas sospechosas, y ademas sella cada evento con una cadena de
+integridad para que la evidencia sirva como prueba forense: si alguien la
+manipula, se nota."
+
+  -> Con esto ya dijiste QUE es, QUE hace y QUE lo hace especial.
+
+
+----------------------------------------------------------------
+  2. VERSION 2 MINUTOS  (el desarrollo, en 4 bloques)
+----------------------------------------------------------------
+
+EL PROBLEMA
+  "Cuando atacan una red, las pistas quedan repartidas en los registros de
+  cada maquina: el auth.log de Linux, el Event Log de Windows... Revisarlos a
+  mano, maquina por maquina, es lento y propenso a errores. Y ademas esos
+  registros se pueden borrar o alterar para ocultar el ataque."
+
+LA SOLUCION (que construi)
+  "Construi un sistema que centraliza todos esos registros en un unico panel.
+  Cada maquina vigilada tiene un agente que lee sus registros en tiempo real y
+  los envia a un servidor central. El servidor los analiza con reglas basadas
+  en MITRE ATT&CK y genera alertas cuando detecta un patron de ataque."
+
+LO FORENSE (el diferenciador)
+  "La parte 'forense' es lo que lo distingue de un SIEM normal: cada evento se
+  encadena con un hash HMAC al anterior, como una cadena de bloques. Si alguien
+  modifica o borra un evento, la cadena se rompe y el sistema lo detecta. Eso
+  garantiza la integridad de la evidencia para que tenga valor legal."
+
+COMO FUNCIONA (el recorrido)
+  "El flujo es: el agente detecta un login -> lo manda al servidor -> el
+  servidor lo guarda y lo mete en una cola -> un proceso analizador aplica las
+  reglas -> si hay ataque, crea una alerta -> y todo aparece en un panel web
+  con control de acceso por roles."
+
+
+----------------------------------------------------------------
+  3. LOS 3 CONCEPTOS QUE HAY QUE CLAVAR
+----------------------------------------------------------------
+CENTRALIZADO -> Reune logs de varias maquinas en uno.
+  "Un solo panel para toda la red, en vez de revisar maquina por maquina."
+
+DETECCION -> Aplica reglas para encontrar ataques solo.
+  "No busco a mano; el sistema detecta patrones como 5 fallos de login en
+   60 segundos."
+
+FORENSE -> Garantiza que la evidencia no se manipulo.
+  "Cadena de integridad con HMAC: si tocan un evento, se nota."
+
+
+----------------------------------------------------------------
+  4. EL EJEMPLO QUE LO HACE TANGIBLE  (usar siempre tras la teoria)
+----------------------------------------------------------------
+"Por ejemplo: desde Kali lanzo un ataque de fuerza bruta SSH contra la maquina
+Linux. El agente ve los intentos fallidos y los envia. Cuando se superan 5
+fallos de la misma IP en 60 segundos, el sistema genera una alerta de severidad
+alta, etiquetada con la tecnica MITRE T1110 (Brute Force), y aparece sola en el
+panel en segundos. Lo mismo hago en Windows por SMB, y tambien detecto cuando
+alguien crea una cuenta backdoor para mantener el acceso."
+
+  -> Demuestra que el sistema funciona de verdad, no es solo teoria.
+
+
+----------------------------------------------------------------
+  5. SI PREGUNTAN "CON QUE LO HICISTE"  (NO decirlo de entrada)
+----------------------------------------------------------------
+"Es un monorepo en TypeScript: backend con NestJS sobre PostgreSQL y Redis,
+frontend con Vue 3, y dos agentes recolectores -uno en Python para Linux y
+otro en PowerShell para Windows- todo en Docker."
+
+  Por capas:
+    - Backend/API ... TypeScript + NestJS + TypeORM
+    - Base datos .... PostgreSQL (permanente)
+    - Memoria/cola .. Redis (cola de deteccion BullMQ, cache sesiones, rate limit)
+    - Frontend ...... Vue 3 + Pinia + Vite
+    - Agente Linux .. Python 3 (lee /var/log/auth.log)
+    - Agente Windows. PowerShell (lee el registro Security: 4624/4625/4720)
+    - Infra ......... Docker Compose, pnpm (monorepo), Node 22
+
+
+----------------------------------------------------------------
+  6. EL ORDEN MENTAL DE LA PRESENTACION
+----------------------------------------------------------------
+  1) Que es        -> SIEM forense centralizado (1 frase)
+  2) Que problema  -> logs dispersos + evidencia manipulable
+  3) Como resuelve -> agentes -> central -> reglas -> alertas -> panel
+  4) Que lo hace especial -> la cadena forense HMAC
+  5) Demo en vivo  -> el ataque de fuerza bruta apareciendo solo
+  6) (si preguntan) la tecnologia
+
+  REGLA DE ORO: no empieces por la tecnologia. El profesor quiere ver que
+  entiendes el PROBLEMA de seguridad que resuelves. La tecnologia es el COMO,
+  y viene despues del QUE y el POR QUE.
+
+
+----------------------------------------------------------------
+  7. PREGUNTAS DIFICILES  (respuestas cortas de reserva)
+----------------------------------------------------------------
+"Por que HMAC y no un hash normal?"
+  -> Un hash normal (SHA-256) cualquiera lo puede recalcular tras manipular el
+     dato. El HMAC usa una clave secreta: sin esa clave no se puede recalcular
+     la cadena, asi que un atacante no puede 'arreglar' la evidencia que toco.
+
+"Como evitas falsos positivos?"
+  -> Cada regla tiene un umbral pensado: fuerza bruta exige 5 fallos en 60s
+     (un fallo suelto es normal); crear una cuenta salta con 1 porque es raro y
+     de alto impacto. Y el sistema no duplica alertas de un mismo ataque.
+
+"Que pasa si se cae Redis?"
+  -> La ingesta no se cuelga: la cola usa enableOfflineQueue:false para que
+     /ingest responda aunque Redis no este. Degrada con elegancia.
+
+"Por que dos lenguajes en los agentes?"
+  -> Cada agente vive en la maquina que vigila y usa su herramienta nativa:
+     Python para leer ficheros de log en Linux, PowerShell para el Event Log en
+     Windows. El SIEM central (TypeScript) los unifica.
+
+"Como controlas quien ve o hace que?"
+  -> Tres roles: admin, analista y auditor. Control por rol (RBAC) y por
+     atributo (ABAC): un analista solo modifica las alertas que tiene asignadas.
+
+"Donde esta la seguridad del login?"
+  -> Doble token: un Access corto en memoria y un Refresh en cookie HttpOnly que
+     rota en cada uso; si se reutiliza uno viejo, se detecta el robo y se corta
+     la sesion. Contrasenas y llaves con Argon2. Entradas validadas con Zod.
+
+
+================================================================
+  RECORDATORIO: el valor del proyecto es demostrar el CICLO DE UN ATAQUE
+  (entrar -> mantenerse -> actuar) detectado en Linux Y Windows de forma
+  centralizada, con la evidencia protegida contra manipulacion.
+================================================================

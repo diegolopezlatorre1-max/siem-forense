@@ -1,0 +1,239 @@
+================================================================
+  GUION DE DEMO - SIEM Forense Centralizado   (version definitiva)
+  Ataques: LINUX-001, WIN-002, WIN-001  +  cadena forense
+================================================================
+
+
+----------------------------------------------------------------
+  QUE ATACA A QUE
+----------------------------------------------------------------
+  LINUX-001  Fuerza bruta SSH       Kali (.103)  ->  Ubuntu (.101)
+  WIN-002    Crear usuario backdoor    Local DENTRO de Windows (.102)
+  WIN-001    Fuerza bruta SMB       Kali (.103)  ->  Windows (.102)
+
+
+----------------------------------------------------------------
+  QUE COMANDO VA EN QUE MAQUINA
+----------------------------------------------------------------
+  New-..., Set-..., Remove-..., Test-..., net user, auditpol  -> WINDOWS (PowerShell admin)
+  hydra, smbclient, nc, for ...; do ... done                  -> KALI
+  pnpm, docker, curl, python3, tail, git                      -> UBUNTU
+
+  OJO: las lineas que empiezan por #, o que terminan en ":",
+  son titulos/comentarios. NO se pegan como comando.
+
+
+----------------------------------------------------------------
+  VENTANAS
+----------------------------------------------------------------
+  U1  Ubuntu   infra + backend + web
+  U2  Ubuntu   agente Linux (primer plano, aqui se ven los 202)
+  U3  Ubuntu   worker (tail -f, vigila)
+  K1  Kali     lanzar ataques
+  W1  Windows  agente Windows (primer plano, PowerShell ADMIN)
+  W2  Windows  ataque local net user (PowerShell ADMIN)
+
+  REGLA DE ORO: los agentes (U2 y W1) leen los logs DESDE EL FINAL.
+  Tienen que estar corriendo ANTES de lanzar el ataque.
+
+  MIS LLAVES: NO se escriben aqui. Estan en docs/privado/credenciales.md (ignorado por Git).
+    - Ubuntu  (agente 17, prefijo cfc152ea): copiala de docs/privado/credenciales.md
+    - Windows (agente nuevo, prefijo 8c68172b): copiala de docs/privado/credenciales.md
+
+
+================================================================
+  FASE 1 - ARRANQUE  (Ubuntu U1)
+  Ejecutar ESTANDO dentro de ~/siem-forense. Linea por linea.
+================================================================
+cd ~/siem-forense
+docker compose up -d postgres redis
+nohup pnpm --filter api start        > ~/api.log    2>&1 &
+sleep 20
+nohup pnpm --filter api start:worker > ~/worker.log 2>&1 &
+nohup pnpm --filter web dev --host   > ~/web.log    2>&1 &
+sleep 12
+curl -s http://localhost:3000/api/v1/health      # responde JSON = OK
+
+WEB:  http://192.168.56.101:5173   (usuario admin)
+API:  puerto 3000  (solo JSON, no es para el navegador)
+
+# Si el curl da error de conexion: espera 10-15 s y repitelo (la API tarda en compilar).
+# Comprobar que arranco bien:  tail -n 15 ~/api.log   (debe decir "Nest application successfully started")
+
+
+================================================================
+  FASE 2 - LLAVES  (Ubuntu U1)  -- ya creadas, solo consultar
+================================================================
+Ver los agentes que existen:
+  docker compose exec -T postgres psql -U siem -d siem -c "SELECT id, nombre, prefijo_llave FROM agentes ORDER BY id;"
+
+Crear uno nuevo (solo si se pierde la llave; NO escribir los < >):
+  pnpm --filter api agente:crear un-nombre-nuevo
+  (la ultima linea siem_... es la llave; se muestra UNA vez)
+
+Borrar uno (si es nuevo y sin eventos):
+  docker compose exec -T postgres psql -U siem -d siem -c "DELETE FROM agentes WHERE id = <id>;"
+
+
+================================================================
+  FASE 3 - LINUX-001  (fuerza bruta SSH: Kali -> Ubuntu)
+================================================================
+
+U2  (agente Linux):
+--------------------------------------------------------------
+export SIEM_AGENT_KEY='<LLAVE_UBUNTU: copiala de docs/privado/credenciales.md>'
+echo "$SIEM_AGENT_KEY"                      # debe verse la llave entera, NO el ejemplo
+cd ~/siem-forense/agents/linux
+PYTHONUNBUFFERED=1 python3 agent_linux.py   # "Agente siguiendo /var/log/auth.log..."
+
+U3  (worker):
+--------------------------------------------------------------
+tail -f ~/worker.log
+
+BORRAR ALERTAS PREVIAS (antes de atacar, para verla nacer de cero):
+--------------------------------------------------------------
+  Opcion A (recomendada): en la web, como admin, boton rojo "Borrar alertas".
+  Opcion B (consola):
+  docker compose exec -T postgres psql -U siem -d siem -c "DELETE FROM alertas WHERE regla_id='LINUX-001';"
+
+K1  (ataque Kali):
+--------------------------------------------------------------
+printf '123456\npassword\nadmin\nqwerty\nletmein\nhola1234\ntest1234\nroot\ntoor\n12345678\n111111\niloveyou\n' > /tmp/claves.txt
+hydra -l intruso -P /tmp/claves.txt -t 4 ssh://192.168.56.101
+
+QUE DEBE APARECER:
+  U2  -> 202 login_failed intruso 192.168.56.103   (x12)
+  U3  -> deteccion.evaluada ... "nuevas":1
+  Web -> Alertas -> LINUX-001  (clave 192.168.56.103)   [aparece sola en ~4 s]
+
+SI DA 401 EN VEZ DE 202:
+  1) Ctrl+C para el agente.
+  2) export SIEM_AGENT_KEY='siem_cfc152ea_...'    (la llave buena, pegada entera)
+  3) echo "$SIEM_AGENT_KEY"   -> debe salir la llave correcta
+  4) PYTHONUNBUFFERED=1 python3 agent_linux.py    (relanzar)
+  5) Atacar de nuevo.
+
+SI DA "No es posible conectar con el servidor remoto":
+  La API de Ubuntu esta apagada -> repite la FASE 1.
+
+
+================================================================
+  PREPARACION WINDOWS - UNA SOLA VEZ
+  (ya hecha; repetir solo si restauras un snapshot de la VM)
+  PowerShell como ADMINISTRADOR
+================================================================
+# Descargar los archivos del agente
+New-Item -ItemType Directory -Force C:\siem\agente | Out-Null
+cd C:\siem\agente
+$base='https://raw.githubusercontent.com/diegolopezlatorre1-max/siem-forense/dev/agents/windows'
+(New-Object Net.WebClient).DownloadFile("$base/agente_windows.ps1","C:\siem\agente\agente_windows.ps1")
+(New-Object Net.WebClient).DownloadFile("$base/ParserWindows.psm1","C:\siem\agente\ParserWindows.psm1")
+
+# Auditoria: creacion de usuarios (4720, para WIN-002) y logins (4624/4625, para WIN-001)
+auditpol /set /subcategory:"{0CCE9235-69AE-11D9-BED3-505054503030}" /success:enable /failure:enable
+auditpol /set /subcategory:"{0CCE9215-69AE-11D9-BED3-505054503030}" /success:enable /failure:enable
+
+# Firewall SMB solo desde la red del laboratorio (para WIN-001)
+New-NetFirewallRule -DisplayName "SIEM lab SMB" -Direction Inbound -Protocol TCP -LocalPort 445 -RemoteAddress 192.168.56.0/24 -Action Allow
+
+# Permitir ejecutar el script del agente PARA SIEMPRE (una vez)
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
+
+
+================================================================
+  ARRANCAR EL AGENTE DE WINDOWS  (W1, PowerShell ADMIN)
+  Sirve para WIN-002 y WIN-001. Dejarlo corriendo.
+================================================================
+Remove-Item C:\siem\agente\.ultimo-registro -ErrorAction SilentlyContinue
+$env:SIEM_AGENT_KEY='<LLAVE_WINDOWS: copiala de docs/privado/credenciales.md>'
+echo $env:SIEM_AGENT_KEY                      # debe verse la llave entera
+cd C:\siem\agente
+.\agente_windows.ps1                          # "Agente siguiendo Security (4624,4625,4720)..."
+
+# Si dice "No es posible conectar...": la API de Ubuntu esta apagada (FASE 1).
+# Si dice 401: la llave esta mal tecleada (usa copiar/pegar, no la escribas).
+
+
+================================================================
+  FASE 4 - WIN-002  (crear usuario backdoor: local en Windows)
+================================================================
+BORRAR ALERTAS PREVIAS (antes de atacar):
+  Web (admin) -> boton "Borrar alertas"   (o el DELETE de WIN-002 por consola)
+
+W2  (OTRA PowerShell ADMIN):
+--------------------------------------------------------------
+net user backdoor5 Clave.Lab.2026 /add       # si "ya existe" -> backdoor6, backdoor7...
+
+QUE DEBE APARECER:
+  W1  -> 202 user_created backdoor5   (espera ~5 s)
+  U3  -> "nuevas":1
+  Web -> Alertas -> WIN-002 (MITRE T1136.001)   [aparece sola en ~4 s]
+
+Frase: "No todo ataque viene de fuera. WIN-002 detecta a alguien que
+ya entro y crea una cuenta backdoor para mantener el acceso."
+
+
+================================================================
+  FASE 5 - WIN-001  (fuerza bruta SMB: Kali -> Windows)
+================================================================
+Requiere el agente Windows corriendo + auditoria Logon + firewall SMB (todo arriba).
+
+BORRAR ALERTAS PREVIAS (antes de atacar):
+  Web (admin) -> boton "Borrar alertas"   (o el DELETE de WIN-001 por consola)
+
+K1  (ataque Kali):
+--------------------------------------------------------------
+for p in 123456 password admin qwerty letmein hola1234 test1234 root toor 12345678 111111 iloveyou; do
+  smbclient -L //192.168.56.102 -U "Usuario10%$p" -t 3
+done
+
+QUE DEBE APARECER:
+  Kali -> NT_STATUS_LOGON_FAILURE en cada intento
+          (y puede acabar en NT_STATUS_ACCOUNT_LOCKED_OUT: es normal)
+  W1   -> 202 login_failed Usuario10 192.168.56.103
+  U3   -> "nuevas":1
+  Web  -> Alertas -> WIN-001 (clave 192.168.56.103)   [aparece sola en ~4 s]
+
+
+================================================================
+  FASE 6 - CADENA FORENSE  (el cierre, tu diferencial)
+================================================================
+Web (como admin o auditor) -> Verificar cadena -> cadena integra.
+
+Frase: "Si un atacante alterara un registro para borrar su rastro,
+la verificacion detectaria el eslabon roto: cada evento esta
+encadenado con HMAC al anterior. Las ALERTAS si se pueden borrar
+(son derivadas), pero los EVENTOS son inmutables."
+
+
+================================================================
+  SI ALGO FALLA  (resumen)
+================================================================
+Agente da 401          -> Llave mal tecleada. Copia/pega, verifica con echo.
+Agente "No conecta"    -> API de Ubuntu apagada. Repite FASE 1.
+Agente da 404          -> API reiniciandose/mal arrancada. Repite FASE 1, confirma con curl health.
+Web no cambia          -> Ahora refresca sola cada 4 s. Si no, boton "Buscar".
+"nuevas":0             -> La alerta ya existia (antiduplicados). Borrala y reataca.
+PowerShell "scripts deshabilitada" -> Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
+net user "ya existe"   -> Usa otro nombre (backdoor6...).
+agente:crear "agentes_nombre_key" -> Nombre repetido. Usa otro o reutiliza la llave.
+agente:crear con < >   -> NO se escriben los corchetes.
+"New-NetFirewallRule not found" -> Lo lanzaste en KALI. Es de WINDOWS.
+Kali SMB "IO_TIMEOUT"  -> Firewall SMB sin abrir. nc -zv 192.168.56.102 445
+smbclient "not found"  -> sudo apt install smbclient
+ping a Windows falla   -> Normal (ICMP). Usa Test-NetConnection 192.168.56.101 -Port 3000
+Ver alertas en crudo:
+  docker compose exec -T postgres psql -U siem -d siem -c "SELECT regla_id, clave, cantidad, creada_en FROM alertas ORDER BY creada_en DESC LIMIT 5;"
+
+
+================================================================
+  ORDEN SUGERIDO PARA LA DEFENSA (~7 min)
+================================================================
+1. FASE 1: infra arriba (docker compose ps, curl health). Muestra la web.
+2. LINUX-001: borrar alertas -> hydra -> 202 en U2 -> nuevas:1 -> alerta sola en la web.
+3. WIN-002: borrar alertas -> net user backdoor5 /add -> 202 user_created -> alerta sola.
+4. WIN-001 (opcional): borrar alertas -> smbclient desde Kali -> 202 login_failed -> alerta sola.
+5. VERIFICAR CADENA: cierre con la integridad forense.
+
+LIMPIEZA al terminar (en Windows):  net user backdoor5 /delete
+================================================================
