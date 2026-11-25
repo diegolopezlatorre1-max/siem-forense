@@ -31,6 +31,7 @@ Proyecto de la carrera de Ciberseguridad · Actualizado el 5 de noviembre de 202
 | 11 | [Laboratorio](11-laboratorio.md) | Máquinas, red y cómo encender todo |
 | 12 | [Bitácora](12-bitacora.md) | Diario, retros y problemas resueltos |
 | 13 | [Demostración de ataque](13-demo-ataque.md) | Guion paso a paso del ataque Hydra, detección y verificación forense (con registro de la ejecución en vivo) |
+| 14 | [Montaje desde cero](14-montaje-desde-cero.md) | Reconstruir el laboratorio en otro equipo: VMs, `.env`, Docker, admin, agentes y respaldo de datos |
 | — | [Decisiones (ADR)](adr/) | Por qué se eligió cada cosa |
 | — | [Plan de reestructuración por fases](plan-reestructuracion.md) | Fases 0–3 de la migración al CORE (Fases 0 y 1 hechas salvo rotar la clave; Fase 3 en el Sprint 3) |
 
