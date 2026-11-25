@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue';
-import { CrearUsuarioSchema, type Rol, RolSchema } from '@siem/shared';
+import { CrearUsuarioSchema, EDAD_MINIMA, type Rol, RolSchema } from '@siem/shared';
 
 import AvisoError from '../components/AvisoError.vue';
 import EstadoVacio from '../components/EstadoVacio.vue';
@@ -21,6 +21,7 @@ const QUE_PUEDE: Record<Rol, string> = {
 const usuario = ref('');
 const clave = ref('');
 const rol = ref<Rol>('analista');
+const edad = ref<number | null>(null);
 const aviso = ref<string | null>(null);
 const errorLocal = ref<string | null>(null);
 
@@ -28,11 +29,21 @@ const errorLocal = ref<string | null>(null);
 async function crear(): Promise<void> {
   aviso.value = null;
   errorLocal.value = null;
-  const datos = CrearUsuarioSchema.safeParse({ usuario: usuario.value.trim(), clave: clave.value, rol: rol.value });
+  const datos = CrearUsuarioSchema.safeParse({
+    usuario: usuario.value.trim(),
+    clave: clave.value,
+    rol: rol.value,
+    edad: edad.value,
+  });
   if (!datos.success) {
-    errorLocal.value = datos.error.issues.some((i) => i.path[0] === 'clave')
-      ? 'La contraseña debe tener al menos 8 caracteres.'
-      : 'Revise el nombre de usuario (1 a 60 caracteres).';
+    const campos = datos.error.issues.map((i) => i.path[0]);
+    if (campos.includes('edad')) {
+      errorLocal.value = `Debe tener ${EDAD_MINIMA} años o más para registrarse.`;
+    } else if (campos.includes('clave')) {
+      errorLocal.value = 'La contraseña debe tener al menos 8 caracteres.';
+    } else {
+      errorLocal.value = 'Revise el nombre de usuario (1 a 60 caracteres).';
+    }
     return;
   }
   const creado = await users.crear(datos.data);
@@ -40,6 +51,7 @@ async function crear(): Promise<void> {
     aviso.value = `Usuario «${creado.usuario}» creado con rol ${creado.rol}.`;
     usuario.value = '';
     clave.value = ''; // la contraseña no se queda en el formulario
+    edad.value = null;
   }
 }
 
@@ -77,6 +89,16 @@ onMounted(() => {
             type="password"
             autocomplete="new-password"
             minlength="8"
+            required
+          >
+        </label>
+        <label>
+          edad (mín. {{ EDAD_MINIMA }})
+          <input
+            v-model.number="edad"
+            type="number"
+            min="0"
+            max="100"
             required
           >
         </label>

@@ -66,9 +66,20 @@ describe('RBAC', () => {
     const creado = await request(app.getHttpServer())
       .post('/api/v1/users')
       .set(bearer(t))
-      .send({ usuario: nuevo, clave: 'Clave-nueva-123', rol: 'analista' })
+      .send({ usuario: nuevo, clave: 'Clave-nueva-123', rol: 'analista', edad: 25 })
       .expect(201);
     expect(creado.body).toMatchObject({ usuario: nuevo, rol: 'analista' });
+  });
+
+  it('crear un usuario menor de 18 años responde 400', async () => {
+    const admin = `e2e-admin-${randomUUID().slice(0, 8)}`;
+    await crearUsuario(admin, 'admin');
+    const menor = `e2e-menor-${randomUUID().slice(0, 8)}`;
+    await request(app.getHttpServer())
+      .post('/api/v1/users')
+      .set(bearer(await token(admin)))
+      .send({ usuario: menor, clave: 'Clave-nueva-123', rol: 'analista', edad: 17 })
+      .expect(400);
   });
 
   it('sin token, /users responde 401', async () => {

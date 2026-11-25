@@ -29,11 +29,14 @@ export type LoginRespuesta = z.infer<typeof LoginRespuestaSchema>;
 export const RefreshRespuestaSchema = z.object({ accessToken: z.string() });
 export type RefreshRespuesta = z.infer<typeof RefreshRespuestaSchema>;
 
+export const EDAD_MINIMA = 18;
+
 export const CrearUsuarioSchema = z
   .object({
     usuario: z.string().min(1).max(60),
     clave: z.string().min(8).max(200),
     rol: RolSchema,
+    edad: z.number().int().min(EDAD_MINIMA).max(100),
   })
   .strict();
 export type CrearUsuario = z.infer<typeof CrearUsuarioSchema>;

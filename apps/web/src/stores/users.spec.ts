@@ -45,7 +45,7 @@ describe('useUsersStore', () => {
     await store.cargar();
     vi.mocked(crearUsuario).mockResolvedValue({ id: 3, usuario: 'audi', rol: 'auditor' });
 
-    const creado = await store.crear({ usuario: 'audi', clave: 'una-clave-larga', rol: 'auditor' });
+    const creado = await store.crear({ usuario: 'audi', clave: 'una-clave-larga', rol: 'auditor', edad: 30 });
 
     expect(creado?.id).toBe(3);
     expect(store.lista.map((u) => u.usuario)).toEqual(['admin', 'ana', 'audi']);
@@ -57,7 +57,7 @@ describe('useUsersStore', () => {
     await store.cargar();
     vi.mocked(crearUsuario).mockRejectedValue(errorHttp(409, 'Conflict'));
 
-    const creado = await store.crear({ usuario: 'ana', clave: 'una-clave-larga', rol: 'analista' });
+    const creado = await store.crear({ usuario: 'ana', clave: 'una-clave-larga', rol: 'analista', edad: 30 });
 
     expect(creado).toBeNull();
     expect(store.errorCrear?.status).toBe(409);
