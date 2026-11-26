@@ -5,13 +5,13 @@ RUN npm install -g pnpm@9.15.9
 
 WORKDIR /repo
 
-COPY pnpm-workspace.yaml pnpm-lock.yaml package.json ./
-COPY packages/shared/package.json ./packages/shared/
+COPY pnpm-workspace.yaml pnpm-lock.yaml package.json tsconfig.base.json ./
+# @siem/shared completo antes del install: su script "prepare" lo compila durante pnpm install.
+COPY packages/shared ./packages/shared
 COPY apps/api/package.json ./apps/api/
 COPY apps/web/package.json ./apps/web/
 RUN pnpm install --frozen-lockfile --filter web...
 
-COPY packages/shared ./packages/shared
 COPY apps/web ./apps/web
 RUN pnpm --filter @siem/shared build && pnpm --filter web build
 

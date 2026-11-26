@@ -1,0 +1,63 @@
+# Modo desarrollo en la VM: el codigo se lee de la carpeta compartida de VirtualBox
+# (D:\SIEM-forense del PC montada en SIEM_SRC) y la API y el worker se recompilan solos.
+#
+# Uso (en la VM): bash /media/sf_SIEM-forense/scripts/dev-vm.sh
+# Guia completa: docs/15-desarrollo-carpeta-compartida.md
+#
+# - Solo se montan carpetas de codigo: los node_modules siguen siendo los de la imagen
+#   (los del PC estan compilados para Windows, p. ej. argon2).
+# - Las carpetas de VirtualBox no emiten eventos de cambio (inotify): el watch de
+#   TypeScript tiene que usar polling (TSC_WATCHFILE / TSC_WATCHDIRECTORY).
+# - Si cambian dependencias (package.json / pnpm-lock.yaml) hay que reconstruir la imagen:
+#   bash /media/sf_SIEM-forense/scripts/dev-vm.sh up -d --build
+
+x-codigo: &codigo
+  - ${SIEM_SRC:?Define SIEM_SRC con la ruta de la carpeta compartida}/apps/api/src:/repo/apps/api/src
+  - ${SIEM_SRC}/packages/shared/src:/repo/packages/shared/src
+  - ${SIEM_SRC}/rules:/repo/rules
+
+x-polling: &polling
+  TSC_WATCHFILE: DynamicPriorityPolling
+  TSC_WATCHDIRECTORY: DynamicPriorityPolling
+
+services:
+  # Las imagenes tambien se construyen con el codigo del PC (no con el clon de la VM).
+  # Las migraciones nuevas tambien se toman del PC (el script compila antes de aplicar).
+  migrate:
+    build:
+      context: ${SIEM_SRC}
+    volumes: *codigo
+
+  web:
+    build:
+      context: ${SIEM_SRC}
+
+  # tsc --watch compila src -> dist (polling sobre la carpeta compartida) y node --watch
+  # reinicia al cambiar dist. No se usa `nest start --watch` porque arranca el proceso nuevo
+  # sin esperar a que el viejo cierre (shutdown hooks) y choca con EADDRINUSE :3000;
+  # node --watch espera a que el anterior termine antes de relanzar.
+  api:
+    volumes: *codigo
+    environment:
+      <<: *polling
+    command:
+      - sh
+      - -c
+      - |
+        pnpm --filter @siem/shared build
+        pnpm exec tsc -p tsconfig.build.json || echo "tsc: hay errores de tipos (se arranca igual)"
+        pnpm exec tsc -p tsconfig.build.json --watch --preserveWatchOutput &
+        exec node --watch dist/main.js
+
+  worker:
+    volumes: *codigo
+    environment:
+      <<: *polling
+    command:
+      - sh
+      - -c
+      - |
+        pnpm --filter @siem/shared build
+        pnpm exec tsc -p tsconfig.build.json || echo "tsc: hay errores de tipos (se arranca igual)"
+        pnpm exec tsc -p tsconfig.build.json --watch --preserveWatchOutput &
+        exec node --watch dist/main.worker.js
